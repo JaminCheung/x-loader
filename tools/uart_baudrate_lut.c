@@ -162,4 +162,6 @@ int main(void) {
     printf("#define UART_UACR_BEST                  0x%x\n", quot1[2]);
     printf("\n");
     printf("#endif /* UART_BAUDRATE_LUT_H */\n");
+
+    return 0;
 }

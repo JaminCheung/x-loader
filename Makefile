@@ -185,7 +185,6 @@ $(TOOLSDIR)/uart_baudrate_lut: $(TOOLSDIR)/uart_baudrate_lut.c
 	$@ > $(TOPDIR)/include/generated/uart_baudrate_reg_values.h
 
 $(TIMESTAMP_FILE):
-	@mkdir -p $(dir $(TIMESTAMP_FILE))
 	@LC_ALL=C date +'#define X_LOADER_DATE "%b %d %C%y"' > $@.tmp
 	@LC_ALL=C date +'#define X_LOADER_TIME "%T"' >> $@.tmp
 	@cmp -s $@ $@.tmp && rm -f $@.tmp || mv -f $@.tmp $@
