@@ -1,0 +1,13 @@
+!.gitignore
+.cproject
+.project
+out/*
+*.o
+*.i
+a.out
+*.swp
+~.*
+include/generated
+tools/sfc_boot_checksum
+tools/ddr_params_creator
+tools/uart_baudrate_lut

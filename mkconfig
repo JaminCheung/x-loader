@@ -1,0 +1,35 @@
+ #
+ #  Copyright (C) 2016 Ingenic Semiconductor Co.,Ltd
+ #
+ #  X1000 series bootloader for u-boot/rtos/linux
+ #
+ #  Zhang YanMing <yanming.zhang@ingenic.com, jamincheung@126.com>
+ #
+ #  This program is free software; you can redistribute it and/or modify it
+ #  under  the terms of the GNU General  Public License as published by the
+ #  Free Software Foundation;  either version 2 of the License, or (at your
+ #  option) any later version.
+ #
+ #  You should have received a copy of the GNU General Public License along
+ #  with this program; if not, write to the Free Software Foundation, Inc.,
+ #  675 Mass Ave, Cambridge, MA 02139, USA.
+ #
+ #
+
+#!/bin/sh -e
+
+[ $# -lt 1 ] && exit 1
+[ $# -gt 2 ] && exit 1
+
+echo "Configuring for $1($2) board..."
+
+[ -d ./include/generated ] || mkdir -p ./include/generated ]
+cd ./include/generated
+
+echo "BOARD = $1" > config.mk
+echo "BOOT_FROM = $2" >> config.mk
+
+echo "/* Automatically generated - do not edit */" >> config.h
+echo "#include <configs/$1.h>" > config.h
+
+exit 0
