@@ -265,39 +265,26 @@ void clk_init(void) {
     start_clk();
 }
 
-#if CONFIG_CONSOLE_INDEX == 0
 void enable_uart_clk(void) {
     uint32_t clkgr;
 
     clkgr = cpm_inl(CPM_CLKGR);
+
+#if CONFIG_CONSOLE_INDEX == 0
     clkgr &= ~CPM_CLKGR_UART0;
-    cpm_outl(clkgr, CPM_CLKGR);
-}
 
 #elif CONFIG_CONSOLE_INDEX == 1
-
-void enable_uart_clk(void) {
-    uint32_t clkgr;
-
-    clkgr = cpm_inl(CPM_CLKGR);
     clkgr &= ~CPM_CLKGR_UART1;
-    cpm_outl(clkgr, CPM_CLKGR);
-}
 
 #elif CONFIG_CONSOLE_INDEX == 2
-
-void enable_uart_clk(void) {
-    uint32_t clkgr;
-
-    clkgr = cpm_inl(CPM_CLKGR);
     clkgr &= ~CPM_CLKGR_UART2;
-    cpm_outl(clkgr, CPM_CLKGR);
-}
 
 #else
 #error Unknown console index!
 #endif
 
+    cpm_outl(clkgr, CPM_CLKGR);
+}
 
 uint32_t get_ddr_rate(void) {
     uint32_t freq = CONFIG_DDR_SEL_PLL == APLL ? CONFIG_APLL_FREQ / CONFIG_DDR_FREQ_DIV

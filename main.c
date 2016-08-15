@@ -26,6 +26,8 @@ void x_loader_main(void) {
      */
     uart_init();
 
+    uart_puts("\nX-Loader Build: " X_LOADER_DATE " - " X_LOADER_TIME);
+
     /*
      * Print error pc register
      */
@@ -38,7 +40,7 @@ void x_loader_main(void) {
     printf("\n\n\treset errorpc: 0x%x\n", errorpc);
 
     /*
-     * Init clock gate
+     * Init clock
      */
     clk_init();
 
@@ -47,7 +49,7 @@ void x_loader_main(void) {
      */
     lpddr_init();
 
-    debug("Going to boot next stage\n");
+    debug("Going to boot next stage.\n");
 
     /*
      * Boot next stage(kernel/u-boot/rtos)
