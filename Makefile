@@ -165,7 +165,7 @@ $(OUTDIR)/x-loader.bin: $(OUTDIR)/x-loader.elf
 	@exit 1
 endif
 
-$(OUTDIR)/x-loader.elf: $(TOOLSDIR)/ddr_params_creator $(TOOLSDIR)/uart_baudrate_lut $(TIMESTAMP_FILE) $(OBJS) $(LIBS)
+$(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator $(TOOLSDIR)/uart_baudrate_lut $(OBJS) $(LIBS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@
 
 ifneq ($(CONFIG_BOOT_MMC), y)
@@ -227,7 +227,8 @@ clean:
 			$(TOOLSDIR)/ddr_params_creator \
 			$(TOOLSDIR)/uart_baudrate_lut \
 			$(TOPDIR)/include/generated/ddr_reg_values.h \
-			$(TOPDIR)/include/generated/uart_baudrate_reg_values.h
+			$(TOPDIR)/include/generated/uart_baudrate_reg_values.h \
+			$(TIMESTAMP_FILE)
 
 distclean: clean unconfig
 
