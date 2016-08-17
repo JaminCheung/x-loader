@@ -89,7 +89,7 @@ ifdef BOOT_FROM
 		CONFIG_BOOT_NOR=y
 	endif
 	ifeq ($(BOOT_FROM), nand)
-		CFGFLAGS + -DCONFIG_BOOT_NAND -DCONFIG_BOOT_SFC
+		CFGFLAGS += -DCONFIG_BOOT_NAND -DCONFIG_BOOT_SFC
 		CONFIG_BOOT_NAND=y
 	endif
 	ifeq ($(BOOT_FROM), mmc)
@@ -100,9 +100,10 @@ ifdef BOOT_FROM
 #
 # Compiler & Linker options
 #
-CFLAGS := -Os -g -march=mips32r2 -fno-pic -fno-builtin -mno-abicalls -nostdlib -EL -msoft-float -Bstatic -std=gnu11 -I$(TOPDIR)/include
+CFLAGS := -Os -g -G 0 -march=mips32r2 -mtune=mips32r2 -mabi=32 -fno-pic -fno-builtin -mno-abicalls -nostdlib -EL -msoft-float -std=gnu11 -I$(TOPDIR)/include
 CHECKFLAGS := -Wall -Wuninitialized -Wstrict-prototypes -Wundef -Werror
 LDFLAGS := -nostdlib -T ldscripts/x-loader.lds -EL
+OBJCFLAGS := --gap-fill=0xff --remove-section=.dynsym
 DEBUGFLAGS := -DDEBUG
 override CFLAGS := $(CHECKFLAGS) $(DEBUGFLAGS) $(CFLAGS) $(CFGFLAGS) $(BOARD_CFLAGS)
 
@@ -153,20 +154,19 @@ all: clean $(OUTDIR)/x-loader-pad.bin
 
 $(OUTDIR)/x-loader-pad.bin: $(OUTDIR)/x-loader.bin
 	$(OBJDUMP) -D $(OUTDIR)/x-loader.elf > $(OUTDIR)/x-loader.elf.dump
-	$(OBJCOPY) --gap-fill=0xff --pad-to=16384 -I binary -O binary $< $@
+	$(OBJCOPY) $(OBJCFLAGS) --pad-to=16384 -I binary -O binary $< $@
 
 ifneq ($(CONFIG_BOOT_MMC),y)
 $(OUTDIR)/x-loader.bin: $(OUTDIR)/x-loader.elf $(TOOLSDIR)/sfc_boot_checksum
-	$(OBJCOPY) --gap-fill=0xff -O binary $< $@
+	$(OBJCOPY) $(OBJCFLAGS) -O binary $< $@
 	$(TOOLSDIR)/sfc_boot_checksum $@
 else
 $(OUTDIR)/x-loader.bin: $(OUTDIR)/x-loader.elf
-	@echo -e "\n\tMMC boot not support yet!\n" >&2
-	@exit 1
+	$(OBJCOPY) $(OBJCFLAGS) -O binary $< $@
 endif
 
 $(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator $(TOOLSDIR)/uart_baudrate_lut $(OBJS) $(LIBS)
-	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@
+	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ -Map $(OUTDIR)/x-loader.map
 
 ifneq ($(CONFIG_BOOT_MMC), y)
 $(TOOLSDIR)/sfc_boot_checksum:

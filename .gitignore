@@ -8,6 +8,7 @@ a.out
 *.swp
 ~.*
 *.tmp
+*.map
 include/generated
 tools/sfc_boot_checksum
 tools/ddr_params_creator

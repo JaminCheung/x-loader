@@ -112,6 +112,8 @@
 //#define CONFIG_BOOT_MMC_PA_8BIT
 #define CONFIG_BOOT_MMC_PC_4BIT
 
+#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON "ubi.mtd=5 root=ubi0:rootfs ubi.mtd=6 rootfstype=ubifs rw"
+
 #endif /* CONFIG_BOOT_MMC */
 
 #endif /* PHOENIX_H */

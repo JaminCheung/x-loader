@@ -37,7 +37,7 @@ void x_loader_main(void) {
         "nop \n\t"
         :"=r"(errorpc)
         :);
-    printf("\n\n\treset errorpc: 0x%x\n", errorpc);
+    printf("\nreset errorpc: 0x%x\n", errorpc);
 
     /*
      * Init clock
@@ -48,6 +48,11 @@ void x_loader_main(void) {
      * Init lpddr
      */
     lpddr_init();
+
+    /*
+     * Init Board
+     */
+    board_init();
 
     debug("Going to boot next stage.\n");
 

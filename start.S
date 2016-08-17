@@ -36,10 +36,9 @@ __start:
     RESERVED_FOR_SC(0)
 #endif
 
-#if (defined CONFIG_BOOT_NOR) || (defined CONFIG_BOOT_NAND)
+#ifdef CONFIG_BOOT_SFC
     .word 0x03040506
     .word 0x55aa5502
-#endif
 
 #ifdef CONFIG_BOOT_NOR
     .word 0xffff00aa
@@ -52,6 +51,7 @@ __start:
 
     .space (512 - 16), 0
     RESERVED_FOR_SC(0)
+#endif
 
     /* Invalidate BTB */
     mfc0    v0, CP0_CONFIG, 7

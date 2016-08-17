@@ -31,4 +31,17 @@ SECTIONS
 		. = ALIGN(4);
 		__bss_end = .;
 	} >.tcsm
+
+	/DISCARD/ : {
+		*(.dynbss)
+		*(.dynstr)
+		*(.dynamic)
+		*(.interp)
+		*(.hash)
+		*(.gnu.*)
+		*(.plt)
+		*(.got.plt)
+		*(.rel.plt)
+		*(.rel.dyn)
+	}
 }
