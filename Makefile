@@ -145,7 +145,7 @@ LIBS := $(addprefix $(TOPDIR)/, $(LIBS-y))
 ifneq ($(CONFIG_BOOT_MMC),y)
 TARGET := $(OUTDIR)/x-loader-pad.bin
 else
-TARGET := $(OUTDIR)/x-loader-pad-with-mbr.bin
+TARGET := $(OUTDIR)/x-loader-pad-with-mbr-gpt.bin
 endif
 
 %.o:%.c
@@ -161,8 +161,8 @@ all: clean $(TARGET) Tips
 Tips: $(TARGET)
 	@echo -e '\n  Download image: "$(TARGET)" is ready\n'
 
-$(OUTDIR)/x-loader-pad-with-mbr.bin: $(OUTDIR)/mbr.bin $(OUTDIR)/x-loader-pad.bin
-	cat $(OUTDIR)/mbr.bin $(OUTDIR)/x-loader-pad.bin > $@
+$(OUTDIR)/x-loader-pad-with-mbr-gpt.bin: $(OUTDIR)/mbr-gpt.bin $(OUTDIR)/x-loader-pad.bin
+	cat $(OUTDIR)/mbr-gpt.bin $(OUTDIR)/x-loader-pad.bin > $@
 
 $(OUTDIR)/x-loader-pad.bin: $(OUTDIR)/x-loader.bin
 	$(OBJDUMP) -D $(OUTDIR)/x-loader.elf > $(OUTDIR)/x-loader.elf.dump
@@ -185,6 +185,11 @@ $(TOOLSDIR)/sfc_boot_checksum:
 	gcc -o $@ $(TOOLSDIR)/sfc_boot_checksum.c
 	strip $@
 else # CONFIG_BOOT_MMC #
+
+$(OUTDIR)/mbr-gpt.bin: $(OUTDIR)/mbr.bin
+	dd if=/dev/zero of=$(OUTDIR)/gpt.bin bs=512 count=33
+	cat $(OUTDIR)/mbr.bin $(OUTDIR)/gpt.bin > $@
+
 $(OUTDIR)/mbr.bin: $(TOOLSDIR)/mbr_creator.c
 	gcc -o $(TOOLSDIR)/mbr_creator -D__HOST__ -I$(TOPDIR)/include $<
 	strip $(TOOLSDIR)/mbr_creator
@@ -247,7 +252,7 @@ clean:
 			$(TOOLSDIR)/sfc_boot_checksum \
 			$(TOOLSDIR)/ddr_params_creator \
 			$(TOOLSDIR)/uart_baudrate_lut \
-			$(TOOLSDIR)/mbr.bin \
+			$(TOOLSDIR)/mbr_creator \
 			$(TOPDIR)/include/generated/ddr_reg_values.h \
 			$(TOPDIR)/include/generated/uart_baudrate_reg_values.h \
 			$(TIMESTAMP_FILE)

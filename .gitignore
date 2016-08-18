@@ -9,6 +9,10 @@ a.out
 ~.*
 *.tmp
 *.map
+*.bin
+*.elf
+*.map
+*.temp
 include/generated
 tools/sfc_boot_checksum
 tools/ddr_params_creator
