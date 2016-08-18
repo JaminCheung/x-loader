@@ -56,6 +56,63 @@
         __fast_iob();           \
     } while (0)
 
+uint32_t __div64_32(uint64_t *n, uint32_t base) {
+    uint64_t rem = *n;
+    uint64_t b = base;
+    uint64_t res, d = 1;
+    uint32_t high = rem >> 32;
+
+    /* Reduce the thing a bit first */
+    res = 0;
+    if (high >= base) {
+        high /= base;
+        res = (uint64_t) high << 32;
+        rem -= (uint64_t) (high*base) << 32;
+    }
+    while ((int64_t)b > 0 && b < rem) {
+        b = b+b;
+        d = d+d;
+    }
+
+    do {
+        if (rem >= b) {
+            rem -= b;
+            res += d;
+        }
+        b >>= 1;
+        d >>= 1;
+    } while (d);
+
+    *n = res;
+
+    return rem;
+}
+
+void set_bit(int nr, volatile void * addr)
+{
+    int mask;
+    volatile int    *a = addr;
+
+    a += nr >> 5;
+    mask = 1 << (nr & 0x1f);
+    *a |= mask;
+}
+
+void clear_bit(int nr, volatile void * addr)
+{
+    int mask;
+    volatile int    *a = addr;
+
+    a += nr >> 5;
+    mask = 1 << (nr & 0x1f);
+    *a &= ~mask;
+}
+
+int test_bit(int nr, const volatile void *addr)
+{
+    return ((1UL << (nr & 31)) & (((const unsigned int *) addr)[nr >> 5])) != 0;
+}
+
 void udelay(unsigned long usec) {
     unsigned long loops = usec * (CONFIG_APLL_FREQ / 2);
 

@@ -37,20 +37,33 @@ typedef unsigned short __u16;
 typedef __signed__ int __s32;
 typedef unsigned int __u32;
 
+typedef __signed__ long long __s64;
+typedef unsigned long long __u64;
+
 typedef     __u8        u_int8_t;
 typedef     __s8        int8_t;
 typedef     __u16       u_int16_t;
 typedef     __s16       int16_t;
 typedef     __u32       u_int32_t;
 typedef     __s32       int32_t;
+typedef     __s64       int64_t;
+typedef     __u64       u_int64_t;
 
 typedef     __u8        uint8_t;
 typedef     __u16       uint16_t;
 typedef     __u32       uint32_t;
+typedef     __u64       uint64_t;
 
 typedef     __u8        uint8;
 typedef     __u16       uint16;
 typedef     __u32       uint32;
+typedef     __u64       uint64;
+
+
+typedef __u32 dma_addr_t;
+
+typedef unsigned long phys_addr_t;
+typedef unsigned long phys_size_t;
 
 /* bsd */
 typedef unsigned char       u_char;
@@ -64,7 +77,7 @@ typedef unsigned short      ushort;
 typedef unsigned int        uint;
 typedef unsigned long       ulong;
 
-#ifndef HOST
+#ifndef __HOST__
 typedef unsigned int        size_t;
 #endif
 

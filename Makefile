@@ -123,7 +123,7 @@ OBJS-y := start.o                                                              \
           drivers/clk.o                                                        \
           drivers/gpio.o
 
-OBJS-y += common/printf.o                                                       \
+OBJS-y += common/printf.o                                                      \
           common/common.o
 
 OBJS-y += boards/$(BOARD)/board.o
@@ -142,15 +142,27 @@ LIBS := $(addprefix $(TOPDIR)/, $(LIBS-y))
 #
 # Targets
 #
+ifneq ($(CONFIG_BOOT_MMC),y)
+TARGET := $(OUTDIR)/x-loader-pad.bin
+else
+TARGET := $(OUTDIR)/x-loader-pad-with-mbr.bin
+endif
+
 %.o:%.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 %.o:%.S
 	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
 
-.PHONY: all clean
+.PHONY: all clean Tips
 
-all: clean $(OUTDIR)/x-loader-pad.bin
+all: clean $(TARGET) Tips
+
+Tips: $(TARGET)
+	@echo -e '\n  Download image: "$(TARGET)" is ready\n'
+
+$(OUTDIR)/x-loader-pad-with-mbr.bin: $(OUTDIR)/mbr.bin $(OUTDIR)/x-loader-pad.bin
+	cat $(OUTDIR)/mbr.bin $(OUTDIR)/x-loader-pad.bin > $@
 
 $(OUTDIR)/x-loader-pad.bin: $(OUTDIR)/x-loader.bin
 	$(OBJDUMP) -D $(OUTDIR)/x-loader.elf > $(OUTDIR)/x-loader.elf.dump
@@ -172,15 +184,25 @@ ifneq ($(CONFIG_BOOT_MMC), y)
 $(TOOLSDIR)/sfc_boot_checksum:
 	gcc -o $@ $(TOOLSDIR)/sfc_boot_checksum.c
 	strip $@
+else # CONFIG_BOOT_MMC #
+$(OUTDIR)/mbr.bin: $(TOOLSDIR)/mbr_creator.c
+	gcc -o $(TOOLSDIR)/mbr_creator -D__HOST__ -I$(TOPDIR)/include $<
+	strip $(TOOLSDIR)/mbr_creator
+	$(TOOLSDIR)/mbr_creator \
+		p0off=$(CONFIG_MBR_P0_OFF),p0end=$(CONFIG_MBR_P0_END),p0type=$(CONFIG_MBR_P0_TYPE) \
+		p1off=$(CONFIG_MBR_P1_OFF),p1end=$(CONFIG_MBR_P1_END),p1type=$(CONFIG_MBR_P1_TYPE) \
+		p2off=$(CONFIG_MBR_P2_OFF),p2end=$(CONFIG_MBR_P2_END),p2type=$(CONFIG_MBR_P2_TYPE) \
+		p3off=$(CONFIG_MBR_P3_OFF),p3end=$(CONFIG_MBR_P3_END),p3type=$(CONFIG_MBR_P3_TYPE) \
+		-o $@ > /dev/zero
 endif
 
 $(TOOLSDIR)/ddr_params_creator: $(TOOLSDIR)/ddr_params_creator.c
-	gcc -o $@ -DHOST -I$(TOPDIR)/include $<
+	gcc -o $@ -D__HOST__ -I$(TOPDIR)/include $<
 	strip $@
 	$@ > $(TOPDIR)/include/generated/ddr_reg_values.h
 
 $(TOOLSDIR)/uart_baudrate_lut: $(TOOLSDIR)/uart_baudrate_lut.c
-	gcc -o $@ -DHOST -I$(TOPDIR)/include $<
+	gcc -o $@ -D__HOST__ -I$(TOPDIR)/include $<
 	strip $@
 	$@ > $(TOPDIR)/include/generated/uart_baudrate_reg_values.h
 
@@ -225,6 +247,7 @@ clean:
 			$(TOOLSDIR)/sfc_boot_checksum \
 			$(TOOLSDIR)/ddr_params_creator \
 			$(TOOLSDIR)/uart_baudrate_lut \
+			$(TOOLSDIR)/mbr.bin \
 			$(TOPDIR)/include/generated/ddr_reg_values.h \
 			$(TOPDIR)/include/generated/uart_baudrate_reg_values.h \
 			$(TIMESTAMP_FILE)
