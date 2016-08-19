@@ -19,7 +19,7 @@
 #include <common.h>
 
 __attribute__ ((noreturn)) void jump_to_image(void) {
-#ifdef CONFIG_BOOT_UBOOT
+#if defined CONFIG_BOOT_UBOOT
     typedef void (*image_entry_t)(void) __attribute__ ((noreturn));
 
     image_entry_t image_entry = (image_entry_t) CONFIG_BOOT_NEXT_STAGE_TEXT;
@@ -28,7 +28,7 @@ __attribute__ ((noreturn)) void jump_to_image(void) {
 
     image_entry();
 
-#elif CONFIG_BOOT_KERNEL /* CONFIG_BOOT_UBOOT */
+#elif defined CONFIG_BOOT_KERNEL /* CONFIG_BOOT_UBOOT */
     typedef void (*image_entry_t)(int, char **, void *)
             __attribute__ ((noreturn));
 
@@ -53,13 +53,21 @@ static void mmc_boot(void) {
 
 #ifdef CONFIG_BOOT_NAND
 static void nand_boot(void) {
-
+#if defined CONFIG_BOOT_UBOOT
+    spinand_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, CONFIG_BOOT_NEXT_STAGE_TEXT);
+#elif defined CONFIG_BOOT_KERNEL
+    spinand_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, CONFIG_BOOT_NEXT_STAGE_TEXT);
+#endif
 }
 #endif /* CONFIG_BOOT_NAND */
 
 #ifdef CONFIG_BOOT_NOR
 static void nor_boot(void) {
-
+#if defined CONFIG_BOOT_UBOOT
+    spinor_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, CONFIG_BOOT_NEXT_STAGE_TEXT);
+#elif defined CONFIG_BOOT_KERNEL
+    spinor_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, CONFIG_BOOT_NEXT_STAGE_TEXT);
+#endif
 }
 #endif /* CONFIG_BOOT_NOR */
 

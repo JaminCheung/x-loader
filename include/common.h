@@ -29,8 +29,8 @@
 #include <cpm.h>
 #include <clk.h>
 #include <mmc.h>
-#include <nand.h>
-#include <nor.h>
+#include <sfc.h>
+#include <spiflash.h>
 #include <lpddr/lpddr.h>
 #include <lpddr/lpddr_chip.h>
 #endif

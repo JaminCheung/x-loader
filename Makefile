@@ -130,9 +130,9 @@ OBJS-y += boards/$(BOARD)/board.o
 
 OBJS-$(CONFIG_BOOT_MMC) +=  drivers/mmc.o
 OBJS-$(CONFIG_BOOT_NAND) += drivers/sfc.o                                      \
-                            drivers/nand.o
+                            drivers/spinand.o
 OBJS-$(CONFIG_BOOT_NOR) +=  drivers/sfc.o                                      \
-                            drivers/nor.o
+                            drivers/spinor.o
 
 OBJS := $(addprefix $(TOPDIR)/, $(OBJS-y))
 

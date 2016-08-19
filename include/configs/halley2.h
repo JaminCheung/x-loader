@@ -39,7 +39,7 @@
  * Console
  */
 #define CONFIG_CONSOLE_BAUDRATE      115200
-#define CONFIG_CONSOLE_INDEX        2
+#define CONFIG_CONSOLE_INDEX         2
 //#define CONFIG_UART_PORTD
 #define CONFIG_UART_PORTC
 
@@ -49,13 +49,17 @@
 #define CONFIG_MDDR_H5MS5122DFR_J3M
 
 /*
+ * SFC
+ */
+#ifdef CONFIG_BOOT_SFC
+#define  CONFIG_SFC_FREQ    70000000
+#endif
+/*
  * The following configure only for boot u-boot
  */
 #ifdef CONFIG_BOOT_UBOOT
-
-#define CONFIG_UBOOT_OFFSET                 -1
-#define CONFIG_UBOOT_LENGTH                 -1
-
+#define CONFIG_UBOOT_OFFSET                 0x4000
+#define CONFIG_UBOOT_LENGTH                 0x40000
 #endif /* CONFIG_BOOT_UBOOT */
 
 /*
@@ -65,8 +69,8 @@
 
 #define KERNEL_ARGS_COMMON "mem=32M@0 console=ttyS2,115200n8 ip=off init=/linuxrc"
 
-#define CONFIG_KERNEL_OFFSET                -1
-#define CONFIG_KERNEL_LENGTH                -1
+#define CONFIG_KERNEL_OFFSET                0x40000
+#define CONFIG_KERNEL_LENGTH                0x300000
 
 #define CONFIG_RECOVERY_BOOT_KEY            -1
 #define CONFIG_RECOVERY_BOOT_KEY_ENLEVEL    -1
