@@ -85,12 +85,12 @@ endif
 
 ifdef BOOT_FROM
 	ifeq ($(BOOT_FROM), nor)
-		CFGFLAGS += -DCONFIG_BOOT_NOR -DCONFIG_BOOT_SFC
-		CONFIG_BOOT_NOR=y
+		CFGFLAGS += -DCONFIG_BOOT_SPI_NOR -DCONFIG_BOOT_SFC
+		CONFIG_BOOT_SPI_NOR=y
 	endif
 	ifeq ($(BOOT_FROM), nand)
-		CFGFLAGS += -DCONFIG_BOOT_NAND -DCONFIG_BOOT_SFC
-		CONFIG_BOOT_NAND=y
+		CFGFLAGS += -DCONFIG_BOOT_SPI_NAND -DCONFIG_BOOT_SFC
+		CONFIG_BOOT_SPI_NAND=y
 	endif
 	ifeq ($(BOOT_FROM), mmc)
 		CFGFLAGS += -DCONFIG_BOOT_MMC
@@ -129,10 +129,10 @@ OBJS-y += common/printf.o                                                      \
 OBJS-y += boards/$(BOARD)/board.o
 
 OBJS-$(CONFIG_BOOT_MMC) +=  drivers/mmc.o
-OBJS-$(CONFIG_BOOT_NAND) += drivers/sfc.o                                      \
-                            drivers/spinand.o
-OBJS-$(CONFIG_BOOT_NOR) +=  drivers/sfc.o                                      \
-                            drivers/spinor.o
+OBJS-$(CONFIG_BOOT_SPI_NAND) += drivers/sfc.o                                  \
+                                drivers/spinand.o
+OBJS-$(CONFIG_BOOT_SPI_NOR) +=  drivers/sfc.o                                  \
+                                drivers/spinor.o
 
 OBJS := $(addprefix $(TOPDIR)/, $(OBJS-y))
 
@@ -161,8 +161,9 @@ all: clean $(TARGET) Tips
 Tips: $(TARGET)
 	@echo -e '\n  Download image: "$(TARGET)" is ready\n'
 
-$(OUTDIR)/x-loader-pad-with-mbr-gpt.bin: $(OUTDIR)/mbr-gpt.bin $(OUTDIR)/x-loader-pad.bin
+$(OUTDIR)/x-loader-pad-with-mbr-gpt.bin: $(OUTDIR)/mbr-gpt.bin $(OUTDIR)/x-loader-pad.bin $(TOOLSDIR)/spl_params_fixer
 	cat $(OUTDIR)/mbr-gpt.bin $(OUTDIR)/x-loader-pad.bin > $@
+	$(TOOLSDIR)/spl_params_fixer $@ $(OUTDIR)/x-loader.bin > /dev/null
 
 $(OUTDIR)/x-loader-pad.bin: $(OUTDIR)/x-loader.bin
 	$(OBJDUMP) -D $(OUTDIR)/x-loader.elf > $(OUTDIR)/x-loader.elf.dump
@@ -181,10 +182,14 @@ $(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator $(TOOLS
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ -Map $(OUTDIR)/x-loader.map
 
 ifneq ($(CONFIG_BOOT_MMC), y)
-$(TOOLSDIR)/sfc_boot_checksum:
-	gcc -o $@ $(TOOLSDIR)/sfc_boot_checksum.c
+$(TOOLSDIR)/sfc_boot_checksum: $(TOOLSDIR)/sfc_boot_checksum.c
+	gcc -o $@ -D__HOST__ -I$(TOPDIR)/include $<
 	strip $@
 else # CONFIG_BOOT_MMC #
+
+$(TOOLSDIR)/spl_params_fixer: $(TOOLSDIR)/spl_params_fixer.c
+	gcc -o $@ -D__HOST__ -I$(TOPDIR)/include $<
+	strip $@
 
 ifeq ($(CONFIG_GPT_TABLE), y)
 ifneq ($(TOPDIR)/boards/$(BOARD)/partitions.tab, $(wildcard $(TOPDIR)/boards/$(BOARD)/partitions.tab))
@@ -269,6 +274,7 @@ clean:
 			$(TOOLSDIR)/ddr_params_creator \
 			$(TOOLSDIR)/uart_baudrate_lut \
 			$(TOOLSDIR)/mbr_creator \
+			$(TOOLSDIR)/spl_params_fixer \
 			$(TOPDIR)/include/generated/ddr_reg_values.h \
 			$(TOPDIR)/include/generated/uart_baudrate_reg_values.h \
 			$(TIMESTAMP_FILE)

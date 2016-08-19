@@ -40,10 +40,10 @@ __start:
     .word 0x03040506
     .word 0x55aa5502
 
-#ifdef CONFIG_BOOT_NOR
+#ifdef CONFIG_BOOT_SPI_NOR
     .word 0xffff00aa
 
-#elif (defined CONFIG_BOOT_NAND)
+#elif (defined CONFIG_BOOT_SPI_NAND)
     .word (0x00000000 | ((CONFIG_NAND_PPB / 32) << 16) | ((CONFIG_NAND_BPP / 1024) << 24))
 #endif
 

@@ -79,7 +79,7 @@
 /*
  * The following configure only for NAND boot
  */
-#ifdef CONFIG_BOOT_NAND
+#ifdef CONFIG_BOOT_SPI_NAND
 /*
  * Nand - bytes per-page
  */
@@ -92,16 +92,16 @@
 
 #define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON "ubi.mtd=5 root=ubi0:rootfs ubi.mtd=6 rootfstype=ubifs rw"
 
-#endif /* CONFIG_BOOT_NAND */
+#endif /* CONFIG_BOOT_SPI_NAND */
 
 /*
  * The following configure only for NOR boot
  */
-#ifdef CONFIG_BOOT_NOR
+#ifdef CONFIG_BOOT_SPI_NOR
 
 #define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON "rootfstype=jffs2 root=/dev/mtdblock2 rw"
 
-#endif /* CONFIG_BOOT_NOR */
+#endif /* CONFIG_BOOT_SPI_NOR */
 
 /*
  * The following configure only for MMC boot

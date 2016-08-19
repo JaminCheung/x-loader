@@ -155,7 +155,7 @@ static void start_clk(void) {
 
 static void pll_init(void) {
     uint8_t n, m, od, bs;
-    uint32_t regval;
+    uint32_t regval = 0;
 
     /*
      * Configure APLL
@@ -165,7 +165,6 @@ static void pll_init(void) {
     m = CONFIG_APLL_FREQ / CONFIG_EXTAL_FREQ - 1;
     od = 0;
 
-    regval = cpm_inl(CPM_CPAPCR);
     regval |= (1 << CPM_CPAPCR_PLLEN_BIT) |
               (0x20 << CPM_CPAPCR_PLLST_BIT) |
               (bs << CPM_CPAPCR_BS_BIT) |
@@ -186,8 +185,7 @@ static void pll_init(void) {
     n = 0;
     m = CONFIG_MPLL_FREQ / CONFIG_EXTAL_FREQ - 1;
     od = 0;
-
-    regval = cpm_inl(CPM_CPMPCR);
+    regval = 0;
     regval |= (1 << CPM_CPMPCR_PLLEN_BIT) |
             (bs << CPM_CPMPCR_BS_BIT) |
             (m << CPM_CPMPCR_PLLM_BIT) |
@@ -203,7 +201,7 @@ static void pll_init(void) {
 
 
 static void clk_tree_init(void) {
-    uint32_t cpccr,regval;
+    uint32_t cpccr = 0,regval = 0;
 
     uint8_t cdiv, l2div, h0div, h2div, pdiv;
     uint8_t src_sel, cpu_clk_sel, h0_clk_sel, h2_clk_sel;

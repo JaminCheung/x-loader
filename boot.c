@@ -51,7 +51,7 @@ static void mmc_boot(void) {
 }
 #endif /* CONFIG_BOOT_MMC */
 
-#ifdef CONFIG_BOOT_NAND
+#ifdef CONFIG_BOOT_SPI_NAND
 static void nand_boot(void) {
 #if defined CONFIG_BOOT_UBOOT
     spinand_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, CONFIG_BOOT_NEXT_STAGE_TEXT);
@@ -59,9 +59,9 @@ static void nand_boot(void) {
     spinand_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, CONFIG_BOOT_NEXT_STAGE_TEXT);
 #endif
 }
-#endif /* CONFIG_BOOT_NAND */
+#endif /* CONFIG_BOOT_SPI_NAND */
 
-#ifdef CONFIG_BOOT_NOR
+#ifdef CONFIG_BOOT_SPI_NOR
 static void nor_boot(void) {
 #if defined CONFIG_BOOT_UBOOT
     spinor_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, CONFIG_BOOT_NEXT_STAGE_TEXT);
@@ -69,20 +69,20 @@ static void nor_boot(void) {
     spinor_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, CONFIG_BOOT_NEXT_STAGE_TEXT);
 #endif
 }
-#endif /* CONFIG_BOOT_NOR */
+#endif /* CONFIG_BOOT_SPI_NOR */
 
 void boot_next_stage(void) {
 #ifdef CONFIG_BOOT_MMC
     mmc_boot();
 #endif /* CONFIG_BOOT_MMC */
 
-#ifdef CONFIG_BOOT_NAND
+#ifdef CONFIG_BOOT_SPI_NAND
     nand_boot();
-#endif /* CONFIG_BOOT_NAND */
+#endif /* CONFIG_BOOT_SPI_NAND */
 
-#ifdef CONFIG_BOOT_NOR
+#ifdef CONFIG_BOOT_SPI_NOR
     nor_boot();
-#endif /* CONFIG_BOOT_NOR */
+#endif /* CONFIG_BOOT_SPI_NOR */
 
     /*
      * We will nerver return here

@@ -18,3 +18,4 @@ tools/sfc_boot_checksum
 tools/ddr_params_creator
 tools/uart_baudrate_lut
 tools/mbr_creator
+tools/spl_params_fixer
