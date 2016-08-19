@@ -186,6 +186,20 @@ $(TOOLSDIR)/sfc_boot_checksum:
 	strip $@
 else # CONFIG_BOOT_MMC #
 
+ifeq ($(CONFIG_GPT_TABLE), y)
+ifneq ($(TOPDIR)/boards/$(BOARD)/partitions.tab, $(wildcard $(TOPDIR)/boards/$(BOARD)/partitions.tab))
+$(error Can not found "partitions.tab" for board $(BOARD))
+else
+$(OUTDIR)/mbr-gpt.bin:	$(TOOLSDIR)/gpt_creator
+	$< $(TOPDIR)/boards/$(BOARD)/partitions.tab $(OUTDIR)/mbr-of-gpt.bin $(OUTDIR)/gpt.bin
+	cat $(OUTDIR)/mbr-of-gpt.bin $(OUTDIR)/gpt.bin > $@
+	dd if=/dev/zero of=$(OUTDIR)/file.bin bs=512 count=33
+	cat $@ $(OUTDIR)/file.bin > $(OUTDIR)/file2.bin
+	dd if=$(OUTDIR)/file2.bin of=$@ bs=512 count=34
+	rm $(OUTDIR)/file* -rf
+endif
+
+else
 $(OUTDIR)/mbr-gpt.bin: $(OUTDIR)/mbr.bin
 	dd if=/dev/zero of=$(OUTDIR)/gpt.bin bs=512 count=33
 	cat $(OUTDIR)/mbr.bin $(OUTDIR)/gpt.bin > $@
@@ -199,6 +213,8 @@ $(OUTDIR)/mbr.bin: $(TOOLSDIR)/mbr_creator.c
 		p2off=$(CONFIG_MBR_P2_OFF),p2end=$(CONFIG_MBR_P2_END),p2type=$(CONFIG_MBR_P2_TYPE) \
 		p3off=$(CONFIG_MBR_P3_OFF),p3end=$(CONFIG_MBR_P3_END),p3type=$(CONFIG_MBR_P3_TYPE) \
 		-o $@ > /dev/zero
+endif
+
 endif
 
 $(TOOLSDIR)/ddr_params_creator: $(TOOLSDIR)/ddr_params_creator.c
