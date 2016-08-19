@@ -102,5 +102,13 @@ cache_clear_a_line:
     ori     t2, t1, CONFIG_SYS_DCACHE_SIZE	/* End address */
     la      t3, 0x1ffff000		/* Physical address and 4KB page mask */
 
+    /* Clear BSS */
+    la      t1, __bss_start
+    la      t2, __bss_end
+1:
+    sw      zero, 0(t1)
+    blt     t1, t2, 1b
+    add     t1, 4
+
     j  x_loader_main
     nop
