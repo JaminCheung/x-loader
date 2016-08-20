@@ -51,6 +51,14 @@ struct cgu cgu_clk_sel[CGU_CNT] = {
     [PCM]    = {0, CPM_PCMCDR,  30, EXCLK,              { APLL,  EXCLK, MPLL,  -1  }, 29, 0,  0,  26},
 };
 
+static void dump_clk_regs(void) {
+    debug("====================\n");
+    debug("CPAPCR = 0x%x\n", cpm_inl(CPM_CPAPCR));
+    debug("CPMPCR = 0x%x\n", cpm_inl(CPM_CPMPCR));
+    debug("CPCCR  = 0x%x\n", cpm_inl(CPM_CPCCR));
+    debug("====================\n");
+}
+
 static void stop_clk(void) {
     uint8_t id;
     struct cgu *cgu = NULL;
@@ -199,7 +207,6 @@ static void pll_init(void) {
     while(!(cpm_inl(CPM_CPMPCR) & (1 << CPM_CPMPCR_PLLON_BIT)));
 }
 
-
 static void clk_tree_init(void) {
     uint32_t cpccr = 0,regval = 0;
 
@@ -261,6 +268,8 @@ void clk_init(void) {
      * Start all clock
      */
     start_clk();
+
+    dump_clk_regs();
 }
 
 void enable_uart_clk(void) {

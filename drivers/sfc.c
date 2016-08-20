@@ -257,7 +257,7 @@ void sfc_init(void) {
 
     sfc_set_gpio_pa_as_6bit();
 
-    set_sfc_freq(CONFIG_SFC_FREQ);
+    set_sfc_freq(CONFIG_SFC_FREQ * 1000 * 1000);
 
 #ifdef CONFIG_SPI_STANDARD
     sfc_quad_mode = 0;

@@ -22,7 +22,9 @@
 
 #include <common.h>
 
+#ifdef printf
 #undef printf
+#endif
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -100,21 +102,22 @@ struct params
 };
 
 struct desc descriptors[14] = {
-/*
- * saddr,        paddr,        value,        poll_h_mask,        poll_l_mask
- */
-{ 0x20,         0xffff,        0x1fffffb4,      0,                  0 },            /* CLKGR */
-{ 0x10,         0x10,          0xa9008520,      0x400,              0 },            /* CPAPCR */
-{ 0,            0xd4,          0x55752210,      0,                  0x7 },          /* CPCCR div */
-{ 0,            0xffff,        0x95752210,      0,                  0 },            /* CPCCR sel */
-#if (defined CONFIG_BOOT_MMC_PA_8BIT) || (defined CONFIG_BOOT_MMC_PA_4BIT)
-{ 0x68,         0x68,          0x2000000a,      0,                  0x10000000 },   /* MSC0CDR */
-#else
-{ 0xa4,         0xa4,          0x2000000a,      0,                  0x10000000 },   /* MSC1CDR */
-#endif
-{ 0x20,         0xffff,        0x1fffff80,      0,                  0 },            /* CLKGR */
+    /*
+     * saddr,        paddr,        value,        poll_h_mask,        poll_l_mask
+     */
+    { 0x20,         0xffff,        0x1fffffb4,      0,                  0 },            /* CLKGR */
+    { 0x10,         0x10,          0xa9008520,      0x400,              0 },            /* CPAPCR */
+    { 0,            0xd4,          0x55752210,      0,                  0x7 },          /* CPCCR div */
+    { 0,            0xffff,        0x95752210,      0,                  0 },            /* CPCCR sel */
+    #if (defined CONFIG_BOOT_MMC_PA_8BIT) || (defined CONFIG_BOOT_MMC_PA_4BIT)
+    { 0x68,         0x68,          0x2000000a,      0,                  0x10000000 },   /* MSC0CDR */
+    #else
+    { 0xa4,         0xa4,          0x2000000a,      0,                  0x10000000 },   /* MSC1CDR */
+    #endif
+    { 0x20,         0xffff,        0x1fffff80,      0,                  0 },            /* CLKGR */
 
-{ 0xffff, 0xffff, 0, 0, 0 }, };
+    { 0xffff,       0xffff,        0,               0,                  0 },            /* End */
+};
 
 void dump_params(struct params *p) {
     int i;
@@ -139,8 +142,8 @@ void dump_params(struct params *p) {
 
         printf("NO.%d:\n", i);
         printf("\tsaddr = 0x%04X\n", desc->set_addr);
-        printf("\tsaddr = 0x%04X\n", desc->poll_addr);
-        printf("\tpaddr = 0x%08X\n", desc->value);
+        printf("\tpaddr = 0x%04X\n", desc->poll_addr);
+        printf("\tvalue = 0x%08X\n", desc->value);
         printf("\tpoll_h_mask = 0x%08X\n", desc->poll_h_mask);
         printf("\tpoll_l_mask = 0x%08X\n", desc->poll_l_mask);
     }
@@ -211,7 +214,7 @@ int main(int argc, char *argv[]) {
             (cdiv - 1) << 0 |
             (0x7) << 20;
 
-    params->pll_freq = 0;
+    params->pll_freq = CONFIG_APLL_FREQ * 1000 * 1000;
     params->cpccr.d32 = cpccr;
 
     desc = params->cpm_desc;

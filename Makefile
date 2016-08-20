@@ -188,7 +188,7 @@ $(TOOLSDIR)/sfc_boot_checksum: $(TOOLSDIR)/sfc_boot_checksum.c
 else # CONFIG_BOOT_MMC #
 
 $(TOOLSDIR)/spl_params_fixer: $(TOOLSDIR)/spl_params_fixer.c
-	gcc -o $@ -D__HOST__ -I$(TOPDIR)/include $<
+	gcc -o $@ -D__HOST__ -DCONFIG_BOOT_MMC -I$(TOPDIR)/include $<
 	strip $@
 
 ifeq ($(CONFIG_GPT_TABLE), y)
