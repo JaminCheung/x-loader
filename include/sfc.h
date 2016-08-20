@@ -1,6 +1,17 @@
 #ifndef SFC_H
 #define SFC_H
 
+#ifdef CONFIG_SFC_DEBUG
+#define sfc_debug(fmt, args...)         \
+    do {                    \
+        printf(fmt, ##args);        \
+    } while (0)
+#else
+#define sfc_debug(fmt, args...)         \
+    do {                    \
+    } while (0)
+#endif
+
 typedef enum{
     TRANSFER,
     RECEIVE,
@@ -183,7 +194,6 @@ struct norflash_partitions {
 int sfc_read_data(unsigned int *data, unsigned int length);
 int sfc_write_data(unsigned int *data, unsigned int length);
 void sfc_send_cmd(struct jz_sfc *sfc, unsigned char dir);
-void sfc_init(void);
 
 void sfc_send_cmd_test(unsigned char *cmd,unsigned int len,unsigned int addr ,unsigned addr_len,unsigned dummy_byte,unsigned int daten,unsigned char dir);
 

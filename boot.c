@@ -46,8 +46,18 @@ __attribute__ ((noreturn)) static void jump_to_image(void) {
 }
 
 void boot_next_stage(void) {
+    /*
+     * For mmc
+     */
 #ifdef CONFIG_BOOT_MMC
+    #if (defined CONFIG_BOOT_UBOOT)
+        mmc_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH,
+                CONFIG_BOOT_NEXT_STAGE_TEXT);
 
+    #elif (defined CONFIG_BOOT_KERNEL)
+        mmc_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH,
+                CONFIG_BOOT_NEXT_STAGE_TEXT);
+    #endif
 #endif /* CONFIG_BOOT_MMC */
 
     /*
@@ -55,23 +65,27 @@ void boot_next_stage(void) {
      */
 #ifdef CONFIG_BOOT_SPI_NAND
     #if (defined CONFIG_BOOT_UBOOT)
-        spinand_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, CONFIG_BOOT_NEXT_STAGE_TEXT);
+        spinand_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH,
+                CONFIG_BOOT_NEXT_STAGE_TEXT);
 
     #elif (defined CONFIG_BOOT_KERNEL)
-        spinand_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, CONFIG_BOOT_NEXT_STAGE_TEXT);
-#endif
+        spinand_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH,
+                CONFIG_BOOT_NEXT_STAGE_TEXT);
+    #endif
 
 #endif /* CONFIG_BOOT_SPI_NAND */
 
-        /*
-         * For spi nor
-         */
+    /*
+     * For spi nor
+     */
 #ifdef CONFIG_BOOT_SPI_NOR
     #if (defined CONFIG_BOOT_UBOOT)
-        spinor_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, CONFIG_BOOT_NEXT_STAGE_TEXT);
+        spinor_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH,
+                CONFIG_BOOT_NEXT_STAGE_TEXT);
 
     #elif (defined CONFIG_BOOT_KERNEL)
-        spinor_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, CONFIG_BOOT_NEXT_STAGE_TEXT);
+        spinor_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH,
+                CONFIG_BOOT_NEXT_STAGE_TEXT);
     #endif
 #endif /* CONFIG_BOOT_SPI_NOR */
 

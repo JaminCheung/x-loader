@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
             spl_path, offset, params_length);
 
     params = (struct params *) malloc(params_length);
-    memset(params, 0, params_length);
+    memset((uint8_t *) params, 0, params_length);
 
     p = (unsigned int *) valid_id;
     params->id = *p;

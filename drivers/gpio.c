@@ -18,16 +18,6 @@
 
 #include <common.h>
 
-void gpio_set_value(unsigned gpio, int value) {
-    int port = gpio / 32;
-    int pin = gpio % 32;
-
-    if (value)
-        writel(1 << pin, GPIO_PXPAT0S(port));
-    else
-        writel(1 << pin, GPIO_PXPAT0C(port));
-}
-
 int gpio_get_value(unsigned gpio) {
     unsigned port = gpio / 32;
     unsigned pin = gpio % 32;
@@ -52,7 +42,10 @@ void gpio_direction_output(unsigned gpio, int value) {
     writel(1 << pin, GPIO_PXMSKS(port));
     writel(1 << pin, GPIO_PXPAT1C(port));
 
-    gpio_set_value(gpio, value);
+    if (value)
+        writel(1 << pin, GPIO_PXPAT0S(port));
+    else
+        writel(1 << pin, GPIO_PXPAT0C(port));
 }
 
 void gpio_enable_pull(unsigned gpio) {
