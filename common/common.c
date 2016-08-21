@@ -133,7 +133,7 @@ void mdelay(unsigned long msec) {
 }
 
 __attribute__((noreturn)) void hang() {
-    uart_puts("\n### Hang-up - Please Reset board ###\n");
+    uart_puts("\n### Hang-up - Please reset board ###\n");
     while (1)
         ;
 }
@@ -142,6 +142,17 @@ __attribute__((noreturn)) void hang_reason(const char* reason) {
     uart_puts(reason);
     hang();
 }
+
+#ifndef __HOST__
+void *memcpy(void *dst, const void *src, unsigned int len) {
+    char *ret = dst;
+    while (len-- > 0) {
+        *ret++ = *((char *)src);
+        src++;
+    }
+    return (void *)ret;
+}
+#endif
 
 void flush_icache_all(void) {
     uint32_t addr, t = 0;

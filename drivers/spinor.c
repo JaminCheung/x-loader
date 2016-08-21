@@ -61,7 +61,7 @@ static void spinor_init(void) {
         spinor_set_quad_mode();
 }
 
-void spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr)
+int spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr)
 {
     int ret = 0;
 
@@ -72,4 +72,6 @@ void spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_add
     if (ret) {
         printf("sfc load error\n");
     }
+
+    return 0;
 }

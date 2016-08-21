@@ -81,4 +81,6 @@ typedef unsigned long       ulong;
 typedef unsigned int        size_t;
 #endif
 
+typedef unsigned long int uintptr_t;
+
 #endif

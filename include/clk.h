@@ -42,13 +42,7 @@ enum clk_id {
 
 void clk_init(void);
 void enable_uart_clk(void);
-
-#ifdef CONFIG_BOOT_MMC
 void set_mmc_freq(uint32_t);
-#endif /* CONFIG_BOOT_MMC */
-
-#ifdef CONFIG_BOOT_SFC
 void set_sfc_freq(uint32_t);
-#endif /* CONFIG_BOOT_SFC */
 
-#endif
+#endif /* CLK_H */

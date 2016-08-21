@@ -40,7 +40,7 @@
  */
 #define CONFIG_CONSOLE_BAUDRATE      115200
 #define CONFIG_CONSOLE_INDEX         2
-//#define CONFIG_UART_PORTD
+#undef CONFIG_UART_PORTD
 #define CONFIG_UART_PORTC
 
 /*
@@ -113,8 +113,8 @@
 #ifdef CONFIG_BOOT_MMC
 
 #define CONFIG_BOOT_MMC_PA_4BIT
-//#define CONFIG_BOOT_MMC_PA_8BIT
-//#define CONFIG_BOOT_MMC_PC_4BIT
+#undef CONFIG_BOOT_MMC_PA_8BIT
+#undef CONFIG_BOOT_MMC_PC_4BIT
 
 #define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON "ubi.mtd=5 root=ubi0:rootfs ubi.mtd=6 rootfstype=ubifs rw"
 

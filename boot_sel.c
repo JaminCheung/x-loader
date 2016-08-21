@@ -18,7 +18,6 @@
 
 #include <common.h>
 
-#ifdef CONFIG_RECOVERY_BOOT_KEY
 #if (CONFIG_RECOVERY_BOOT_KEY > 0)
 static int get_key_level(unsigned pin)
 {
@@ -76,4 +75,3 @@ int get_boot_sel(void)
 
     return NORMAL_BOOT;
 }
-#endif

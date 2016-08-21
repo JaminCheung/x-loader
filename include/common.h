@@ -35,6 +35,13 @@
 #include <lpddr/lpddr_chip.h>
 #endif
 
+/*
+ * Cache defines
+ */
+#define CONFIG_SYS_DCACHE_SIZE      16384
+#define CONFIG_SYS_ICACHE_SIZE      16384
+#define CONFIG_SYS_CACHELINE_SIZE   32
+
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 #define ROUND(a,b)      (((a) + (b) - 1) & ~((b) - 1))
@@ -97,6 +104,7 @@
  * of a function scoped static buffer.  It can not be used to create a cache
  * line aligned global buffer.
  */
+#define ARCH_DMA_MINALIGN       CONFIG_SYS_CACHELINE_SIZE
 #define PAD_COUNT(s, pad) ((s - 1) / pad + 1)
 #define PAD_SIZE(s, pad) (PAD_COUNT(s, pad) * pad)
 #define ALLOC_ALIGN_BUFFER_PAD(type, name, size, align, pad)        \
@@ -429,13 +437,6 @@
 #define AUX_BASE    0xb32a0000
 
 /*
- * Cache defines
- */
-#define CONFIG_SYS_DCACHE_SIZE      16384
-#define CONFIG_SYS_ICACHE_SIZE      16384
-#define CONFIG_SYS_CACHELINE_SIZE   32
-
-/*
  * Bits
  */
 #define BIT0  (1<<0)
@@ -655,6 +656,12 @@ static inline uint64_t lldiv(uint64_t dividend, uint32_t divisor)
     do_div(__res, divisor);
     return(__res);
 }
+#endif
+
+#ifndef __ASSEMBLY__
+#ifndef __HOST__
+void *memcpy(void *dst, const void *src, unsigned int len);
+#endif
 #endif
 
 #endif /* COMMON_H */

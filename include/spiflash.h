@@ -56,6 +56,7 @@
 /* some manufacture with unusual method */
 #define MANUFACTURE_WINBOND_ID      0xef
 
-void spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr);
-void spinand_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr);
-#endif
+int spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr);
+int spinand_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr);
+
+#endif /* SPIFLASH_H */

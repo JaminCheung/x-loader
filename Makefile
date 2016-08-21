@@ -66,18 +66,30 @@ else
 $(error Please define BOARD first!)
 endif
 
+ifeq ($(BOOT_NEXT_STAGE), 0)
+CONFIG_BOOT_UBOOT := y
+else
+ifeq ($(BOOT_NEXT_STAGE), 1)
+CONFIG_BOOT_KERNEL := y
+else
+$(error Boot next stage "$(BOOT_NEXT_STAGE)" has not support yet!)
+endif
+endif
+
 #
 # Kernel parameter & next stage address
 #
-KERNEL_PARAMETER_ADDR := 0x80004000
-ifeq ($(BOOT_NEXT_STAGE), 0)
+ifeq ($(CONFIG_BOOT_UBOOT), y)
 BOOT_NEXT_STAGE_TEXT := 0x80100000
-else
+endif
+
+ifeq ($(CONFIG_BOOT_KERNEL), y)
 BOOT_NEXT_STAGE_TEXT := 0x80600000
+KERNEL_PARAMETER_ADDR := 0x80004000
 endif
 
 CFGFLAGS := -DCONFIG_BOOT_NEXT_STAGE_TEXT=$(BOOT_NEXT_STAGE_TEXT)
-ifeq ($(BOOT_NEXT_STAGE), 1)
+ifeq ($(CONFIG_BOOT_KERNEL), y)
 CFGFLAGS += -DCONFIG_BOOT_KERNEL -DCONFIG_KERNEL_PARAMETER_ADDR=$(KERNEL_PARAMETER_ADDR)
 else
 CFGFLAGS += -DCONFIG_BOOT_UBOOT
@@ -120,11 +132,12 @@ endif
 OBJS-y := start.o                                                              \
           main.o                                                               \
           boot.o                                                               \
-          boot_sel.o                                                           \
           drivers/lpddr.o                                                      \
           drivers/uart.o                                                       \
           drivers/clk.o                                                        \
           drivers/gpio.o
+
+OBJS-$(CONFIG_BOOT_KERNEL) += boot_sel.o
 
 OBJS-y += common/printf.o                                                      \
           common/common.o

@@ -90,7 +90,7 @@ static void spinand_init(void) {
     sfc_write_data(&x,1);
 }
 
-void spinand_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr)
+int spinand_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr)
 {
     int blksize, pagesize, page;
     int pagecopy_cnt = 0;
@@ -113,5 +113,7 @@ void spinand_load(unsigned int src_addr, unsigned int count, unsigned int dst_ad
         page++;
         pagecopy_cnt++;
     }
+
+    return 0;
 }
 
