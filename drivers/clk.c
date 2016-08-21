@@ -31,7 +31,7 @@ struct cgu {
 };
 
 struct cgu cgu_clk_sel[CGU_CNT] = {
-    [DDR]    = {1, CPM_DDRCDR,  30, CONFIG_DDR_SEL_PLL, { 0,     APLL,  MPLL,  -1  }, 29, 28, 27, -1},
+    [DDR]    = {1, CPM_DDRCDR,  30, CONFIG_DDR_SEL_PLL, { 0,     APLL,  MPLL,  -1  }, 29, 28, 27, 31},
     [MACPHY] = {0, CPM_MACCDR,  31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  -1,    -1  }, 29, 28, 27, 25},
 #ifdef CONFIG_BOOT_MMC
     [MSC0]   = {1, CPM_MSC0CDR, 31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  -1,    -1  }, 29, 28, 27, 4 },
@@ -41,12 +41,19 @@ struct cgu cgu_clk_sel[CGU_CNT] = {
     [OTG]    = {0, CPM_USBCDR,  30, EXCLK,              { EXCLK, EXCLK, APLL,  MPLL}, 29, 28, 27, 3 },
     [I2S]    = {0, CPM_I2SCDR,  30, EXCLK,              { APLL,  MPLL,  EXCLK, -1  }, 29, 0,  0,  -1},
     [LCD]    = {0, CPM_LPCDR,   31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  -1,    -1  }, 28, 27, 26, 23},
+
+#ifdef CONFIG_BOOT_MMC_PC_4BIT
+    [MSC1]   = {1, CPM_MSC1CDR, 0,  0,                  { -1,    -1,    -1,    -1  }, 29, 28, 27, 5 },
+#else
     [MSC1]   = {0, CPM_MSC1CDR, 0,  0,                  { -1,    -1,    -1,    -1  }, 29, 28, 27, 5 },
+#endif /* CONFIG_BOOT_MMC_PC_4BIT */
+
 #ifdef CONFIG_BOOT_SFC
     [SFC]    = {1, CPM_SSICDR,  31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  EXCLK, -1  }, 29, 28, 27, 2 },
 #else
     [SFC]    = {0, CPM_SSICDR,  31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  EXCLK, -1  }, 29, 28, 27, 2 },
 #endif /* CONFIG_BOOT_SFC */
+
     [CIM]    = {0, CPM_CIMCDR,  31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  -1,    -1  }, 29, 28, 27, 22},
     [PCM]    = {0, CPM_PCMCDR,  30, EXCLK,              { APLL,  EXCLK, MPLL,  -1  }, 29, 0,  0,  26},
 };
@@ -56,6 +63,7 @@ static void dump_clk_regs(void) {
     debug("CPAPCR = 0x%x\n", cpm_inl(CPM_CPAPCR));
     debug("CPMPCR = 0x%x\n", cpm_inl(CPM_CPMPCR));
     debug("CPCCR  = 0x%x\n", cpm_inl(CPM_CPCCR));
+    debug("CLKGR  = 0x%x\n", cpm_inl(CPM_CLKGR));
     debug("====================\n");
 }
 
@@ -74,7 +82,8 @@ static void stop_clk(void) {
         /*
          * Disable clk gate
          */
-        cpm_outl(cpm_inl(CPM_CLKGR) | (1 << cgu->clkgr_bit), CPM_CLKGR);
+        if (cgu->clkgr_bit != -1)
+            cpm_outl(cpm_inl(CPM_CLKGR) | (1 << cgu->clkgr_bit), CPM_CLKGR);
 
         if (id == PCM)
             goto dis_aic;
@@ -300,23 +309,27 @@ uint32_t get_ddr_rate(void) {
     return freq * 1000 * 1000;
 }
 
-#ifdef CONFIG_BOOT_MMC
 void set_mmc_freq(uint32_t freq) {
     uint32_t div;
+    uint32_t msc_cdr_reg;
 
     div = ((CONFIG_MPLL_FREQ * 1000 * 1000 + freq - 1) / freq / 2 - 1) & 0xff;
 
-    uint32_t reg = cpm_inl(CPM_MSC0CDR);
-    reg = cpm_inl(CPM_MSC0CDR);
+#if (defined CONFIG_BOOT_MMC_PA_8BIT) || (defined CONFIG_BOOT_MMC_PA_4BIT)
+    msc_cdr_reg = CPM_MSC0CDR;
+#else
+    msc_cdr_reg = CPM_MSC1CDR;
+#endif
+
+    uint32_t reg = cpm_inl(msc_cdr_reg);
+    reg = cpm_inl(msc_cdr_reg);
     reg &= ~((0x3 << 27) | 0xff);
     reg |= (1 << 29) | div;
 
-    cpm_outl(reg, CPM_MSC0CDR);
-    while (cpm_inl(CPM_MSC0CDR) & (1 << 28));
+    cpm_outl(reg, msc_cdr_reg);
+    while (cpm_inl(msc_cdr_reg) & (1 << 28));
 }
-#endif
 
-#ifdef CONFIG_BOOT_SFC
 void set_sfc_freq(uint32_t freq) {
     uint32_t div;
 
@@ -330,4 +343,3 @@ void set_sfc_freq(uint32_t freq) {
     cpm_outl(reg, CPM_SSICDR);
     while (cpm_inl(CPM_SSICDR) & (1 << 28));
 }
-#endif

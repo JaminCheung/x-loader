@@ -191,6 +191,7 @@ struct norflash_partitions {
         sfc_send_cmd(sfc, g);\
 }while(0)
 
+void sfc_init(void);
 int sfc_read_data(unsigned int *data, unsigned int length);
 int sfc_write_data(unsigned int *data, unsigned int length);
 void sfc_send_cmd(struct jz_sfc *sfc, unsigned char dir);

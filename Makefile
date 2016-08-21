@@ -100,9 +100,12 @@ ifdef BOOT_FROM
 #
 # Compiler & Linker options
 #
-CFLAGS := -Os -g -G 0 -march=mips32r2 -mtune=mips32r2 -mabi=32 -fno-pic -fno-builtin -mno-abicalls -nostdlib -EL -msoft-float -std=gnu11 -I$(TOPDIR)/include
+CFLAGS := -Os -g -G 0 -march=mips32r2 -mtune=mips32r2 -mabi=32 -fno-pic \
+          -fno-builtin -mno-abicalls -nostdlib -EL -msoft-float -std=gnu11 \
+          -I$(TOPDIR)/include -ffunction-sections -fdata-sections
+
 CHECKFLAGS := -Wall -Wuninitialized -Wstrict-prototypes -Wundef -Werror
-LDFLAGS := -nostdlib -T ldscripts/x-loader.lds -EL
+LDFLAGS := -nostdlib -T ldscripts/x-loader.lds -EL --gc-sections
 OBJCFLAGS := --gap-fill=0xff --remove-section=.dynsym
 DEBUGFLAGS := -DDEBUG
 override CFLAGS := $(CHECKFLAGS) $(DEBUGFLAGS) $(CFLAGS) $(CFGFLAGS) $(BOARD_CFLAGS)
@@ -159,7 +162,7 @@ endif
 all: clean $(TARGET) Tips
 
 Tips: $(TARGET)
-	@echo -e '\n  Download image: "$(TARGET)" is ready\n'
+	@echo -e '\n  Image: "$(TARGET)" is ready\n'
 
 $(OUTDIR)/x-loader-pad-with-mbr-gpt.bin: $(OUTDIR)/mbr-gpt.bin $(OUTDIR)/x-loader-pad.bin $(TOOLSDIR)/spl_params_fixer
 	cat $(OUTDIR)/mbr-gpt.bin $(OUTDIR)/x-loader-pad.bin > $@
