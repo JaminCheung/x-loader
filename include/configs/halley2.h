@@ -52,7 +52,7 @@
  * SFC
  */
 #ifdef CONFIG_BOOT_SFC
-#define  CONFIG_SFC_FREQ    70
+#define  CONFIG_SFC_FREQ    150
 #endif
 /*
  * The following configure only for boot u-boot

@@ -88,6 +88,7 @@ int spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr
     ret = spinor_read(src_addr, count, (void *)dst_addr);
     if (ret) {
         printf("sfc load error\n");
+        return -1;
     }
     return 0;
 }

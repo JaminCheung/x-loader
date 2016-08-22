@@ -139,7 +139,8 @@ int spinand_load(unsigned int src_addr, unsigned int count, unsigned int dst_add
             printf("bad block %d\n", page/(blksize/pagesize));
             page += blksize/pagesize;
             continue;
-        }
+        }else if (ret < 0)
+            return -1;
         buf += pagesize;
         page++;
         pagecopy_cnt++;
