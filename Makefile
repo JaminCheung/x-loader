@@ -84,7 +84,7 @@ BOOT_NEXT_STAGE_TEXT := 0x80100000
 endif
 
 ifeq ($(CONFIG_BOOT_KERNEL), y)
-BOOT_NEXT_STAGE_TEXT := 0x80600000
+BOOT_NEXT_STAGE_TEXT := 0x80f00000
 KERNEL_PARAMETER_ADDR := 0x80004000
 endif
 
@@ -119,7 +119,7 @@ CFLAGS := -Os -g -G 0 -march=mips32r2 -mtune=mips32r2 -mabi=32 -fno-pic \
 CHECKFLAGS := -Wall -Wuninitialized -Wstrict-prototypes -Wundef -Werror
 LDFLAGS := -nostdlib -T ldscripts/x-loader.lds -EL --gc-sections
 OBJCFLAGS := --gap-fill=0xff --remove-section=.dynsym
-DEBUGFLAGS := -DDEBUG
+#DEBUGFLAGS := -DDEBUG
 override CFLAGS := $(CHECKFLAGS) $(DEBUGFLAGS) $(CFLAGS) $(CFGFLAGS) $(BOARD_CFLAGS)
 
 else

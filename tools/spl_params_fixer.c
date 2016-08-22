@@ -115,7 +115,7 @@ struct desc descriptors[14] = {
     #else
     { 0xa4,         0xa4,          0xa0000005,      0,                  0x10000000 },   /* MSC1CDR */
     #endif
-    { 0x20,         0xffff,        0x0fffff80,      0,                  0 },            /* CLKGR */
+    { 0x20,         0xffff,        0x07ffff80,      0,                  0 },            /* CLKGR */
 
     { 0xffff,       0xffff,        0,               0,                  0 },            /* End */
 };

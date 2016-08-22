@@ -143,6 +143,16 @@ __attribute__((noreturn)) void hang_reason(const char* reason) {
     hang();
 }
 
+void dump_mem_content(uint32_t *src, uint32_t len)
+{
+    debug("====================\n");
+    for(int i = 0; i < len / 4; i++) {
+        debug("%x:%x\n", src, *(unsigned int *)src);
+        src++;
+    }
+    debug("====================\n");
+}
+
 #ifndef __HOST__
 void *memcpy(void *dst, const void *src, unsigned int len) {
     char *ret = dst;

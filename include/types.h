@@ -59,7 +59,6 @@ typedef     __u16       uint16;
 typedef     __u32       uint32;
 typedef     __u64       uint64;
 
-
 typedef __u32 dma_addr_t;
 
 typedef unsigned long phys_addr_t;
@@ -82,5 +81,7 @@ typedef unsigned int        size_t;
 #endif
 
 typedef unsigned long int uintptr_t;
+
+typedef     ulong       lbaint_t;
 
 #endif

@@ -36,6 +36,27 @@
 #endif
 
 /*
+ * Sleep lib
+ */
+#if (defined CONFIG_BOOT_SFC)
+
+/*
+ * 12K(SPL) + 4K(PAD)
+ */
+#define SLEEP_LIB_OFFSET  (16 * 1024)
+
+#elif (defined CONFIG_BOOT_MMC)
+
+/*
+ * 17K(MBR+GPT) + 12K(SPL) + 4K(PAD)
+ */
+#define SLEEP_LIB_OFFSET  (33 * 1024)
+
+#endif
+#define SLEEP_LIB_LENGTH  (8 * 1024)
+#define SLEEP_LIB_TCSM    (0xb3422000)
+
+/*
  * Cache defines
  */
 #define CONFIG_SYS_DCACHE_SIZE      16384
@@ -663,5 +684,10 @@ static inline uint64_t lldiv(uint64_t dividend, uint32_t divisor)
 void *memcpy(void *dst, const void *src, unsigned int len);
 #endif
 #endif
+
+#ifndef __ASSEMBLY__
+void dump_mem_content(uint32_t *src, uint32_t len);
+#endif
+
 
 #endif /* COMMON_H */

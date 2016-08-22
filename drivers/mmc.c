@@ -18,19 +18,19 @@
 
 #include <common.h>
 
-#define CONFIG_MSC_DEBUG
+//#define CONFIG_MSC_DEBUG
 
 #ifndef CONFIG_MMC_MAX_BLK_COUNT
 #define CONFIG_MMC_MAX_BLK_COUNT 65535
 #endif
 
-#define CONFIG_MSC_CLK_DIV 12
+#define CONFIG_MSC_CLK (50 * 1000 * 1000)
 
-#define JZ_MMC_BUS_WIDTH_MASK 0x3
-#define JZ_MMC_BUS_WIDTH_1    0x0
-#define JZ_MMC_BUS_WIDTH_4    0x2
-#define JZ_MMC_BUS_WIDTH_8    0x3
-#define JZMMC_CARD_NEED_INIT      (1 << 2)
+#define JZ_MMC_BUS_WIDTH_MASK   0x3
+#define JZ_MMC_BUS_WIDTH_1      0x0
+#define JZ_MMC_BUS_WIDTH_4      0x2
+#define JZ_MMC_BUS_WIDTH_8      0x3
+#define JZMMC_CARD_NEED_INIT    (1 << 2)
 
 #define MMC_BOOT_AREA_PROTECTED     (0x1234)    /* Can not modified the area protected */
 #define MMC_BOOT_AREA_OPENED        (0x4321)    /* Can modified the area protected */
@@ -523,19 +523,15 @@ struct mmc_cmd {
 struct jz_mmc {
     uint32_t voltages;
     uint32_t version;
+    uint32_t clock;
     uint32_t f_min;
     uint32_t f_max;
     uint32_t high_capacity;
     uint32_t bus_width;
-    uint32_t clock;
     uint32_t card_caps;
     uint32_t host_caps;
     uint32_t ocr;
-    uint32_t scr[2];
-    uint32_t csd[4];
-    uint32_t cid[4];
     uint32_t rca;
-    uint64_t capacity;
     uint32_t read_bl_len;
     uint32_t write_bl_len;
     uint32_t flags;
@@ -603,7 +599,7 @@ static void gpio_init(void) {
 static void msc_dump_reg(void)
 {
     msc_debug("==================\n");
-    msc_debug("CTRL2 = 0x%x\n", msc_readl(MSC_CTRL2));
+    msc_debug("CTRL  = 0x%x\n", msc_readl(MSC_CTRL));
     msc_debug("STAT  = 0x%x\n", msc_readl(MSC_STAT));
     msc_debug("CLKRT = 0x%x\n", msc_readl(MSC_CLKRT));
     msc_debug("CMDAT = 0x%x\n", msc_readl(MSC_CMDAT));
@@ -618,23 +614,9 @@ static void msc_dump_reg(void)
     msc_debug("ARG   = 0x%x\n", msc_readl(MSC_ARG));
     msc_debug("RES   = 0x%x\n", msc_readl(MSC_RES));
     msc_debug("LPM   = 0x%x\n", msc_readl(MSC_LPM));
-    msc_debug("DMAC  = 0x%x\n", msc_readl(MSC_DMAC));
-    msc_debug("DMANDA= 0x%x\n", msc_readl(MSC_DMANDA));
-    msc_debug("DMADA = 0x%x\n", msc_readl(MSC_DMADA));
-    msc_debug("DMALEN= 0x%x\n", msc_readl(MSC_DMALEN));
-    msc_debug("DMACMD= 0x%x\n", msc_readl(MSC_DMACMD));
+    msc_debug("CTRL2 = 0x%x\n", msc_readl(MSC_CTRL2));
     msc_debug("RTCNT = 0x%x\n", msc_readl(MSC_RTCNT));
-    msc_debug("DEBUG = 0x%x\n", msc_readl(MSC_DEBUG));
     msc_debug("==================\n");
-}
-
-static inline int mmc_check_error_status(struct jz_mmc* mmc, uint32_t status) {
-    if (status & ERROR_STAT) {
-        printf("Error status: 0x%x\n", status);
-        return -1;
-    }
-
-    return 0;
 }
 
 static inline void clear_msc_irq(struct jz_mmc* mmc, uint32_t bits) {
@@ -642,12 +624,12 @@ static inline void clear_msc_irq(struct jz_mmc* mmc, uint32_t bits) {
 }
 
 static int mmc_polling_status(struct jz_mmc* mmc, uint32_t status) {
-    uint32_t timeout = 100 * 1000 * 1000;
+    uint32_t timeout = 50 * 1000 * 1000;
 
     while(!(msc_readl(MSC_STAT) & (status | ERROR_STAT)) && (--timeout));
 
     if (!timeout) {
-       printf("polling status(0x%x) timeout, MSC_STAT=0x%x\n",
+       printf("polling status(0x%x) timeout, MSC_STAT=0x%x\n", status,
                 msc_readl(MSC_STAT));
        return -1;
     }
@@ -711,7 +693,7 @@ static int mmc_send_cmd(struct jz_mmc* mmc, struct mmc_cmd* cmd,
         mmc->flags |= JZMMC_CARD_NEED_INIT;
     }
 
-    cmdat |= (mmc->bus_width & JZ_MMC_BUS_WIDTH_MASK) << 9;
+    cmdat |= (mmc->flags & JZ_MMC_BUS_WIDTH_MASK) << 9;
 
     msc_writel(cmdat, MSC_CMDAT);
 
@@ -742,42 +724,123 @@ static int mmc_send_cmd(struct jz_mmc* mmc, struct mmc_cmd* cmd,
     }
 
     if (cmd->resp_type == MMC_RSP_R1b) {
-        mmc_polling_status(mmc, STAT_PRG_DONE);
+        if (mmc_polling_status(mmc, STAT_PRG_DONE))
+            return -1;
+
         clear_msc_irq(mmc, IFLG_PRG_DONE);
     }
 
     //TODO:
-    if (data && (data->flags & MMC_DATA_WRITE))
+    if (data && (data->flags & MMC_DATA_WRITE)) {
+        printf("MSC: Unsupport write\n");
         return -1;
+    }
 
     if (data && (data->flags & MMC_DATA_READ)) {
         uint32_t size = data->blocks * data->blksz;
         void* buf = data->dest;
 
-        if (!mmc_polling_status(mmc, STAT_DATA_FIFO_EMPTY))
-            return -1;
-
         do {
-            uint32_t val = msc_readl(MSC_RXFIFO);
-            if (size == 1)
-                *(uint8_t *)buf = (uint8_t)val;
-            else if (size == 2)
-                put_unaligned_le16(val, buf);
-            else if (size >= 4)
-                put_unaligned_le32(val, buf);
-
-            buf += 4;
-            size -= 4;
-
             status = msc_readl(MSC_STAT);
-        } while (!(status & STAT_DATA_FIFO_EMPTY));
 
-        mmc_polling_status(mmc, STAT_DATA_TRAN_DONE);
+            if (status & STAT_TIME_OUT_READ) {
+                printf("MSC: read timeout\n");
+                return -1;
+            }
+
+            if (status & STAT_CRC_READ_ERROR) {
+                printf("MSC: read crc error\n");
+                return -1;
+            }
+
+            if (status & STAT_DATA_FIFO_EMPTY) {
+                udelay(100);
+                continue;
+            }
+
+            do {
+                uint32_t val = msc_readl(MSC_RXFIFO);
+                if (size == 1)
+                    *(uint8_t *)buf = (uint8_t)val;
+                else if (size == 2)
+                    put_unaligned_le16(val, buf);
+                else if (size >= 4)
+                    put_unaligned_le32(val, buf);
+
+                buf += 4;
+                size -= 4;
+
+                status = msc_readl(MSC_STAT);
+            } while (!(status & STAT_DATA_FIFO_EMPTY));
+
+        } while (!(status & STAT_DATA_TRAN_DONE));
+
+        while (!(msc_readl(MSC_IFLG) & IFLG_DATA_TRAN_DONE));
+
         clear_msc_irq(mmc, IFLG_DATA_TRAN_DONE);
     }
 
     return 0;
+}
 
+static void mmc_set_ios(struct jz_mmc* mmc) {
+    uint32_t lpm = 0;
+    uint32_t real_rate = 0;
+    uint8_t clk_div = 0;
+
+    /*
+     * Set mmc controler clock
+     */
+    if (mmc->clock > 1000000)
+        set_mmc_freq(mmc->clock);
+    else
+        set_mmc_freq(25000000);
+
+    real_rate = get_mmc_freq();
+
+    while ((real_rate > mmc->clock) && (clk_div < 7)) {
+        real_rate >>= 1;
+        clk_div++;
+    }
+
+    msc_writel(clk_div, MSC_CLKRT);
+
+    real_rate = get_mmc_freq() / (1 << clk_div);
+
+    if (real_rate > 25000000)
+        lpm = (0x2 << LPM_DRV_SEL_SHF) | LPM_SMP_SEL;
+
+    lpm |= LPM_LPM;
+    msc_writel(lpm, MSC_LPM);
+
+    mmc->flags &= ~JZ_MMC_BUS_WIDTH_MASK;
+    if (mmc->bus_width == 8)
+        mmc->flags |= JZ_MMC_BUS_WIDTH_8;
+    else if (mmc->bus_width == 4)
+        mmc->flags |= JZ_MMC_BUS_WIDTH_4;
+    else
+        mmc->flags |= JZ_MMC_BUS_WIDTH_1;
+
+    msc_debug("MSC: clk_want=%d, clk_set=%d, bus_width=%d\n", mmc->clock,
+            real_rate, mmc->bus_width);
+}
+
+static void mmc_set_bus_width(struct jz_mmc* mmc, uint32_t width) {
+    mmc->bus_width = width;
+
+    mmc_set_ios(mmc);
+}
+
+static void mmc_set_clock(struct jz_mmc* mmc, uint32_t clock) {
+    if (clock > mmc->f_max)
+        clock = mmc->f_max;
+
+    if (clock < mmc->f_min)
+        clock = mmc->f_min;
+
+    mmc->clock = clock;
+
+    mmc_set_ios(mmc);
 }
 
 static int mmc_go_idle(struct jz_mmc* mmc) {
@@ -834,6 +897,8 @@ static int sd_send_op_cond(struct jz_mmc *mmc)
     struct mmc_cmd cmd;
 
     do {
+        udelay(1000);
+
         cmd.opcode = MMC_CMD_APP_CMD;
         cmd.resp_type = MMC_RSP_R1;
         cmd.arg = 0;
@@ -863,7 +928,6 @@ static int sd_send_op_cond(struct jz_mmc *mmc)
         if (error)
             return error;
 
-        udelay(1000);
     } while ((!(cmd.resp[0] & OCR_BUSY)) && timeout--);
 
     if (timeout <= 0)
@@ -1007,29 +1071,8 @@ static int mmc_complete_op_cond(struct jz_mmc *mmc)
     return 0;
 }
 
-static int mmc_switch(struct jz_mmc *mmc, uint8_t set, uint8_t index, uint8_t value)
-{
-    struct mmc_cmd cmd;
-    int error;
-
-    cmd.opcode = MMC_CMD_SWITCH;
-    cmd.resp_type = MMC_RSP_R1b;
-    cmd.arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
-                 (index << 16) |
-                 (value << 8);
-
-    error = mmc_send_cmd(mmc, &cmd, NULL);
-
-    /* Waiting for the ready status */
-    if (!error)
-        error = mmc_send_status(mmc);
-
-    return error;
-
-}
-
-static int mmc_read_blocks(struct jz_mmc* mmc, void* dest, uint32_t start,
-        uint32_t blkcnt) {
+static int mmc_read_blocks(struct jz_mmc* mmc, void* dest, lbaint_t start,
+        lbaint_t blkcnt) {
     struct mmc_cmd cmd;
     struct mmc_data data;
 
@@ -1066,17 +1109,12 @@ static int mmc_read_blocks(struct jz_mmc* mmc, void* dest, uint32_t start,
     return blkcnt;
 }
 
-static uint32_t mmc_read(struct jz_mmc* mmc, uint32_t start, uint32_t blkcnt,
+static uint32_t mmc_bread(struct jz_mmc* mmc, lbaint_t start, lbaint_t blkcnt,
         void* dest) {
-    uint32_t cur = 0, blocks_todo = blkcnt;
+    lbaint_t cur = 0, blocks_todo = blkcnt;
 
     if (blkcnt == 0)
         return 0;
-
-    if ((start + blkcnt) > lldiv(mmc->capacity, mmc->read_bl_len)) {
-        printf("MMC: block number exceeds\n");
-        return -1;
-    }
 
     if (mmc_set_blocklen(mmc, mmc->read_bl_len))
         return 0;
@@ -1106,7 +1144,7 @@ static int mmc_card_starup(struct jz_mmc* mmc) {
     if (error < 0)
         return error;
 
-    memcpy(mmc->cid, cmd.resp, 16);
+    udelay(1000);
 
     /*
      * For MMC cards, set the Relative Address.
@@ -1131,16 +1169,13 @@ static int mmc_card_starup(struct jz_mmc* mmc) {
     cmd.arg = mmc->rca << 16;
 
     error = mmc_send_cmd(mmc, &cmd, NULL);
-
-    /* Waiting for the ready status */
-    mmc_send_status(mmc);
     if (error)
         return error;
 
-    mmc->csd[0] = cmd.resp[0];
-    mmc->csd[1] = cmd.resp[1];
-    mmc->csd[2] = cmd.resp[2];
-    mmc->csd[3] = cmd.resp[3];
+    /* Waiting for the ready status */
+    error = mmc_send_status(mmc);
+    if (error)
+        return error;
 
     mmc->read_bl_len = 1 << ((cmd.resp[1] >> 16) & 0xf);
 
@@ -1162,10 +1197,8 @@ static int mmc_card_starup(struct jz_mmc* mmc) {
     if (error)
         return error;
 
-    mmc->card_caps &= mmc->host_caps;
-
     if (IS_SD(mmc)) {
-        if (mmc->card_caps & MMC_MODE_4BIT) {
+        if (mmc->host_caps & MMC_MODE_4BIT) {
             cmd.opcode = MMC_CMD_APP_CMD;
             cmd.resp_type = MMC_RSP_R1;
             cmd.arg = mmc->rca << 16;
@@ -1180,18 +1213,40 @@ static int mmc_card_starup(struct jz_mmc* mmc) {
             error = mmc_send_cmd(mmc, &cmd, NULL);
             if (error)
                 return error;
+
+            mmc_set_bus_width(mmc, 4);
         }
 
     } else {
-        mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL,
-               EXT_CSD_BUS_WIDTH, EXT_CSD_BUS_WIDTH_4);
+        cmd.opcode = MMC_CMD_SWITCH;
+        cmd.resp_type = MMC_RSP_R1b;
+        cmd.arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
+                     (EXT_CSD_BUS_WIDTH << 16) |
+                     (EXT_CSD_BUS_WIDTH_4 << 8);
+
+        error = mmc_send_cmd(mmc, &cmd, NULL);
+        if (error < 0)
+            return error;
+
+        /* Waiting for the ready status */
+        error = mmc_send_status(mmc);
+        if (error < 0)
+            return error;
+
+        mmc_set_bus_width(mmc, 4);
     }
+
+    mmc_set_clock(mmc, CONFIG_MSC_CLK);
 
     return 0;
 }
 
 static int mmc_card_probe(struct jz_mmc *mmc) {
     int error = 0;
+
+    mmc_set_bus_width(mmc, 1);
+
+    mmc_set_clock(mmc, 1);
 
     /*
      * Reset the card
@@ -1227,38 +1282,6 @@ static int mmc_card_probe(struct jz_mmc *mmc) {
         return error;
 
     return 0;
-}
-
-static void mmc_set_ios(struct jz_mmc* mmc) {
-    uint32_t clk_rate = (CONFIG_MPLL_FREQ / CONFIG_MSC_CLK_DIV) * 1000 * 1000;
-    uint32_t lpm = 0;
-
-    if (clk_rate > mmc->f_max)
-        clk_rate = mmc->f_max;
-
-    if (clk_rate < mmc->f_min)
-        clk_rate = mmc->f_min;
-
-    /*
-     * Set mmc controler clock
-     */
-    set_mmc_freq(clk_rate);
-
-    if (clk_rate > 25000000)
-        lpm = (0x2 << LPM_DRV_SEL_SHF) | LPM_SMP_SEL;
-
-    lpm |= LPM_LPM;
-    msc_writel(lpm, MSC_LPM);
-
-    mmc->flags &= ~JZ_MMC_BUS_WIDTH_MASK;
-    if (mmc->bus_width == 8)
-        mmc->flags |= JZ_MMC_BUS_WIDTH_8;
-    else if (mmc->bus_width == 4)
-        mmc->flags |= JZ_MMC_BUS_WIDTH_4;
-    else
-        mmc->flags |= JZ_MMC_BUS_WIDTH_1;
-
-    msc_debug("MSC: clk=%d, bus_width=%d\n", clk_rate, mmc->bus_width);
 }
 
 static int mmc_reset(struct jz_mmc* mmc) {
@@ -1318,8 +1341,25 @@ static int mmc_controller_init(struct jz_mmc* mmc) {
     return 0;
 }
 
+static int install_sleep_lib(struct jz_mmc* mmc) {
+    uint32_t start_blk = 0;
+    uint32_t blkcnt = 0;
+
+    start_blk = (SLEEP_LIB_OFFSET + mmc->read_bl_len - 1) / mmc->read_bl_len;
+    blkcnt = (SLEEP_LIB_LENGTH + mmc->read_bl_len - 1) / mmc->read_bl_len;
+
+    if (mmc_bread(mmc, start_blk, blkcnt, (void*) SLEEP_LIB_TCSM) != blkcnt) {
+        printf("Install sleep lib failed\n");
+        return -1;
+    }
+
+    return 0;
+}
+
 int mmc_load(uint32_t offset, uint32_t length, uint32_t dest) {
     int error = 0;
+    uint32_t blkcnt = 0;
+    uint32_t start_blk = 0;
     struct jz_mmc* mmc = &jz_mmc_dev;
 
     mmc->send_cmd = mmc_send_cmd;
@@ -1330,29 +1370,35 @@ int mmc_load(uint32_t offset, uint32_t length, uint32_t dest) {
             MMC_VDD_34_35 | MMC_VDD_35_36;
 
     mmc->f_min = 200000;
-    mmc->f_max = 50000000;
+    mmc->f_max = 52000000;
 
 #ifdef CONFIG_BOOT_MMC_PA_8BIT
     mmc->host_caps = MMC_MODE_8BIT | MMC_MODE_HS_52MHz | MMC_MODE_HS | MMC_MODE_HC;
-    mmc->bus_width = 8;
 #else
     mmc->host_caps = MMC_MODE_4BIT | MMC_MODE_HS_52MHz | MMC_MODE_HS | MMC_MODE_HC;
-    mmc->bus_width = 4;
 #endif
 
     mmc->b_max = CONFIG_MMC_MAX_BLK_COUNT;
-    mmc->read_bl_len = 512;
 
     mmc->init(mmc);
-    mmc->set_ios(mmc);
 
     error = mmc_card_probe(mmc);
     if (error < 0)
         goto error;
 
-    error = mmc_read(mmc, offset, (length - 1) / mmc->read_bl_len + 1, (void *) dest);
+    error = install_sleep_lib(mmc);
     if (error < 0)
         goto error;
+
+    start_blk = (offset + mmc->read_bl_len - 1) / mmc->read_bl_len;
+    blkcnt =  (length + mmc->read_bl_len - 1) / mmc->read_bl_len;
+
+    if (mmc_bread(mmc, start_blk, blkcnt, (void *) dest) != blkcnt) {
+        error = -1;
+        goto error;
+    }
+
+    dump_mem_content((uint32_t *) dest, 200);
 
     return 0;
 

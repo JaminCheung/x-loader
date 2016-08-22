@@ -121,6 +121,10 @@ static void spinand_init(void) {
     sfc_write_data(&x,1);
 }
 
+static void install_sleep_lib(void) {
+//TODO: fill me
+}
+
 int spinand_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr)
 {
     int blksize, pagesize, page;

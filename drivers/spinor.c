@@ -78,6 +78,10 @@ static void spinor_init(void) {
 #endif
 }
 
+static void install_sleep_lib(void) {
+//TODO: fill me
+}
+
 int spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr)
 {
     int ret = 0;

@@ -52,13 +52,23 @@
  * SFC
  */
 #ifdef CONFIG_BOOT_SFC
+/*
+ * unit(MHz)
+ */
 #define  CONFIG_SFC_FREQ    150
 #endif
 /*
  * The following configure only for boot u-boot
  */
 #ifdef CONFIG_BOOT_UBOOT
+/*
+ * unit(byte)
+ */
 #define CONFIG_UBOOT_OFFSET                 0x4000
+
+/*
+ * unit(byte)
+ */
 #define CONFIG_UBOOT_LENGTH                 0x40000
 #endif /* CONFIG_BOOT_UBOOT */
 
@@ -67,9 +77,16 @@
  */
 #ifdef CONFIG_BOOT_KERNEL
 
-#define KERNEL_ARGS_COMMON "mem=32M@0 console=ttyS2,115200n8 ip=off init=/linuxrc"
+#define KERNEL_ARGS_COMMON "mem=32M@0x0 console=ttyS2,115200n8 lpj=5009408 ip=off init=/linuxrc "
 
+/*
+ * unit(byte)
+ */
 #define CONFIG_KERNEL_OFFSET                0x40000
+
+/*
+ * unit(byte)
+ */
 #define CONFIG_KERNEL_LENGTH                0x300000
 
 #define CONFIG_RECOVERY_BOOT_KEY            -1

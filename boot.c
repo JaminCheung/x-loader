@@ -94,6 +94,8 @@ void boot_next_stage(void) {
     if (retval < 0)
         panic("\n\tLoad next stage failed.\n");
 
+    printf("\nJump...\n\n");
+
     /*
      * We will nerver return here
      */

@@ -309,6 +309,24 @@ uint32_t get_ddr_rate(void) {
     return freq * 1000 * 1000;
 }
 
+uint32_t get_mmc_freq(void) {
+    uint32_t msc_cdr_reg;
+    uint32_t div;
+    uint32_t freq;
+
+#if (defined CONFIG_BOOT_MMC_PA_8BIT) || (defined CONFIG_BOOT_MMC_PA_4BIT)
+    msc_cdr_reg = CPM_MSC0CDR;
+#else
+    msc_cdr_reg = CPM_MSC1CDR;
+#endif
+
+    div = ((cpm_inl(msc_cdr_reg) & 0xff) + 1) * 2;
+
+    freq = (CONFIG_MPLL_FREQ * 1000 * 1000) / div;
+
+    return freq;
+}
+
 void set_mmc_freq(uint32_t freq) {
     uint32_t div;
     uint32_t msc_cdr_reg;
