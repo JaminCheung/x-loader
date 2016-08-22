@@ -39,4 +39,10 @@ CONFIG_MBR_P3_END=0mb
 CONFIG_MBR_P3_TYPE=linux
 endif
 
+#
+# zImage: 0
+# xImage: 1
+#
+KERNEL_IN_XIMAGE := 1
+
 BOARD_CFLAGS :=

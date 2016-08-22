@@ -22,7 +22,7 @@ __attribute__ ((noreturn)) static void jump_to_image(void) {
 #if (defined CONFIG_BOOT_UBOOT)
     typedef void (*image_entry_t)(void) __attribute__ ((noreturn));
 
-    image_entry_t image_entry = (image_entry_t) CONFIG_BOOT_NEXT_STAGE_TEXT;
+    image_entry_t image_entry = (image_entry_t) CONFIG_BOOT_NEXT_STAGE_ENTRY_ADDR;
 
     flush_cache_all();
 
@@ -32,9 +32,17 @@ __attribute__ ((noreturn)) static void jump_to_image(void) {
     typedef void (*image_entry_t)(int, char **, void *)
             __attribute__ ((noreturn));
 
+    uint32_t entry_addr = 0;
+
+#ifdef CONFIG_KERNEL_IN_XIMAGE
+    entry_addr = CONFIG_BOOT_NEXT_STAGE_ENTRY_ADDR - 64;
+#else
+    entry_addr = CONFIG_BOOT_NEXT_STAGE_ENTRY_ADDR;
+#endif
+
     uint32_t *linux_argv = (uint32_t *) CONFIG_KERNEL_PARAMETER_ADDR;
 
-    image_entry_t image_entry = (image_entry_t) CONFIG_BOOT_NEXT_STAGE_TEXT;
+    image_entry_t image_entry = (image_entry_t) entry_addr;
 
     linux_argv[0] = 0;
     linux_argv[1] = (uint32_t) (CONFIG_KERNEL_ARGS);
@@ -54,11 +62,11 @@ void boot_next_stage(void) {
 #ifdef CONFIG_BOOT_MMC
     #if (defined CONFIG_BOOT_UBOOT)
         retval = mmc_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH,
-                CONFIG_BOOT_NEXT_STAGE_TEXT);
+                CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR);
 
     #elif (defined CONFIG_BOOT_KERNEL)
         retval = mmc_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH,
-                CONFIG_BOOT_NEXT_STAGE_TEXT);
+                CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR);
     #endif
 #endif /* CONFIG_BOOT_MMC */
 
@@ -68,11 +76,11 @@ void boot_next_stage(void) {
 #ifdef CONFIG_BOOT_SPI_NAND
     #if (defined CONFIG_BOOT_UBOOT)
         retval = spinand_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH,
-                CONFIG_BOOT_NEXT_STAGE_TEXT);
+                CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR);
 
     #elif (defined CONFIG_BOOT_KERNEL)
         retval = spinand_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH,
-                CONFIG_BOOT_NEXT_STAGE_TEXT);
+                CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR);
     #endif
 
 #endif /* CONFIG_BOOT_SPI_NAND */
@@ -83,11 +91,11 @@ void boot_next_stage(void) {
 #ifdef CONFIG_BOOT_SPI_NOR
     #if (defined CONFIG_BOOT_UBOOT)
         retval = spinor_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH,
-                CONFIG_BOOT_NEXT_STAGE_TEXT);
+                CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR);
 
     #elif (defined CONFIG_BOOT_KERNEL)
         retval = spinor_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH,
-                CONFIG_BOOT_NEXT_STAGE_TEXT);
+                CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR);
     #endif
 #endif /* CONFIG_BOOT_SPI_NOR */
 
