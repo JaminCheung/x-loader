@@ -43,6 +43,7 @@
 #define CMD_ERASE_128K              0xd8
 #define CMD_R_CACHE                 0x03    /* read from cache */
 #define CMD_FR_CACHE                0x0b    /* fast read from cache */
+#define CMD_FR_CACHE_QUAD           0x6b
 #define CMD_GET_FEATURE             0x0f
 #define CMD_SET_FEATURE             0x1f
 
@@ -51,7 +52,8 @@
 #define FEATURE_REG_STATUS1         0xc0
 #define FEATURE_REG_FEATURE2        0xd0
 #define FEATURE_REG_STATUS2         0xf0
-#define BITS_ECC_EN                 0x10
+#define BITS_ECC_EN                 (1 << 4)
+#define BITS_QUAD_EN                (1 << 0)
 
 /* some manufacture with unusual method */
 #define MANUFACTURE_WINBOND_ID      0xef

@@ -1,4 +1,27 @@
+/*
+ *  Copyright (C) 2016 Ingenic Semiconductor Co.,Ltd
+ *
+ *  X1000 series bootloader for u-boot/rtos/linux
+ *
+ *  Zhang YanMing <yanming.zhang@ingenic.com, jamincheung@126.com>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under  the terms of the GNU General  Public License as published by the
+ *  Free Software Foundation;  either version 2 of the License, or (at your
+ *  option) any later version.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
+
 #include <common.h>
+
+struct spi_mode_peer spi_mode_local[] = {
+    [SPI_MODE_STANDARD] = {TRAN_SPI_STANDARD, CMD_R_CACHE},
+    [SPI_MODE_QUAD] = {TRAN_SPI_QUAD, CMD_FR_CACHE_QUAD},
+};
 
 static inline int spinand_bad_block_check(int len,unsigned char *buf)
 {
@@ -47,7 +70,11 @@ static int spinand_read_page(unsigned int page, unsigned char *dst_addr,
     }
 
     column = (column << 8) & 0xffffff00;
-    SFC_SEND_COMMAND(&sfc,CMD_R_CACHE,pagesize,column,3,0,1,0);
+#ifndef CONFIG_SPI_STANDARD
+    SFC_SEND_COMMAND(&sfc,SPI_MODE_QUAD,pagesize,column,3,0,1,0);
+#else
+    SFC_SEND_COMMAND(&sfc,SPI_MODE_STANDARD,pagesize,column,3,0,1,0);
+#endif
     sfc_read_data((unsigned int *)dst_addr,pagesize);
 
     if (!oob_flag && !(page % (blksize/pagesize))){
@@ -72,18 +99,22 @@ static inline void spinand_get_base_param(int *pagesize, int *blocksize)
 static void spinand_init(void) {
 
     unsigned char id[4];
-    unsigned int x=0;
+    unsigned int x;
     struct jz_sfc sfc;
 
     /* get id */
     SFC_SEND_COMMAND(&sfc,CMD_RDID,2,0,1,0,1,0);
     sfc_read_data((unsigned int *)id,2);
     /* disable write protect */
+    x = 0;
     SFC_SEND_COMMAND(&sfc,CMD_SET_FEATURE,1,FEATURE_REG_PROTECT,1,0,1,1);
     sfc_write_data(&x,1);
 
     /* enable ecc */
     x = BITS_ECC_EN;
+#ifndef CONFIG_SPI_STANDARD
+    x |= BITS_QUAD_EN;
+#endif
     if (id[0] == MANUFACTURE_WINBOND_ID)
         x |= (1 << 3);  // BUF equaled 1
     SFC_SEND_COMMAND(&sfc,CMD_SET_FEATURE,1,FEATURE_REG_FEATURE1,1,0,1,1);

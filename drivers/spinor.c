@@ -1,8 +1,29 @@
+/*
+ *  Copyright (C) 2016 Ingenic Semiconductor Co.,Ltd
+ *
+ *  X1000 series bootloader for u-boot/rtos/linux
+ *
+ *  Zhang YanMing <yanming.zhang@ingenic.com, jamincheung@126.com>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under  the terms of the GNU General  Public License as published by the
+ *  Free Software Foundation;  either version 2 of the License, or (at your
+ *  option) any later version.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
+
 #include <common.h>
 
-extern unsigned int sfc_quad_mode;
-extern int mode;
+struct spi_mode_peer spi_mode_local[] = {
+    [SPI_MODE_STANDARD] = {TRAN_SPI_STANDARD, CMD_READ},
+    [SPI_MODE_QUAD] = {TRAN_SPI_QUAD, CMD_QUAD_READ},
+};
 
+#ifndef CONFIG_SPI_STANDARD
 void spinor_set_quad_mode(void)
 {
     unsigned int buf;
@@ -29,25 +50,20 @@ void spinor_set_quad_mode(void)
         sfc_read_data(&buf, 1);
     }
 }
+#endif
 
 static int spinor_read(unsigned int offset, unsigned int len, void *data)
 {
     int addr_len = 3;
-    int dummy_byte = 8;
     struct jz_sfc sfc;
     int ret;
 
-    if(sfc_quad_mode == 1){
-        mode = TRAN_SPI_QUAD;
-    } else{
-        mode = TRAN_SPI_STANDARD;
-    }
-
-    if(sfc_quad_mode == 1){
-        SFC_SEND_COMMAND(&sfc,CMD_QUAD_READ,len,offset,addr_len,dummy_byte,1,0);
-    }else{
-        SFC_SEND_COMMAND(&sfc,CMD_READ,len,offset,addr_len,0,1,0);
-    }
+#ifndef CONFIG_SPI_STANDARD
+    int dummy_byte = 8;
+    SFC_SEND_COMMAND(&sfc,SPI_MODE_QUAD,len,offset,addr_len,dummy_byte,1,0);
+#else
+    SFC_SEND_COMMAND(&sfc,SPI_MODE_STANDARD,len,offset,addr_len,0,1,0);
+#endif
 
     ret = sfc_read_data(data, len);
     if (ret)
@@ -57,8 +73,9 @@ static int spinor_read(unsigned int offset, unsigned int len, void *data)
 }
 
 static void spinor_init(void) {
-    if(sfc_quad_mode == 1)
+#ifndef CONFIG_SPI_STANDARD
         spinor_set_quad_mode();
+#endif
 }
 
 int spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr)
@@ -72,6 +89,5 @@ int spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr
     if (ret) {
         printf("sfc load error\n");
     }
-
     return 0;
 }

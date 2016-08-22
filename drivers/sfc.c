@@ -21,10 +21,6 @@
 #define src_readl(offset) readl(SFC_BASE + offset)
 #define sfc_writel(value, offset) writel(value, SFC_BASE + offset);
 
-unsigned int sfc_rate = 0;
-unsigned int sfc_quad_mode = 1;
-int mode = 0;
-
 inline void sfc_set_mode(int channel, int value)
 {
     unsigned int tmp;
@@ -121,7 +117,7 @@ inline void sfc_dev_addr_plus(int channel, unsigned int value)
     sfc_writel(value,SFC_DEV_ADDR_PLUS(channel));
 }
 
-inline void sfc_set_transfer(struct jz_sfc *hw,int dir)
+inline void sfc_set_transfer(struct jz_sfc *hw, int dir)
 {
     if(dir == 1)
         sfc_transfer_direction(GLB_TRAN_DIR_WRITE);
@@ -142,11 +138,6 @@ inline void sfc_send_cmd(struct jz_sfc *sfc, unsigned char dir)
 {
     unsigned int reg_tmp = 0;
 
-    if((sfc->daten == 1)&&(sfc->addr_len != 0)){
-        sfc->sfc_mode = mode;
-    }else{
-        sfc->sfc_mode = 0;
-    }
     sfc_set_transfer(sfc,dir);
     sfc_writel(1 << 2,SFC_TRIG);
     sfc_writel(START,SFC_TRIG);
@@ -259,9 +250,6 @@ void sfc_init(void) {
 
     set_sfc_freq(CONFIG_SFC_FREQ * 1000 * 1000);
 
-#ifdef CONFIG_SPI_STANDARD
-    sfc_quad_mode = 0;
-#endif
     tmp = src_readl(SFC_GLB);
     tmp &= ~(TRAN_DIR | OP_MODE );
     tmp |= WP_EN;

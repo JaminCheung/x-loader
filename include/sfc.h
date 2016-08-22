@@ -1,37 +1,6 @@
 #ifndef SFC_H
 #define SFC_H
 
-#ifdef CONFIG_SFC_DEBUG
-#define sfc_debug(fmt, args...)         \
-    do {                    \
-        printf(fmt, ##args);        \
-    } while (0)
-#else
-#define sfc_debug(fmt, args...)         \
-    do {                    \
-    } while (0)
-#endif
-
-typedef enum{
-    TRANSFER,
-    RECEIVE,
-}tran_dir;
-
-#define DISABLE 0
-#define ENABLE  1
-#define RDID_NUM    2
-
-struct sfc_xfer{
-    int cmd;
-    int tran_dir;
-    int addr_width;
-    int data_en;
-    int poll_en;
-    int tran_len;
-    int addr;
-    int column;
-};
-
 struct jz_sfc {
     unsigned int  addr;
     unsigned int  len;
@@ -45,23 +14,26 @@ struct jz_sfc {
     unsigned char dummy_byte;
 };
 
-#define NOR_MAGIC   0x726f6e    //ascii "nor"
-#define NOR_PART_NUM    10
-#define NORFLASH_PART_RW    0
-#define NORFLASH_PART_WO    1
-#define NORFLASH_PART_RO    2
-struct nor_partition {
-    char name[32];
-    uint32_t size;
-    uint32_t offset;
-    uint32_t mask_flags;//bit 0-1 mask the partiton RW mode, 0:RW  1:W  2:R
-    uint32_t manager_mode;
+struct spi_mode_peer {
+    int controller_mode;
+    int device_mode;
 };
 
-struct norflash_partitions {
-    struct nor_partition nor_partition[NOR_PART_NUM];
-    uint32_t num_partition_info;
+enum {
+    SPI_MODE_STANDARD,
+    SPI_MODE_QUAD,
 };
+
+#ifdef CONFIG_SFC_DEBUG
+#define sfc_debug(fmt, args...)         \
+    do {                    \
+        printf(fmt, ##args);        \
+    } while (0)
+#else
+#define sfc_debug(fmt, args...)         \
+    do {                    \
+    } while (0)
+#endif
 
 #define SFC_GLB               (0x0000)
 #define SFC_DEV_CONF          (0x0004)
@@ -137,7 +109,6 @@ struct norflash_partitions {
 #define FLUSH           (1 << 2)
 #define STOP            (1 << 1)
 #define START           (1 << 0)
-
 //For SFC_SR
 #define FIFONUM_OFFSET      (16)
 #define FIFONUM_MSK     (0x7f << FIFONUM_OFFSET)
@@ -148,21 +119,18 @@ struct norflash_partitions {
 #define RECE_REQ        (1 << 2)
 #define OVER            (1 << 1)
 #define UNDER           (1 << 0)
-
 //For SFC_SCR
 #define CLR_END         (1 << 4)
 #define CLR_TREQ        (1 << 3)
 #define CLR_RREQ        (1 << 2)
 #define CLR_OVER        (1 << 1)
 #define CLR_UNDER       (1 << 0)
-
 //For SFC_INTC
 #define MASK_END        (1 << 4)
 #define MASK_TREQ       (1 << 3)
 #define MASK_RREQ       (1 << 2)
 #define MASK_OVER       (1 << 1)
 #define MASK_UNDR       (1 << 0)
-
 //For SFC_FSM
 #define FSM_AHB_OFFSET      (16)
 #define FSM_AHB_MSK     (0xf << FSM_AHB_OFFSET)
@@ -174,11 +142,25 @@ struct norflash_partitions {
 #define FSM_DMAC_MSK        (0x7 << FSM_DMAC_OFFSET)
 #define FSM_RMC_OFFSET      (0)
 #define FSM_RMC_MSK     (0x7 << FSM_RMC_OFFSET)
-
 //For SFC_CGE
 #define CG_EN           (1 << 0)
 #define SFC_FIFO_LEN    (63)
 #define THRESHOLD       (31)
+
+#define  SFC_MODE_GENERATE(sfc, a)    do{\
+        if ((a >= SPI_MODE_STANDARD) && (a <= SPI_MODE_QUAD)){ \
+            ((struct jz_sfc *)sfc)->cmd = spi_mode_local[a].device_mode;\
+        }\
+        if((((struct jz_sfc *)sfc)->daten == 1) \
+        && (((struct jz_sfc *)sfc)->addr_len != 0)){ \
+            if (a == SPI_MODE_QUAD) \
+                ((struct jz_sfc *)sfc)->sfc_mode = spi_mode_local[a].controller_mode; \
+            else \
+                ((struct jz_sfc *)sfc)->sfc_mode = 0; \
+        }else{  \
+            ((struct jz_sfc *)sfc)->sfc_mode = 0;  \
+        }\
+}while(0)
 
 #define  SFC_SEND_COMMAND(sfc, a, b, c, d, e, f, g)   do{\
         ((struct jz_sfc *)sfc)->cmd = a;\
@@ -188,6 +170,7 @@ struct norflash_partitions {
         ((struct jz_sfc *)sfc)->addr_plus = 0;\
         ((struct jz_sfc *)sfc)->dummy_byte = e;\
         ((struct jz_sfc *)sfc)->daten = f;\
+        SFC_MODE_GENERATE(sfc, a);\
         sfc_send_cmd(sfc, g);\
 }while(0)
 
@@ -195,7 +178,4 @@ void sfc_init(void);
 int sfc_read_data(unsigned int *data, unsigned int length);
 int sfc_write_data(unsigned int *data, unsigned int length);
 void sfc_send_cmd(struct jz_sfc *sfc, unsigned char dir);
-
-void sfc_send_cmd_test(unsigned char *cmd,unsigned int len,unsigned int addr ,unsigned addr_len,unsigned dummy_byte,unsigned int daten,unsigned char dir);
-
 #endif
