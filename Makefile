@@ -273,6 +273,7 @@ endif
 unconfig:
 	rm -f include/generated/config.h include/generated/config.mk
 
+#===============================================================================
 phoenix_nor_config: unconfig
 	@./mkconfig $(@:_config) phoenix nor
 
@@ -291,6 +292,11 @@ halley2_nand_config: unconfig
 halley2_mmc_config: unconfig
 	@./mkconfig $(@:_config) halley2 mmc
 
+#
+# Put your board's config here
+#
+
+#===============================================================================
 clean:
 	rm -rf $(OUTDIR)/* \
 			$(OBJS) \

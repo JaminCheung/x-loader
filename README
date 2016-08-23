@@ -15,12 +15,60 @@
  #  675 Mass Ave, Cambridge, MA 02139, USA.
  #
  #
- 
-如何编译?
-================
-举例:
+
+这是什么？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+bootloader - 用于加载引导u-boot/linux/rtos，支持spi nand/nor, mmc/sdcard启动
+
+如何编译？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+以phoenix板(spi nor)为例
+
 第一步： 配置
 	make phoenix_nor_config
 
 第二步：编译
 	make
+
+如何添加新板极？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+1.在boards下添加板极目录
+2.打开Makefile添加新板极编译目标
+
+如何引到u-boot？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+打开config.mk，修改BOOT_NEXT_STAGE := 0，重新编译
+
+如何引导zImage？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+打开config.mk，修改BOOT_NEXT_STAGE := 1
+打开boards/BOARD_NAME/board.mk，修改KERNEL_IN_XIMAGE := 0，重新编译
+
+如何引导xImage？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+打开config.mk，修改BOOT_NEXT_STAGE := 1
+打开boards/BOARD_NAME/board.mk，修改KERNEL_IN_XIMAGE := 1，重新编译
+
+板极配置文件在哪里？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+在include/configs/BOARD_NAME.h
+
+如何针对板子做特定初始化？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+boards/BOARD_NAME/board.c中board_init()用于在引导前对板子
+进行初始化，当然也可以没有
+
+烧录什么文件？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+编译完成会有提示：“Image: xxxxxx” is ready
+
+添加了代码编译不过怎么办？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+首先确认代码没有超过12KByte，如果没有继续debug
+
+引导不成功怎么办？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+将out目录打包，进行问题反馈
+
+
+问题反馈：ZhangYanMing<yanming.zhang@ingenic.com>
