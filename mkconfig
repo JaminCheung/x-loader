@@ -23,7 +23,7 @@
 
 echo "Configuring for $1($2) board..."
 
-[ -d ./include/generated ] || mkdir -p ./include/generated ]
+[ -d ./include/generated ] || mkdir -p ./include/generated
 cd ./include/generated
 
 echo "BOARD = $1" > config.mk
