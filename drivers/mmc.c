@@ -883,13 +883,6 @@ static int mmc_send_if_cond(struct jz_mmc* mmc) {
     return 0;
 }
 
-#if 0
-static void dump_resp(struct mmc_cmd* cmd) {
-    for (int i = 0; i < 4; i++)
-        printf("resp[%d]=0x%x\n", i, cmd->resp[i]);
-}
-#endif
-
 static int sd_send_op_cond(struct jz_mmc *mmc)
 {
     int timeout = 1000;

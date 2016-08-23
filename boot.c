@@ -18,11 +18,11 @@
 
 #include <common.h>
 
-__attribute__ ((noreturn)) static void jump_to_image(void) {
+__attribute__ ((noreturn)) static void jump_to_image(uint32_t entry_addr) {
 #if (defined CONFIG_BOOT_UBOOT)
     typedef void (*image_entry_t)(void) __attribute__ ((noreturn));
 
-    image_entry_t image_entry = (image_entry_t) CONFIG_BOOT_NEXT_STAGE_ENTRY_ADDR;
+    image_entry_t image_entry = (image_entry_t) entry_addr;
 
     flush_cache_all();
 
@@ -31,14 +31,6 @@ __attribute__ ((noreturn)) static void jump_to_image(void) {
 #elif (defined CONFIG_BOOT_KERNEL) /* CONFIG_BOOT_UBOOT */
     typedef void (*image_entry_t)(int, char **, void *)
             __attribute__ ((noreturn));
-
-    uint32_t entry_addr = 0;
-
-#ifdef CONFIG_KERNEL_IN_XIMAGE
-    entry_addr = CONFIG_BOOT_NEXT_STAGE_ENTRY_ADDR - 64;
-#else
-    entry_addr = CONFIG_BOOT_NEXT_STAGE_ENTRY_ADDR;
-#endif
 
     uint32_t *linux_argv = (uint32_t *) CONFIG_KERNEL_PARAMETER_ADDR;
 
@@ -55,18 +47,35 @@ __attribute__ ((noreturn)) static void jump_to_image(void) {
 
 void boot_next_stage(void) {
     int retval = 0;
+    uint32_t load_addr = 0;
+    uint32_t entry_addr = 0;
+
+    entry_addr = CONFIG_BOOT_NEXT_STAGE_ENTRY_ADDR;
+
+#if (defined CONFIG_BOOT_KERNEL)
+
+#ifdef CONFIG_KERNEL_IN_XIMAGE
+    /*
+     * 0x40: mkimage header
+     */
+    load_addr = CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR - 0x40;
+#else
+    load_addr = CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR;
+#endif /* CONFIG_KERNEL_IN_XIMAGE */
+
+#elif (defined CONFIG_BOOT_UBOOT) /* CONFIG_BOOT_KERNEL */
+    load_addr = CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR;
+#endif
 
     /*
      * For mmc
      */
 #ifdef CONFIG_BOOT_MMC
     #if (defined CONFIG_BOOT_UBOOT)
-        retval = mmc_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH,
-                CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR);
+        retval = mmc_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
 
     #elif (defined CONFIG_BOOT_KERNEL)
-        retval = mmc_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH,
-                CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR);
+        retval = mmc_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
     #endif
 #endif /* CONFIG_BOOT_MMC */
 
@@ -75,12 +84,10 @@ void boot_next_stage(void) {
      */
 #ifdef CONFIG_BOOT_SPI_NAND
     #if (defined CONFIG_BOOT_UBOOT)
-        retval = spinand_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH,
-                CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR);
+        retval = spinand_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
 
     #elif (defined CONFIG_BOOT_KERNEL)
-        retval = spinand_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH,
-                CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR);
+        retval = spinand_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
     #endif
 
 #endif /* CONFIG_BOOT_SPI_NAND */
@@ -90,14 +97,15 @@ void boot_next_stage(void) {
      */
 #ifdef CONFIG_BOOT_SPI_NOR
     #if (defined CONFIG_BOOT_UBOOT)
-        retval = spinor_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH,
-                CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR);
+        retval = spinor_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
 
     #elif (defined CONFIG_BOOT_KERNEL)
-        retval = spinor_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH,
-                CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR);
+        retval = spinor_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
     #endif
 #endif /* CONFIG_BOOT_SPI_NOR */
+
+    printf("Load address:  0x%x\n", load_addr);
+    printf("Entry address: 0x%x\n", entry_addr);
 
     if (retval < 0)
         panic("\n\tLoad next stage failed.\n");
@@ -107,5 +115,5 @@ void boot_next_stage(void) {
     /*
      * We will nerver return here
      */
-    jump_to_image();
+    jump_to_image(entry_addr);
 }
