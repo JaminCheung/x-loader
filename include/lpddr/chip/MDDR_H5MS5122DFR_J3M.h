@@ -15,8 +15,14 @@
 /* MDDR paramters */
 #define DDR_ROW 13 /* ROW : 12 to 14 row address */
 #define DDR_ROW1 13 /* ROW : 12 to 14 row address */
+#ifdef CONFIG_MEM_SIZE_64M
+#define DDR_COL 10/* COL :  8 to 10 column address */
+#define DDR_COL1 10/* COL :  8 to 10 column address */
+#else
 #define DDR_COL 9/* COL :  8 to 10 column address */
 #define DDR_COL1 9/* COL :  8 to 10 column address */
+#endif
+
 #define DDR_BANK8 0 /* Banks each chip: 0-4bank, 1-8bank 0 for falcon fpga, 1 for develop board */
 #define DDR_CL 4 /* CAS latency: 1 to 7 */
 

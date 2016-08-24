@@ -24,7 +24,7 @@
 #define CONFIG_MMC_MAX_BLK_COUNT 65535
 #endif
 
-#define CONFIG_MSC_CLK (50 * 1000 * 1000)
+#define CONFIG_MSC_FREQ (50 * 1000 * 1000)
 
 #define JZ_MMC_BUS_WIDTH_MASK   0x3
 #define JZ_MMC_BUS_WIDTH_1      0x0
@@ -1229,7 +1229,7 @@ static int mmc_card_starup(struct jz_mmc* mmc) {
         mmc_set_bus_width(mmc, 4);
     }
 
-    mmc_set_clock(mmc, CONFIG_MSC_CLK);
+    mmc_set_clock(mmc, CONFIG_MSC_FREQ);
 
     return 0;
 }

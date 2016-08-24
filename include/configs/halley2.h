@@ -20,22 +20,6 @@
 #define HALLEY2_H
 
 /*
- * External crystal freq - unit(MHz)
- */
-#define CONFIG_EXTAL_FREQ           24
-
-/*
- * PLL freq - unit(MHz)
- */
-#define CONFIG_APLL_FREQ        1008
-#define CONFIG_MPLL_FREQ        600
-#define CONFIG_CPU_SEL_PLL      APLL
-#define CONFIG_DDR_SEL_PLL      MPLL
-#define CONFIG_DDR_FREQ_DIV     3
-#define CONFIG_L2CACHE_CLK_DIV  2
-#define CONFIG_AHB_CLK_DIV      3
-
-/*
  * Console
  */
 #define CONFIG_CONSOLE_BAUDRATE      3000000
@@ -44,35 +28,28 @@
 #define CONFIG_UART_PORTC
 
 /*
- * DDR
- */
-#define CONFIG_MDDR_H5MS5122DFR_J3M
-
-/*
- * SFC
- */
-#ifdef CONFIG_BOOT_SFC
-/*
- * unit(MHz)
- */
-#define  CONFIG_SFC_FREQ    150
-
-#undef CONFIG_SPI_STANDARD
-
-#endif /* CONFIG_BOOT_SFC */
-
-/*
  * The following configure only for boot kernel
  */
 #ifdef CONFIG_BOOT_KERNEL
 
-#define KERNEL_ARGS_COMMON "mem=32M@0x0 no_console_suspend console=ttyS2,3000000n8 lpj=5009408 ip=off init=/linuxrc "
+#ifdef CONFIG_MEM_SIZE_64M
+#define KERNEL_ARGS_MEM         "mem=64M@0x0 "
+#else
+#define KERNEL_ARGS_MEM         "mem=32M@0x0 "
+#endif
 
-#define CONFIG_RECOVERY_BOOT_KEY            -1
-#define CONFIG_RECOVERY_BOOT_KEY_ENLEVEL    -1
-#define CONFIG_RECOVERY_OFFSET              -1
-#define CONFIG_RECOVERY_LENGTH              -1
-#define CONFIG_RECOVERY_ARGS  KERNEL_ARGS_COMMON
+#define KERNEL_ARGS_CONSOLE     "no_console_suspend console=ttyS2,3000000n8 "
+#define KERNEL_ARGS_OTHERS      "lpj=5009408 ip=off "
+#define KERNEL_ARGS_COMMON KERNEL_ARGS_MEM KERNEL_ARGS_CONSOLE KERNEL_ARGS_OTHERS
+
+#define KERNEL_ARGS_INIT        "init=/linuxrc"
+#define RECOVERY_ARGS_INIT      "init=/init"
+
+#define CONFIG_RECOVERY_BOOT_KEY            GPIO_PA(10)
+#define CONFIG_RECOVERY_BOOT_KEY_ENLEVEL    0
+#define CONFIG_RECOVERY_OFFSET              0x400000
+#define CONFIG_RECOVERY_LENGTH              0x300000
+#define CONFIG_RECOVERY_ARGS KERNEL_ARGS_COMMON RECOVERY_ARGS_INIT
 
 #endif /* CONFIG_BOOT_KERNEL */
 
@@ -90,7 +67,7 @@
  */
 #define CONFIG_NAND_PPB             (64)
 
-#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON "ubi.mtd=5 root=ubi0:rootfs ubi.mtd=6 rootfstype=ubifs rw"
+#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT " ubi.mtd=5 root=ubi0:rootfs ubi.mtd=6 rootfstype=ubifs rw"
 
 /*
  * unit(byte)
@@ -108,7 +85,7 @@
  */
 #ifdef CONFIG_BOOT_SPI_NOR
 
-#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON "rootfstype=jffs2 root=/dev/mtdblock2 rw"
+#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT " rootfstype=jffs2 root=/dev/mtdblock2 rw"
 
 /*
  * unit(byte)
@@ -130,7 +107,7 @@
 #undef CONFIG_BOOT_MMC_PA_8BIT
 #undef CONFIG_BOOT_MMC_PC_4BIT
 
-#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON "ubi.mtd=5 root=ubi0:rootfs ubi.mtd=6 rootfstype=ubifs rw"
+#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT " rootfstype=jffs2 root=/dev/mtdblock2 rw"
 
 /*
  * unit(byte)

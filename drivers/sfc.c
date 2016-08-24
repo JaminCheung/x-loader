@@ -18,6 +18,8 @@
 
 #include <common.h>
 
+#define  CONFIG_SFC_FREQ    (150 * 1000 * 1000)
+
 #define src_readl(offset) readl(SFC_BASE + offset)
 #define sfc_writel(value, offset) writel(value, SFC_BASE + offset);
 
@@ -248,7 +250,7 @@ void sfc_init(void) {
 
     sfc_set_gpio_pa_as_6bit();
 
-    set_sfc_freq(CONFIG_SFC_FREQ * 1000 * 1000);
+    set_sfc_freq(CONFIG_SFC_FREQ);
 
     tmp = src_readl(SFC_GLB);
     tmp &= ~(TRAN_DIR | OP_MODE );

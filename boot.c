@@ -99,7 +99,7 @@ void boot_next_stage(void) {
         retval = spinand_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
 
     #elif (defined CONFIG_BOOT_KERNEL)
-        if (get_boot_sel() == RECOVERY_BOOT)
+        if (boot_sel == RECOVERY_BOOT)
             retval = spinand_load(CONFIG_RECOVERY_OFFSET, CONFIG_RECOVERY_LENGTH, load_addr);
         else
             retval = spinand_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
@@ -114,7 +114,7 @@ void boot_next_stage(void) {
         retval = spinor_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
 
     #elif (defined CONFIG_BOOT_KERNEL)
-        if (get_boot_sel() == RECOVERY_BOOT)
+        if (boot_sel == RECOVERY_BOOT)
             retval = spinor_load(CONFIG_RECOVERY_OFFSET, CONFIG_RECOVERY_LENGTH, load_addr);
         else
             retval = spinor_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);

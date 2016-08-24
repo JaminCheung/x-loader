@@ -30,6 +30,8 @@ echo "BOARD = $1" > config.mk
 echo "BOOT_FROM = $2" >> config.mk
 
 echo "/* Automatically generated - do not edit */" >> config.h
-echo "#include <configs/$1.h>" > config.h
+echo "#include <configs/boards_common.h>" >> config.h
+echo "#include <configs/$1.h>" >> config.h
+
 
 exit 0
