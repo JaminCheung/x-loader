@@ -46,8 +46,11 @@ typedef     __u16       u_int16_t;
 typedef     __s16       int16_t;
 typedef     __u32       u_int32_t;
 typedef     __s32       int32_t;
+
+#ifndef __HOST__
 typedef     __s64       int64_t;
 typedef     __u64       u_int64_t;
+#endif
 
 typedef     __u8        uint8_t;
 typedef     __u16       uint16_t;

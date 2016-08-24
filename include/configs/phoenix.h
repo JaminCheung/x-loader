@@ -38,8 +38,8 @@
 /*
  * Console
  */
-#define CONFIG_CONSOLE_BAUDRATE      115200
-#define CONFIG_CONSOLE_INDEX        2
+#define CONFIG_CONSOLE_BAUDRATE      3000000
+#define CONFIG_CONSOLE_INDEX         2
 #undef CONFIG_UART_PORTD
 #define CONFIG_UART_PORTC
 
@@ -56,30 +56,17 @@
  * unit(MHz)
  */
 #define  CONFIG_SFC_FREQ    150
-#endif
 
-/*
- * The following configure only for boot u-boot
- */
-#ifdef CONFIG_BOOT_UBOOT
-/*
- * unit(byte)
- */
-#define CONFIG_UBOOT_OFFSET                 0x4000
+#undef CONFIG_SPI_STANDARD
 
-/*
- * unit(byte)
- */
-#define CONFIG_UBOOT_LENGTH                 0x40000
-
-#endif /* CONFIG_BOOT_UBOOT */
+#endif /* CONFIG_BOOT_SFC */
 
 /*
  * The following configure only for boot kernel
  */
 #ifdef CONFIG_BOOT_KERNEL
 
-#define KERNEL_ARGS_COMMON "mem=32M@0x0 console=ttyS2,115200n8 lpj=5009408 ip=off init=/linuxrc "
+#define KERNEL_ARGS_COMMON "mem=32M@0x0 no_console_suspend console=ttyS2,3000000n8 lpj=5009408 ip=off init=/linuxrc "
 
 #define CONFIG_RECOVERY_BOOT_KEY            -1
 #define CONFIG_RECOVERY_BOOT_KEY_ENLEVEL    -1
@@ -105,8 +92,15 @@
 
 #define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON "ubi.mtd=5 root=ubi0:rootfs ubi.mtd=6 rootfstype=ubifs rw"
 
+/*
+ * unit(byte)
+ */
+#define CONFIG_UBOOT_OFFSET         0x6000
+#define CONFIG_UBOOT_LENGTH         0x40000
+
 #define CONFIG_KERNEL_OFFSET        0x100000
 #define CONFIG_KERNEL_LENGTH        0x300000
+
 #endif /* CONFIG_BOOT_SPI_NAND */
 
 /*
@@ -116,8 +110,15 @@
 
 #define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON "rootfstype=jffs2 root=/dev/mtdblock2 rw"
 
+/*
+ * unit(byte)
+ */
+#define CONFIG_UBOOT_OFFSET         0x6000
+#define CONFIG_UBOOT_LENGTH         0x40000
+
 #define CONFIG_KERNEL_OFFSET        0x40000
 #define CONFIG_KERNEL_LENGTH        0x300000
+
 #endif /* CONFIG_BOOT_SPI_NOR */
 
 /*
@@ -131,8 +132,15 @@
 
 #define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON "ubi.mtd=5 root=ubi0:rootfs ubi.mtd=6 rootfstype=ubifs rw"
 
+/*
+ * unit(byte)
+ */
+#define CONFIG_UBOOT_OFFSET         0xA400
+#define CONFIG_UBOOT_LENGTH         0x40000
+
 #define CONFIG_KERNEL_OFFSET        0x40000
 #define CONFIG_KERNEL_LENGTH        0x300000
+
 #endif /* CONFIG_BOOT_MMC */
 
 #endif /* PHOENIX_H */
