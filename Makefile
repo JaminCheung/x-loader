@@ -143,7 +143,8 @@ OBJS-y := start.o                                                              \
           drivers/lpddr.o                                                      \
           drivers/uart.o                                                       \
           drivers/clk.o                                                        \
-          drivers/gpio.o
+          drivers/gpio.o                                                       \
+          drivers/i2c.o
 
 OBJS-$(CONFIG_BOOT_KERNEL) += boot_sel.o
 
