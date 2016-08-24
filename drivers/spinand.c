@@ -23,6 +23,11 @@ struct spi_mode_peer spi_mode_local[] = {
     [SPI_MODE_QUAD] = {TRAN_SPI_QUAD, CMD_FR_CACHE_QUAD},
 };
 
+
+struct spiflash_desc spinand_descs[] = {
+    {MANUFACTURE_WINBOND_ID, {FEATURE_REG_FEATURE1, BITS_BUF_EN, VALUE_SET}},
+};
+
 static inline int spinand_bad_block_check(int len,unsigned char *buf)
 {
     int i,bit0_cnt = 0;
@@ -96,6 +101,55 @@ static inline void spinand_get_base_param(int *pagesize, int *blocksize)
     *blocksize = 128 * 1024;
 }
 
+static int spinand_read(unsigned int src_addr, unsigned int count,
+        unsigned int dst_addr)
+{
+    int blksize, pagesize, page;
+    int pagecopy_cnt = 0;
+    unsigned int ret;
+    unsigned char *buf = (unsigned char *)dst_addr;
+
+    spinand_get_base_param(&pagesize, &blksize);
+    page = src_addr / pagesize;
+    while (pagecopy_cnt * pagesize < count) {
+        ret = spinand_read_page(page, buf, pagesize, blksize);
+        if (ret > 0){
+            printf("bad block %d\n", page/(blksize/pagesize));
+            page += blksize/pagesize;
+            continue;
+        }else if (ret < 0)
+            return -1;
+        buf += pagesize;
+        page++;
+        pagecopy_cnt++;
+    }
+
+    return 0;
+}
+static int spinand_dev_special_init(struct jz_sfc *sfc, unsigned int id)
+{
+    int i;
+    int num = sizeof(spinand_descs) / sizeof(spinand_descs[0]);
+    struct spiflash_register *regs;
+    unsigned int x;
+    int ret = 0;
+
+    for (i = 0; i < num; i++) {
+        if (id == spinand_descs[i].id){
+            regs = &spinand_descs[i].regs;
+            SFC_SEND_COMMAND(sfc,CMD_GET_FEATURE,1,regs->addr,1,0,1,0);
+            sfc_read_data(&x, 1);
+            OPERAND_CONTROL(regs->action, regs->val, x);
+            SFC_SEND_COMMAND(sfc,CMD_SET_FEATURE,1,regs->addr,1,0,1,1);
+            sfc_write_data(&x, 1);
+            SFC_SEND_COMMAND(sfc,CMD_GET_FEATURE,1,regs->addr,1,0,1,0);
+            sfc_read_data(&x, 1);
+        }
+    }
+
+    return ret;
+}
+
 static void spinand_init(void) {
 
     unsigned char id[4];
@@ -115,41 +169,25 @@ static void spinand_init(void) {
 #ifndef CONFIG_SPI_STANDARD
     x |= BITS_QUAD_EN;
 #endif
-    if (id[0] == MANUFACTURE_WINBOND_ID)
-        x |= (1 << 3);  // BUF equaled 1
     SFC_SEND_COMMAND(&sfc,CMD_SET_FEATURE,1,FEATURE_REG_FEATURE1,1,0,1,1);
     sfc_write_data(&x,1);
+
+    spinand_dev_special_init(&sfc, id[0]);
 }
 
-static void install_sleep_lib(void) {
-//TODO: fill me
+static int install_sleep_lib(void) {
+    return spinand_read(SLEEP_LIB_OFFSET, SLEEP_LIB_LENGTH, SLEEP_LIB_TCSM);
 }
 
 int spinand_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr)
 {
-    int blksize, pagesize, page;
-    int pagecopy_cnt = 0;
-    unsigned int ret;
-    unsigned char *buf = (unsigned char *)dst_addr;
-
     sfc_init();
     spinand_init();
 
-    spinand_get_base_param(&pagesize, &blksize);
-    page = src_addr / pagesize;
-    while (pagecopy_cnt * pagesize < count) {
-        ret = spinand_read_page(page, buf, pagesize, blksize);
-        if (ret > 0){
-            printf("bad block %d\n", page/(blksize/pagesize));
-            page += blksize/pagesize;
-            continue;
-        }else if (ret < 0)
-            return -1;
-        buf += pagesize;
-        page++;
-        pagecopy_cnt++;
+    if (install_sleep_lib() < 0){
+        printf("install sleep lib failed\n");
+        return -1;
     }
-
-    return 0;
+    return spinand_read(src_addr, count, dst_addr);
 }
 
