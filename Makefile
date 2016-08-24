@@ -184,7 +184,7 @@ endif
 %.o:%.S
 	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
 
-.PHONY: all clean Tips
+.PHONY: all clean Tips backup
 
 all: clean $(TARGET) Tips
 
@@ -309,6 +309,7 @@ halley2_mmc_config: unconfig
 #
 
 #===============================================================================
+
 clean:
 	rm -rf $(OUTDIR)/* \
 			$(OBJS) \
@@ -323,3 +324,6 @@ clean:
 
 distclean: clean unconfig
 
+backup: distclean
+	F=`basename $(TOPDIR)` ; cd .. ; \
+	tar --force-local --exclude=.git -Jcvf `date "+$$F-%Y-%m-%d-%T.tar.xz"` $$F
