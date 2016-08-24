@@ -42,6 +42,11 @@ $(shell [ -d $(OUTDIR) ] || mkdir -p $(OUTDIR))
 OUTDIR := $(shell cd $(OUTDIR) && /bin/pwd)
 $(if $(OUTDIR),,$(error output directory "$(OUTDIR)" does not exist))
 TOOLSDIR := $(TOPDIR)/tools
+SLEEPLIB := $(TOPDIR)/sleep-lib/sleep_lib_tcsm_pad.bin
+
+ifneq ($(SLEEPLIB), $(wildcard $(SLEEPLIB)))
+$(error Could not found sleep lib!)
+endif
 
 #
 # Timestamp file
@@ -168,9 +173,9 @@ LIBS := $(addprefix $(TOPDIR)/, $(LIBS-y))
 # Targets
 #
 ifneq ($(CONFIG_BOOT_MMC),y)
-TARGET := $(OUTDIR)/x-loader-pad.bin
+TARGET := $(OUTDIR)/x-loader-pad-with-sleep-lib.bin
 else
-TARGET := $(OUTDIR)/x-loader-pad-with-mbr-gpt.bin
+TARGET := $(OUTDIR)/x-loader-pad-with-mbr-gpt-with-sleep-lib.bin
 endif
 
 %.o:%.c
@@ -185,6 +190,12 @@ all: clean $(TARGET) Tips
 
 Tips: $(TARGET)
 	@echo -e '\n  Image: "$(TARGET)" is ready\n'
+
+$(OUTDIR)/x-loader-pad-with-mbr-gpt-with-sleep-lib.bin: $(OUTDIR)/x-loader-pad-with-mbr-gpt.bin
+	cat $< $(SLEEPLIB) > $@
+
+$(OUTDIR)/x-loader-pad-with-sleep-lib.bin: $(OUTDIR)/x-loader-pad.bin
+	cat $< $(SLEEPLIB) > $@
 
 $(OUTDIR)/x-loader-pad-with-mbr-gpt.bin: $(OUTDIR)/mbr-gpt.bin $(OUTDIR)/x-loader-pad.bin $(TOOLSDIR)/spl_params_fixer
 	cat $(OUTDIR)/mbr-gpt.bin $(OUTDIR)/x-loader-pad.bin > $@
