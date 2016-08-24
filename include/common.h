@@ -599,7 +599,7 @@ void flush_cache_all(void);
 
 
 #ifndef __ASSEMBLY__
-
+#ifndef __HOST__
 static inline uint16_t __get_unaligned_le16(const uint8_t *p) {
     return p[0] | p[1] << 8;
 }
@@ -629,7 +629,7 @@ static inline void __put_unaligned_le64(uint64_t val, uint8_t *p) {
 }
 
 static inline uint16_t get_unaligned_le16(const void *p) {
-    return __get_unaligned_le16((const uint8 *)p);
+    return __get_unaligned_le16((const uint8_t *)p);
 }
 
 static inline uint32_t get_unaligned_le32(const void *p) {
@@ -678,6 +678,7 @@ static inline uint64_t lldiv(uint64_t dividend, uint32_t divisor)
     do_div(__res, divisor);
     return(__res);
 }
+#endif
 #endif
 
 #ifndef __ASSEMBLY__
