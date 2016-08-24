@@ -74,25 +74,23 @@ static int spinor_read(unsigned int offset, unsigned int len, void *data)
 
 static void spinor_init(void) {
 #ifndef CONFIG_SPI_STANDARD
-        spinor_set_quad_mode();
+    spinor_set_quad_mode();
 #endif
 }
 
-static void install_sleep_lib(void) {
-//TODO: fill me
+static int install_sleep_lib(void) {
+    return spinor_read(SLEEP_LIB_OFFSET, SLEEP_LIB_LENGTH, (void *)SLEEP_LIB_TCSM);
 }
 
 int spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr)
 {
-    int ret = 0;
-
     sfc_init();
     spinor_init();
 
-    ret = spinor_read(src_addr, count, (void *)dst_addr);
-    if (ret) {
-        printf("sfc load error\n");
+    if (install_sleep_lib() < 0){
+        printf("install sleep lib failed\n");
         return -1;
     }
-    return 0;
+
+    return spinor_read(src_addr, count, (void *)dst_addr);
 }

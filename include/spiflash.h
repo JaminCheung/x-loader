@@ -57,6 +57,30 @@
 
 /* some manufacture with unusual method */
 #define MANUFACTURE_WINBOND_ID      0xef
+#define BITS_BUF_EN                 (1 << 3)
+
+enum {
+    VALUE_SET,
+    VALUE_CLR,
+};
+
+#define OPERAND_CONTROL(action, val, ret) do{\
+    if (action == VALUE_SET)\
+        ret |= val;\
+    else\
+        ret &= ~val;\
+}while(0)
+
+struct spiflash_register {
+    unsigned int addr;
+    unsigned int val;
+    unsigned char action;
+};
+
+struct spiflash_desc {
+    unsigned int id;
+    struct spiflash_register regs;
+};
 
 int spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr);
 int spinand_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr);

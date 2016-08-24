@@ -81,16 +81,6 @@
 
 #define KERNEL_ARGS_COMMON "mem=32M@0x0 console=ttyS2,115200n8 lpj=5009408 ip=off init=/linuxrc "
 
-/*
- * unit(byte)
- */
-#define CONFIG_KERNEL_OFFSET                0x40000
-
-/*
- * unit(byte)
- */
-#define CONFIG_KERNEL_LENGTH                0x300000
-
 #define CONFIG_RECOVERY_BOOT_KEY            -1
 #define CONFIG_RECOVERY_BOOT_KEY_ENLEVEL    -1
 #define CONFIG_RECOVERY_OFFSET              -1
@@ -115,6 +105,8 @@
 
 #define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON "ubi.mtd=5 root=ubi0:rootfs ubi.mtd=6 rootfstype=ubifs rw"
 
+#define CONFIG_KERNEL_OFFSET        0x100000
+#define CONFIG_KERNEL_LENGTH        0x300000
 #endif /* CONFIG_BOOT_SPI_NAND */
 
 /*
@@ -124,6 +116,8 @@
 
 #define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON "rootfstype=jffs2 root=/dev/mtdblock2 rw"
 
+#define CONFIG_KERNEL_OFFSET        0x40000
+#define CONFIG_KERNEL_LENGTH        0x300000
 #endif /* CONFIG_BOOT_SPI_NOR */
 
 /*
@@ -137,6 +131,8 @@
 
 #define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON "ubi.mtd=5 root=ubi0:rootfs ubi.mtd=6 rootfstype=ubifs rw"
 
+#define CONFIG_KERNEL_OFFSET        0x40000
+#define CONFIG_KERNEL_LENGTH        0x300000
 #endif /* CONFIG_BOOT_MMC */
 
 #endif /* PHOENIX_H */
