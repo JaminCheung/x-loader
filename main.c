@@ -54,7 +54,7 @@ void x_loader_main(void) {
      */
     board_init();
 
-    printf("Going to boot next stage.\n");
+    uart_puts("Going to boot next stage.\n");
 
     /*
      * Boot next stage(kernel/u-boot/rtos)

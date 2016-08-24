@@ -49,19 +49,28 @@ void boot_next_stage(void) {
     int retval = 0;
     uint32_t load_addr = 0;
     uint32_t entry_addr = 0;
+    int boot_sel = 0;
 
     entry_addr = CONFIG_BOOT_NEXT_STAGE_ENTRY_ADDR;
 
 #if (defined CONFIG_BOOT_KERNEL)
 
-#ifdef CONFIG_KERNEL_IN_XIMAGE
-    /*
-     * 0x40: mkimage header
-     */
-    load_addr = CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR - 0x40;
-#else
-    load_addr = CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR;
-#endif /* CONFIG_KERNEL_IN_XIMAGE */
+    if (get_boot_sel() == RECOVERY_BOOT) {
+        uart_puts("Mod: Recovery\n");
+        boot_sel = RECOVERY_BOOT;
+    } else {
+        uart_puts("Mod: Normal\n");
+        boot_sel = NORMAL_BOOT;
+    }
+
+    #ifdef CONFIG_KERNEL_IN_XIMAGE
+        /*
+         * 0x40: mkimage header
+         */
+        load_addr = CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR - 0x40;
+    #else
+        load_addr = CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR;
+    #endif /* CONFIG_KERNEL_IN_XIMAGE */
 
 #elif (defined CONFIG_BOOT_UBOOT) /* CONFIG_BOOT_KERNEL */
     load_addr = CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR;
@@ -75,7 +84,10 @@ void boot_next_stage(void) {
         retval = mmc_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
 
     #elif (defined CONFIG_BOOT_KERNEL)
-        retval = mmc_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
+        if (boot_sel == RECOVERY_BOOT)
+            retval = mmc_load(CONFIG_RECOVERY_OFFSET, CONFIG_RECOVERY_LENGTH, load_addr);
+        else
+            retval = mmc_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
     #endif
 #endif /* CONFIG_BOOT_MMC */
 
@@ -87,9 +99,11 @@ void boot_next_stage(void) {
         retval = spinand_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
 
     #elif (defined CONFIG_BOOT_KERNEL)
-        retval = spinand_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
+        if (get_boot_sel() == RECOVERY_BOOT)
+            retval = spinand_load(CONFIG_RECOVERY_OFFSET, CONFIG_RECOVERY_LENGTH, load_addr);
+        else
+            retval = spinand_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
     #endif
-
 #endif /* CONFIG_BOOT_SPI_NAND */
 
     /*
@@ -100,7 +114,10 @@ void boot_next_stage(void) {
         retval = spinor_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
 
     #elif (defined CONFIG_BOOT_KERNEL)
-        retval = spinor_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
+        if (get_boot_sel() == RECOVERY_BOOT)
+            retval = spinor_load(CONFIG_RECOVERY_OFFSET, CONFIG_RECOVERY_LENGTH, load_addr);
+        else
+            retval = spinor_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
     #endif
 #endif /* CONFIG_BOOT_SPI_NOR */
 
@@ -110,7 +127,7 @@ void boot_next_stage(void) {
     if (retval < 0)
         panic("\n\tLoad next stage failed.\n");
 
-    printf("\nJump...\n\n");
+    uart_puts("\nJump...\n\n");
 
     /*
      * We will nerver return here
