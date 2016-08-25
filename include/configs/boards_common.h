@@ -54,4 +54,17 @@
 
 #endif /* CONFIG_BOOT_SFC */
 
+#ifdef CONFIG_BOOT_SPI_NAND
+/*
+ * Nand - bytes per-page
+ */
+#define CONFIG_NAND_BPP             (2048)
+
+/*
+ * Nand - page per-block
+ */
+#define CONFIG_NAND_PPB             (64)
+
+#endif /* CONFIG_BOOT_SPI_NAND */
+
 #endif /* BOARDS_COMMON_H */

@@ -56,15 +56,6 @@
  * The following configure only for NAND boot
  */
 #ifdef CONFIG_BOOT_SPI_NAND
-/*
- * Nand - bytes per-page
- */
-#define CONFIG_NAND_BPP             (2048 + 64)
-
-/*
- * Nand - page per-block
- */
-#define CONFIG_NAND_PPB             (64)
 
 #define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "ubi.mtd=5 root=ubi0:rootfs ubi.mtd=6 rootfstype=ubifs rw"
 
