@@ -92,15 +92,6 @@ static int spinand_read_page(unsigned int page, unsigned char *dst_addr,
     return 0;
 }
 
-static inline void spinand_get_base_param(int *pagesize, int *blocksize)
-{
-    unsigned char *spl_flag = (unsigned char *)0xF4001000;
-    int type_len = 6;
-
-    *pagesize = spl_flag[type_len + 5] * 1024;//pagesize off 5,blocksize off 4
-    *blocksize = 128 * 1024;
-}
-
 static int spinand_read(unsigned int src_addr, unsigned int count,
         unsigned int dst_addr)
 {
@@ -109,7 +100,9 @@ static int spinand_read(unsigned int src_addr, unsigned int count,
     unsigned int ret;
     unsigned char *buf = (unsigned char *)dst_addr;
 
-    spinand_get_base_param(&pagesize, &blksize);
+    pagesize = CONFIG_NAND_BPP;
+    blksize = CONFIG_NAND_PPB * pagesize;
+
     page = src_addr / pagesize;
     while (pagecopy_cnt * pagesize < count) {
         ret = spinand_read_page(page, buf, pagesize, blksize);
