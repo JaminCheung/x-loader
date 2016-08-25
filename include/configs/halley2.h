@@ -42,14 +42,13 @@
 #define KERNEL_ARGS_OTHERS      "lpj=5009408 ip=off "
 #define KERNEL_ARGS_COMMON KERNEL_ARGS_MEM KERNEL_ARGS_CONSOLE KERNEL_ARGS_OTHERS
 
-#define KERNEL_ARGS_INIT        "init=/linuxrc"
-#define RECOVERY_ARGS_INIT      "init=/init"
+#define KERNEL_ARGS_INIT        "init=/linuxrc "
 
 #define CONFIG_RECOVERY_BOOT_KEY            GPIO_PA(10)
 #define CONFIG_RECOVERY_BOOT_KEY_ENLEVEL    0
 #define CONFIG_RECOVERY_OFFSET              0x400000
 #define CONFIG_RECOVERY_LENGTH              0x300000
-#define CONFIG_RECOVERY_ARGS KERNEL_ARGS_COMMON RECOVERY_ARGS_INIT
+#define CONFIG_RECOVERY_ARGS KERNEL_ARGS_COMMON
 
 #endif /* CONFIG_BOOT_KERNEL */
 
@@ -67,7 +66,7 @@
  */
 #define CONFIG_NAND_PPB             (64)
 
-#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT " ubi.mtd=5 root=ubi0:rootfs ubi.mtd=6 rootfstype=ubifs rw"
+#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "ubi.mtd=5 root=ubi0:rootfs ubi.mtd=6 rootfstype=ubifs rw"
 
 /*
  * unit(byte)
@@ -85,7 +84,7 @@
  */
 #ifdef CONFIG_BOOT_SPI_NOR
 
-#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT " rootfstype=jffs2 root=/dev/mtdblock2 rw"
+#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "rootfstype=jffs2 root=/dev/mtdblock2 rw"
 
 /*
  * unit(byte)
@@ -107,7 +106,7 @@
 #undef CONFIG_BOOT_MMC_PA_8BIT
 #undef CONFIG_BOOT_MMC_PC_4BIT
 
-#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT " rootfstype=jffs2 root=/dev/mtdblock2 rw"
+#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "rootfstype=jffs2 root=/dev/mtdblock2 rw"
 
 /*
  * unit(byte)
