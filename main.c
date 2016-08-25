@@ -50,7 +50,7 @@ void x_loader_main(void) {
     lpddr_init();
 
     /*
-     * Init Board
+     * Init board
      */
     board_init();
 
