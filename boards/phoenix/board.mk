@@ -16,6 +16,8 @@
  #
  #
 
+ifeq ($(BOOT_FROM), mmc)
+
 CONFIG_GPT_TABLE=y
 
 #
@@ -37,6 +39,8 @@ CONFIG_MBR_P2_TYPE=linux
 CONFIG_MBR_P3_OFF=0mb
 CONFIG_MBR_P3_END=0mb
 CONFIG_MBR_P3_TYPE=linux
+endif
+
 endif
 
 #
