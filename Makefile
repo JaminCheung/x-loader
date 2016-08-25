@@ -20,6 +20,7 @@ SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	else if [ -x /bin/bash ]; then echo /bin/bash; \
 	else echo sh; fi; fi)
 
+AWK = awk
 #
 # Top directory
 #
@@ -33,7 +34,6 @@ CC := $(CROSS_COMPILE)gcc
 LD := $(CROSS_COMPILE)ld
 OBJDUMP := $(CROSS_COMPILE)objdump
 OBJCOPY := $(CROSS_COMPILE)objcopy
-
 #
 # Out & Tools directory
 #
@@ -93,7 +93,7 @@ ifeq ($(CONFIG_BOOT_KERNEL), y)
 BOOT_NEXT_STAGE_LOAD_ADDR := 0x80f00000
 
 ifeq ($(KERNEL_IN_XIMAGE), 1)
-BOOT_NEXT_STAGE_LOAD_ADDR := $(BOOT_NEXT_STAGE_LOAD_ADDR)-0x40
+$(shell $(eval BOOT_NEXT_STAGE_LOAD_ADDR=$(shell $(AWK) 'BEGIN{printf("0x%x\n",'$(BOOT_NEXT_STAGE_LOAD_ADDR)'-0x40);}')))
 endif
 
 BOOT_NEXT_STAGE_ENTRY_ADDR := 0x80f00000
