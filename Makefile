@@ -20,8 +20,6 @@ SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	else if [ -x /bin/bash ]; then echo /bin/bash; \
 	else echo sh; fi; fi)
 
-AWK := awk
-
 #
 # Top directory
 #
@@ -35,6 +33,8 @@ CC := $(CROSS_COMPILE)gcc
 LD := $(CROSS_COMPILE)ld
 OBJDUMP := $(CROSS_COMPILE)objdump
 OBJCOPY := $(CROSS_COMPILE)objcopy
+AWK := awk
+
 #
 # Out & Tools directory
 #
@@ -94,15 +94,17 @@ ifeq ($(CONFIG_BOOT_KERNEL), y)
 BOOT_NEXT_STAGE_LOAD_ADDR := 0x80f00000
 
 ifeq ($(KERNEL_IN_XIMAGE), 1)
-BOOT_NEXT_STAGE_LOAD_ADDR := $(BOOT_NEXT_STAGE_LOAD_ADDR)-0x40
-#$(shell $(eval BOOT_NEXT_STAGE_LOAD_ADDR=$(shell $(AWK) 'BEGIN{printf("0x%x\n",'$(BOOT_NEXT_STAGE_LOAD_ADDR)'-0x40);}')))
+OFFSET_LEN := 0x40
+BOOT_NEXT_STAGE_LOAD_ADDR := $(shell $(AWK) 'BEGIN{printf("0x%x\n",            \
+	'$(BOOT_NEXT_STAGE_LOAD_ADDR)'-$(OFFSET_LEN));                             \
+	}')
 endif
 
 BOOT_NEXT_STAGE_ENTRY_ADDR := 0x80f00000
 KERNEL_PARAMETER_ADDR := 0x80004000
 endif
 
-CFGFLAGS := -DCONFIG_BOOT_NEXT_STAGE_LOAD_ADDR=$(BOOT_NEXT_STAGE_LOAD_ADDR) \
+CFGFLAGS := -DCONFIG_BOOT_NEXT_STAGE_LOAD_ADDR=$(BOOT_NEXT_STAGE_LOAD_ADDR)    \
             -DCONFIG_BOOT_NEXT_STAGE_ENTRY_ADDR=$(BOOT_NEXT_STAGE_ENTRY_ADDR)
 
 ifeq ($(CONFIG_BOOT_KERNEL), y)
@@ -128,8 +130,8 @@ ifdef BOOT_FROM
 #
 # Compiler & Linker options
 #
-CFLAGS := -Os -g -G 0 -march=mips32r2 -mtune=mips32r2 -mabi=32 -fno-pic \
-          -fno-builtin -mno-abicalls -nostdlib -EL -msoft-float -std=gnu11 \
+CFLAGS := -Os -g -G 0 -march=mips32r2 -mtune=mips32r2 -mabi=32 -fno-pic        \
+          -fno-builtin -mno-abicalls -nostdlib -EL -msoft-float -std=gnu11     \
           -I$(TOPDIR)/include -ffunction-sections -fdata-sections
 
 CHECKFLAGS := -Wall -Wuninitialized -Wstrict-prototypes -Wundef -Werror
