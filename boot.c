@@ -31,7 +31,7 @@ __attribute__ ((noreturn)) static void jump_to_image(uint32_t entry_addr,
     image_entry();
 
 #elif (defined CONFIG_BOOT_KERNEL) /* CONFIG_BOOT_UBOOT */
-    typedef void (*image_entry_t)(int, char **, void *)
+    typedef void (*image_entry_t)(int, char **, void *, int *)
             __attribute__ ((noreturn));
 
     (void) argv;
@@ -45,7 +45,7 @@ __attribute__ ((noreturn)) static void jump_to_image(uint32_t entry_addr,
 
     flush_cache_all();
 
-    image_entry(2, (char **)linux_argv, NULL);
+    image_entry(2, (char **)linux_argv, NULL, 0);
 #endif /* CONFIG_BOOT_KERNEL */
 }
 

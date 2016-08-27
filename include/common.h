@@ -36,6 +36,8 @@
 #include <i2c.h>
 #endif
 
+#define CONFIG_KERNEL_PARAMETER_ADDR    0x80004000
+
 /*
  * Sleep lib
  */
