@@ -38,6 +38,8 @@ bootloader - 用于加载引导u-boot/linux/rtos，支持spi nand/nor, mmc/sdcar
 如何引到u-boot？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 打开config.mk，修改BOOT_NEXT_STAGE := 0，重新编译
+将编译出的x-loader-xxx.bin和u-boot.bin cat在一起
+cat x-loader-xxx.bin u-boot.bin > xxx.bin
 
 如何引导zImage？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
@@ -68,7 +70,9 @@ boards/BOARD_NAME/board.c中board_init()用于在引导前对板子
 
 引导不成功怎么办？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-将out目录打包，进行问题反馈
+1.执行make | tee make.txt
+2.将out目录和make.txt打包
+3.问题反馈
 
 
 问题反馈：ZhangYanMing<yanming.zhang@ingenic.com>
