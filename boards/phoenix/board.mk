@@ -16,6 +16,9 @@
  #
  #
 
+#
+# For boot from mmc/sdcard
+#
 ifeq ($(BOOT_FROM), mmc)
 
 CONFIG_GPT_TABLE=y
@@ -44,9 +47,14 @@ endif
 endif
 
 #
+# For boot kernel
+#
+ifeq ($(BOOT_NEXT_STAGE), 1)
+#
 # zImage: 0
 # xImage: 1
 #
 KERNEL_IN_XIMAGE := 1
+endif
 
 BOARD_CFLAGS :=
