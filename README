@@ -68,6 +68,10 @@ boards/BOARD_NAME/board.c中board_init()用于在引导前对板子
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 首先确认代码没有超过12KByte，如果没有继续debug
 
+如何配置内存为64MB？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+打开板极头文件，添加 #define CONFIG_MEM_SIZE_64M
+
 引导不成功怎么办？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 1.执行make | tee make.txt
