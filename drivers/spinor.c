@@ -94,3 +94,58 @@ int spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr
 
     return spinor_read(src_addr, count, (void *)dst_addr);
 }
+
+#ifdef CONFIG_BEIJING_OTA
+#define NV_AREA_START (288 * 1024)
+static void nv_map_area(unsigned int *base_addr)
+{
+	unsigned int buf[3][2];
+	unsigned int tmp_buf[4];
+	unsigned int nv_num = 0, nv_count = 0;
+	unsigned int addr, i;
+
+	for (i = 0; i < 3; i++) {
+		addr = NV_AREA_START + i * 32 * 1024;
+		spinor_read(addr, 4, (void *)buf[i]);
+		if (buf[i][0] == 0x5a5a5a5a) {
+			spinor_read(addr + 1 *1024, 16, (void *)tmp_buf);
+			addr += 32 * 1024 - 8;
+			spinor_read(addr, 8, (void *)buf[i]);
+			if (buf[i][1] == 0xa5a5a5a5) {
+				if (nv_count < buf[i][0]) {
+					nv_count = buf[i][0];
+					nv_num = i;
+				}
+			}
+		}
+	}
+
+	*base_addr = NV_AREA_START + nv_num * 32 * 1024 + 1024;
+}
+
+int ota_load(unsigned int *argv, unsigned int dst_addr)
+{
+	unsigned int nv_buf[4];
+	unsigned int count = 16;
+	unsigned int src_addr, updata_flag;
+
+	sfc_init();
+	spinor_init();
+
+	if (install_sleep_lib() < 0) {
+		printf("install sleep lib failed\n");
+		return -1;
+	}
+
+	nv_map_area((unsigned int *)&src_addr);
+	spinor_read(src_addr, count, (void *)nv_buf);
+	updata_flag = nv_buf[3];
+
+	if ((updata_flag & 0x3) != 0x3)
+		return spinor_read(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, (void *)dst_addr);
+	else {
+		*argv = (unsigned int)CONFIG_OTA_KERNEL_ARGS;
+		return spinor_read(CONFIG_OTG_STEP2_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, (void *)dst_addr);
+	}
+}
+#endif

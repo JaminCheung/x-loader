@@ -21,3 +21,8 @@ tools/uart_baudrate_lut
 tools/mbr_creator
 tools/spl_params_fixer
 
+#
+# ignore tags files
+tags
+TAGS
+.tags*

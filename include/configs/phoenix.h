@@ -117,4 +117,15 @@
 
 #endif /* CONFIG_BOOT_MMC */
 
+
+/*
+ * OTA
+ */
+#undef CONFIG_BEIJING_OTA
+
+#ifdef CONFIG_BEIJING_OTA
+#define CONFIG_OTA_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "rootfstype=cramfs root=/dev/mtdblock4 rw"
+#define CONFIG_OTG_STEP2_KERNEL_OFFSET    0xd00000
+#endif
+
 #endif /* PHOENIX_H */

@@ -84,5 +84,8 @@ struct spiflash_desc {
 
 int spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr);
 int spinand_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr);
+#ifdef CONFIG_BEIJING_OTA
+int ota_load(unsigned int *argv, unsigned int dst_addr);
+#endif
 
 #endif /* SPIFLASH_H */

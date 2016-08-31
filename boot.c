@@ -119,8 +119,13 @@ void boot_next_stage(void) {
     #elif (defined CONFIG_BOOT_KERNEL)
         if (boot_sel == RECOVERY_BOOT)
             error = spinor_load(CONFIG_RECOVERY_OFFSET, CONFIG_RECOVERY_LENGTH, load_addr);
-        else
-            error = spinor_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
+        else {
+		#ifdef CONFIG_BEIJING_OTA
+			error = ota_load(&argv, load_addr);
+		#else
+			error = spinor_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
+		#endif
+		}
     #endif
 #endif /* CONFIG_BOOT_SPI_NOR */
 
