@@ -536,16 +536,15 @@ struct jz_mmc {
     uint32_t write_bl_len;
     uint32_t flags;
     uint32_t b_max;
-    void (*set_ios)(struct jz_mmc *mmc);
-    int (*send_cmd)(struct jz_mmc *mmc, struct mmc_cmd *cmd,
-            struct mmc_data *data);
-    int (*init)(struct jz_mmc *mmc);
+    void (*set_ios)(void);
+    int (*send_cmd)(struct mmc_cmd *cmd, struct mmc_data *data);
+    int (*init)(void);
     uint32_t op_cond_pending;
     uint32_t op_cond_response;
 };
 
 static struct jz_mmc jz_mmc_dev;
-struct jz_mmc* mmc = &jz_mmc_dev;
+struct jz_mmc *mmc;
 
 #ifdef CONFIG_BOOT_MMC_PA_8BIT
 static void set_gpio_pa_as_mmc0_8bit(void) {
@@ -620,11 +619,11 @@ static void msc_dump_reg(void)
     msc_debug("==================\n");
 }
 
-static inline void clear_msc_irq(struct jz_mmc* mmc, uint32_t bits) {
+static inline void clear_msc_irq(uint32_t bits) {
     msc_writel(bits, MSC_IFLG);
 }
 
-static int mmc_polling_status(struct jz_mmc* mmc, uint32_t status) {
+static int mmc_polling_status(uint32_t status) {
     uint32_t timeout = 50 * 1000 * 1000;
 
     while(!(msc_readl(MSC_STAT) & (status | ERROR_STAT)) && (--timeout));
@@ -644,8 +643,8 @@ static int mmc_polling_status(struct jz_mmc* mmc, uint32_t status) {
     return 0;
 }
 
-static int mmc_wait_cmd_response(struct jz_mmc* mmc) {
-    if (mmc_polling_status(mmc, STAT_END_CMD_RES) < 0) {
+static int mmc_wait_cmd_response(void) {
+    if (mmc_polling_status(STAT_END_CMD_RES) < 0) {
         printf("wait commond response error\n");
         return -1;
     }
@@ -655,8 +654,7 @@ static int mmc_wait_cmd_response(struct jz_mmc* mmc) {
     return 0;
 }
 
-static int mmc_send_cmd(struct jz_mmc* mmc, struct mmc_cmd* cmd,
-        struct mmc_data* data) {
+static int mmc_send_cmd(struct mmc_cmd* cmd, struct mmc_data* data) {
     uint32_t cmdat = 0, status = 0;
 
     msc_writel(cmd->opcode, MSC_CMD);
@@ -703,7 +701,7 @@ static int mmc_send_cmd(struct jz_mmc* mmc, struct mmc_cmd* cmd,
 
     msc_writel(CTRL_START_OP, MSC_CTRL);
 
-    if (mmc_wait_cmd_response(mmc))
+    if (mmc_wait_cmd_response())
         return -1;
 
     if (cmd->resp_type & MMC_RSP_PRESENT) {
@@ -725,10 +723,10 @@ static int mmc_send_cmd(struct jz_mmc* mmc, struct mmc_cmd* cmd,
     }
 
     if (cmd->resp_type == MMC_RSP_R1b) {
-        if (mmc_polling_status(mmc, STAT_PRG_DONE))
+        if (mmc_polling_status(STAT_PRG_DONE))
             return -1;
 
-        clear_msc_irq(mmc, IFLG_PRG_DONE);
+        clear_msc_irq(IFLG_PRG_DONE);
     }
 
     //TODO:
@@ -778,13 +776,13 @@ static int mmc_send_cmd(struct jz_mmc* mmc, struct mmc_cmd* cmd,
 
         while (!(msc_readl(MSC_IFLG) & IFLG_DATA_TRAN_DONE));
 
-        clear_msc_irq(mmc, IFLG_DATA_TRAN_DONE);
+        clear_msc_irq(IFLG_DATA_TRAN_DONE);
     }
 
     return 0;
 }
 
-static void mmc_set_ios(struct jz_mmc* mmc) {
+static void mmc_set_ios(void) {
     uint32_t lpm = 0;
     uint32_t real_rate = 0;
     uint8_t clk_div = 0;
@@ -826,13 +824,13 @@ static void mmc_set_ios(struct jz_mmc* mmc) {
             real_rate, mmc->bus_width);
 }
 
-static void mmc_set_bus_width(struct jz_mmc* mmc, uint32_t width) {
+static void mmc_set_bus_width(uint32_t width) {
     mmc->bus_width = width;
 
-    mmc_set_ios(mmc);
+    mmc_set_ios();
 }
 
-static void mmc_set_clock(struct jz_mmc* mmc, uint32_t clock) {
+static void mmc_set_clock(uint32_t clock) {
     if (clock > mmc->f_max)
         clock = mmc->f_max;
 
@@ -841,10 +839,10 @@ static void mmc_set_clock(struct jz_mmc* mmc, uint32_t clock) {
 
     mmc->clock = clock;
 
-    mmc_set_ios(mmc);
+    mmc_set_ios();
 }
 
-static int mmc_go_idle(struct jz_mmc* mmc) {
+static int mmc_go_idle(void) {
     struct mmc_cmd cmd;
     int error;
 
@@ -854,7 +852,7 @@ static int mmc_go_idle(struct jz_mmc* mmc) {
     cmd.arg = 0;
     cmd.resp_type = MMC_RSP_NONE;
 
-    error = mmc_send_cmd(mmc, &cmd, NULL);
+    error = mmc_send_cmd(&cmd, NULL);
 
     if (error)
         return error;
@@ -864,7 +862,7 @@ static int mmc_go_idle(struct jz_mmc* mmc) {
     return 0;
 }
 
-static int mmc_send_if_cond(struct jz_mmc* mmc) {
+static int mmc_send_if_cond(void) {
     struct mmc_cmd cmd;
     int error = 0;
 
@@ -872,7 +870,7 @@ static int mmc_send_if_cond(struct jz_mmc* mmc) {
     cmd.arg = ((mmc->voltages & 0xff8000) != 0) << 8 | 0xaa;
     cmd.resp_type = MMC_RSP_R7;
 
-    error = mmc_send_cmd(mmc, &cmd, NULL);
+    error = mmc_send_cmd(&cmd, NULL);
     if (error)
         return error;
 
@@ -884,7 +882,7 @@ static int mmc_send_if_cond(struct jz_mmc* mmc) {
     return 0;
 }
 
-static int sd_send_op_cond(struct jz_mmc *mmc)
+static int sd_send_op_cond(void)
 {
     int timeout = 1000;
     int error = 0;
@@ -897,7 +895,7 @@ static int sd_send_op_cond(struct jz_mmc *mmc)
         cmd.resp_type = MMC_RSP_R1;
         cmd.arg = 0;
 
-        error = mmc_send_cmd(mmc, &cmd, NULL);
+        error = mmc_send_cmd(&cmd, NULL);
 
         if (error)
             return error;
@@ -917,7 +915,7 @@ static int sd_send_op_cond(struct jz_mmc *mmc)
         if (mmc->version == SD_VERSION_2)
             cmd.arg |= OCR_HCS;
 
-        error = mmc_send_cmd(mmc, &cmd, NULL);
+        error = mmc_send_cmd(&cmd, NULL);
 
         if (error)
             return error;
@@ -939,9 +937,7 @@ static int sd_send_op_cond(struct jz_mmc *mmc)
 }
 
 /* We pass in the cmd since otherwise the init seems to fail */
-static int mmc_send_op_cond_iter(struct jz_mmc *mmc, struct mmc_cmd *cmd,
-        int use_arg)
-{
+static int mmc_send_op_cond_iter(struct mmc_cmd *cmd, int use_arg) {
     int error = 0;
 
     cmd->opcode = MMC_CMD_SEND_OP_COND;
@@ -956,25 +952,25 @@ static int mmc_send_op_cond_iter(struct jz_mmc *mmc, struct mmc_cmd *cmd,
         if (mmc->host_caps & MMC_MODE_HC)
             cmd->arg |= OCR_HCS;
     }
-    error = mmc_send_cmd(mmc, cmd, NULL);
+    error = mmc_send_cmd(cmd, NULL);
     if (error)
         return error;
     mmc->op_cond_response = cmd->resp[0];
     return 0;
 }
 
-static int mmc_send_op_cond(struct jz_mmc *mmc)
+static int mmc_send_op_cond(void)
 {
     struct mmc_cmd cmd;
     int error, i;
 
     /* Some cards seem to need this */
-    mmc_go_idle(mmc);
+    mmc_go_idle();
 
     /* Asking to the card its capabilities */
     mmc->op_cond_pending = 1;
     for (i = 0; i < 2; i++) {
-        error = mmc_send_op_cond_iter(mmc, &cmd, i != 0);
+        error = mmc_send_op_cond_iter(&cmd, i != 0);
         if (error)
             return error;
 
@@ -994,7 +990,7 @@ static int mmc_send_op_cond(struct jz_mmc *mmc)
     return -1;
 }
 
-int mmc_send_status(struct jz_mmc *mmc)
+int mmc_send_status(void)
 {
     struct mmc_cmd cmd;
     int error = 0, retries = 5;
@@ -1006,7 +1002,7 @@ int mmc_send_status(struct jz_mmc *mmc)
     cmd.arg = mmc->rca << 16;
 
     do {
-        error = mmc_send_cmd(mmc, &cmd, NULL);
+        error = mmc_send_cmd(&cmd, NULL);
         if (!error) {
             if ((cmd.resp[0] & MMC_STATUS_RDY_FOR_DATA) &&
                 (cmd.resp[0] & MMC_STATUS_CURR_STATE) !=
@@ -1028,17 +1024,17 @@ int mmc_send_status(struct jz_mmc *mmc)
     return 0;
 }
 
-static int mmc_set_blocklen(struct jz_mmc* mmc, uint32_t len) {
+static int mmc_set_blocklen(uint32_t len) {
     struct mmc_cmd cmd;
 
     cmd.opcode = MMC_CMD_SET_BLOCKLEN;
     cmd.resp_type = MMC_RSP_R1;
     cmd.arg = len;
 
-    return mmc_send_cmd(mmc, &cmd, NULL);
+    return mmc_send_cmd(&cmd, NULL);
 }
 
-static int mmc_complete_op_cond(struct jz_mmc *mmc)
+static int mmc_complete_op_cond(void)
 {
     struct mmc_cmd cmd;
     int timeout = 1000;
@@ -1046,7 +1042,7 @@ static int mmc_complete_op_cond(struct jz_mmc *mmc)
 
     mmc->op_cond_pending = 0;
     do {
-        error = mmc_send_op_cond_iter(mmc, &cmd, 1);
+        error = mmc_send_op_cond_iter(&cmd, 1);
         if (error)
             return error;
 
@@ -1065,7 +1061,7 @@ static int mmc_complete_op_cond(struct jz_mmc *mmc)
     return 0;
 }
 
-static int mmc_read_blocks(struct jz_mmc* mmc, void* dest, lbaint_t start,
+static int mmc_read_blocks(void* dest, lbaint_t start,
         lbaint_t blkcnt) {
     struct mmc_cmd cmd;
     struct mmc_data data;
@@ -1087,14 +1083,14 @@ static int mmc_read_blocks(struct jz_mmc* mmc, void* dest, lbaint_t start,
     data.blksz = mmc->read_bl_len;
     data.flags = MMC_DATA_READ;
 
-    if (mmc_send_cmd(mmc, &cmd, &data))
+    if (mmc_send_cmd(&cmd, &data))
         return 0;
 
     if (blkcnt > 1) {
         cmd.opcode = MMC_CMD_STOP_TRANSMISSION;
         cmd.arg = 0;
         cmd.resp_type = MMC_RSP_R1b;
-        if (mmc_send_cmd(mmc, &cmd, NULL)) {
+        if (mmc_send_cmd(&cmd, NULL)) {
             printf("mmc failed to send stop cmd\n");
             return 0;
         }
@@ -1103,19 +1099,18 @@ static int mmc_read_blocks(struct jz_mmc* mmc, void* dest, lbaint_t start,
     return blkcnt;
 }
 
-static uint32_t mmc_bread(struct jz_mmc* mmc, lbaint_t start, lbaint_t blkcnt,
-        void* dest) {
+static uint32_t mmc_bread(lbaint_t start, lbaint_t blkcnt, void* dest) {
     lbaint_t cur = 0, blocks_todo = blkcnt;
 
     if (blkcnt == 0)
         return 0;
 
-    if (mmc_set_blocklen(mmc, mmc->read_bl_len))
+    if (mmc_set_blocklen(mmc->read_bl_len))
         return 0;
 
     do {
         cur = (blocks_todo > mmc->b_max) ?  mmc->b_max : blocks_todo;
-        if(mmc_read_blocks(mmc, dest, start, cur) != cur)
+        if(mmc_read_blocks(dest, start, cur) != cur)
             return 0;
 
         blocks_todo -= cur;
@@ -1126,7 +1121,7 @@ static uint32_t mmc_bread(struct jz_mmc* mmc, lbaint_t start, lbaint_t blkcnt,
     return blkcnt;
 }
 
-static int mmc_card_starup(struct jz_mmc* mmc) {
+static int mmc_card_starup(void) {
     struct mmc_cmd cmd;
     int error = 0;
 
@@ -1134,7 +1129,7 @@ static int mmc_card_starup(struct jz_mmc* mmc) {
     cmd.resp_type = MMC_RSP_R2;
     cmd.arg = 0;
 
-    error = mmc_send_cmd(mmc, &cmd, NULL);
+    error = mmc_send_cmd(&cmd, NULL);
     if (error < 0)
         return error;
 
@@ -1149,7 +1144,7 @@ static int mmc_card_starup(struct jz_mmc* mmc) {
     cmd.arg = mmc->rca << 16;
     cmd.resp_type = MMC_RSP_R6;
 
-    error = mmc_send_cmd(mmc, &cmd, NULL);
+    error = mmc_send_cmd(&cmd, NULL);
 
     if (error)
         return error;
@@ -1162,12 +1157,12 @@ static int mmc_card_starup(struct jz_mmc* mmc) {
     cmd.resp_type = MMC_RSP_R2;
     cmd.arg = mmc->rca << 16;
 
-    error = mmc_send_cmd(mmc, &cmd, NULL);
+    error = mmc_send_cmd(&cmd, NULL);
     if (error)
         return error;
 
     /* Waiting for the ready status */
-    error = mmc_send_status(mmc);
+    error = mmc_send_status();
     if (error)
         return error;
 
@@ -1187,7 +1182,7 @@ static int mmc_card_starup(struct jz_mmc* mmc) {
     cmd.opcode = MMC_CMD_SELECT_CARD;
     cmd.resp_type = MMC_RSP_R1;
     cmd.arg = mmc->rca << 16;
-    error = mmc_send_cmd(mmc, &cmd, NULL);
+    error = mmc_send_cmd(&cmd, NULL);
     if (error)
         return error;
 
@@ -1197,18 +1192,18 @@ static int mmc_card_starup(struct jz_mmc* mmc) {
             cmd.resp_type = MMC_RSP_R1;
             cmd.arg = mmc->rca << 16;
 
-            error = mmc_send_cmd(mmc, &cmd, NULL);
+            error = mmc_send_cmd(&cmd, NULL);
             if (error)
                 return error;
 
             cmd.opcode = SD_CMD_APP_SET_BUS_WIDTH;
             cmd.resp_type = MMC_RSP_R1;
             cmd.arg = 2;
-            error = mmc_send_cmd(mmc, &cmd, NULL);
+            error = mmc_send_cmd(&cmd, NULL);
             if (error)
                 return error;
 
-            mmc_set_bus_width(mmc, 4);
+            mmc_set_bus_width(4);
         }
 
     } else {
@@ -1218,48 +1213,48 @@ static int mmc_card_starup(struct jz_mmc* mmc) {
                      (EXT_CSD_BUS_WIDTH << 16) |
                      (EXT_CSD_BUS_WIDTH_4 << 8);
 
-        error = mmc_send_cmd(mmc, &cmd, NULL);
+        error = mmc_send_cmd(&cmd, NULL);
         if (error < 0)
             return error;
 
         /* Waiting for the ready status */
-        error = mmc_send_status(mmc);
+        error = mmc_send_status();
         if (error < 0)
             return error;
 
-        mmc_set_bus_width(mmc, 4);
+        mmc_set_bus_width(4);
     }
 
-    mmc_set_clock(mmc, CONFIG_MSC_FREQ);
+    mmc_set_clock(CONFIG_MSC_FREQ);
 
     return 0;
 }
 
-static int mmc_card_probe(struct jz_mmc *mmc) {
+static int mmc_card_probe(void) {
     int error = 0;
 
-    mmc_set_bus_width(mmc, 1);
+    mmc_set_bus_width(1);
 
-    mmc_set_clock(mmc, 1);
+    mmc_set_clock(1);
 
     /*
      * Reset the card
      */
-    error = mmc_go_idle(mmc);
+    error = mmc_go_idle();
     if (error)
         return error;
 
     /*
      * Test for SD version 2
      */
-    error = mmc_send_if_cond(mmc);
+    error = mmc_send_if_cond();
 
     /*
      * Now try to get the SD card's operating condition
      */
-    error = sd_send_op_cond(mmc);
+    error = sd_send_op_cond();
     if (error < 0) {
-        error = mmc_send_op_cond(mmc);
+        error = mmc_send_op_cond();
         if (error) {
             printf("MSC: card did not respond to voltage select!\n");
             return -1;
@@ -1267,18 +1262,18 @@ static int mmc_card_probe(struct jz_mmc *mmc) {
     }
 
     if (mmc->op_cond_pending)
-        error = mmc_complete_op_cond(mmc);
+        error = mmc_complete_op_cond();
     if (error < 0)
         return error;
 
-    error = mmc_card_starup(mmc);
+    error = mmc_card_starup();
     if (error < 0)
         return error;
 
     return 0;
 }
 
-static int mmc_reset(struct jz_mmc* mmc) {
+static int mmc_reset(void) {
     uint32_t ctrl = 0, timeout = 0x1fff;
 
     /*
@@ -1315,7 +1310,7 @@ static int mmc_reset(struct jz_mmc* mmc) {
     return 0;
 }
 
-static int mmc_controller_init(struct jz_mmc* mmc) {
+static int mmc_controller_init(void) {
     int error = 0;
 
     /*
@@ -1326,7 +1321,7 @@ static int mmc_controller_init(struct jz_mmc* mmc) {
     /*
      * Reset mmc controller
      */
-    error = mmc_reset(mmc);
+    error = mmc_reset();
     if (error < 0)
         return error;
 
@@ -1337,6 +1332,8 @@ static int mmc_controller_init(struct jz_mmc* mmc) {
 
 int mmc_init(void) {
     int error = 0;
+
+    mmc = &jz_mmc_dev;
 
     mmc->send_cmd = mmc_send_cmd;
     mmc->set_ios = mmc_set_ios;
@@ -1356,9 +1353,9 @@ int mmc_init(void) {
 
     mmc->b_max = CONFIG_MMC_MAX_BLK_COUNT;
 
-    mmc->init(mmc);
+    mmc->init();
 
-    error = mmc_card_probe(mmc);
+    error = mmc_card_probe();
 
     return error;
 }
@@ -1370,7 +1367,7 @@ int mmc_read(uint32_t offset, uint32_t length, uint32_t dest) {
     start_blk = (offset + mmc->read_bl_len - 1) / mmc->read_bl_len;
     blkcnt =  (length + mmc->read_bl_len - 1) / mmc->read_bl_len;
 
-    if (mmc_bread(mmc, start_blk, blkcnt, (void *) dest) != blkcnt) {
+    if (mmc_bread(start_blk, blkcnt, (void *) dest) != blkcnt) {
         msc_dump_reg();
         return -1;
     }
