@@ -72,20 +72,24 @@ enum {
 }while(0)
 
 struct spiflash_register {
-    unsigned int addr;
-    unsigned int val;
-    unsigned char action;
+    uint32_t addr;
+    uint32_t val;
+    uint8_t action;
 };
 
 struct spiflash_desc {
-    unsigned int id;
+    uint32_t id;
     struct spiflash_register regs;
 };
 
-int spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr);
-int spinand_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr);
+int spinor_init(void);
+int spinor_read(uint32_t src_addr, uint32_t count, uint32_t dst_addr);
+
+int spinand_init(void);
+int spinand_read(uint32_t src_addr, uint32_t count, uint32_t dst_addr);
+
 #ifdef CONFIG_BEIJING_OTA
-int ota_load(unsigned int *argv, unsigned int dst_addr);
+int ota_load(uint32_t *argv, uint32_t dst_addr);
 #endif
 
 #endif /* SPIFLASH_H */

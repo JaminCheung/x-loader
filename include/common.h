@@ -36,7 +36,10 @@
 #include <i2c.h>
 #endif
 
-#define CONFIG_KERNEL_PARAMETER_ADDR    0x80004000
+/*
+ * Kernel params addr
+ */
+#define KERNEL_PARAMETER_ADDR    0x80004000
 
 /*
  * Sleep lib
@@ -713,6 +716,8 @@ static inline uint64_t lldiv(uint64_t dividend, uint32_t divisor)
 #ifndef __ASSEMBLY__
 #ifndef __HOST__
 void *memcpy(void *dst, const void *src, unsigned int len);
+char * strstr(const char * s1,const char * s2);
+size_t strlen(const char * s);
 #endif
 #endif
 

@@ -18,11 +18,13 @@
 
 #include <common.h>
 
-__attribute__ ((noreturn)) static void jump_to_image(uint32_t entry_addr,
+__attribute__ ((noreturn)) static void jump_to_next_stage(uint32_t entry_addr,
         uint32_t argv) {
 
 #if (defined CONFIG_BOOT_UBOOT)
     typedef void (*image_entry_t)(void) __attribute__ ((noreturn));
+
+    (void) argv;
 
     image_entry_t image_entry = (image_entry_t) entry_addr;
 
@@ -34,9 +36,7 @@ __attribute__ ((noreturn)) static void jump_to_image(uint32_t entry_addr,
     typedef void (*image_entry_t)(int, char **, void *, int *)
             __attribute__ ((noreturn));
 
-    (void) argv;
-
-    uint32_t *linux_argv = (uint32_t *) CONFIG_KERNEL_PARAMETER_ADDR;
+    uint32_t *linux_argv = (uint32_t *) KERNEL_PARAMETER_ADDR;
 
     image_entry_t image_entry = (image_entry_t) entry_addr;
 
@@ -46,7 +46,100 @@ __attribute__ ((noreturn)) static void jump_to_image(uint32_t entry_addr,
     flush_cache_all();
 
     image_entry(2, (char **)linux_argv, NULL, 0);
+
 #endif /* CONFIG_BOOT_KERNEL */
+}
+
+static int load_init(void) {
+/*
+ * For mmc
+ */
+#ifdef CONFIG_BOOT_MMC
+
+    return mmc_init();
+
+#endif /* CONFIG_BOOT_MMC */
+
+/*
+ * For sfc
+ */
+#ifdef CONFIG_BOOT_SFC
+
+    sfc_init();
+
+#endif /* CONFIG_BOOT_SFC */
+
+/*
+ * For spi nand
+ */
+#ifdef CONFIG_BOOT_SPI_NAND
+
+    return spinand_init();
+
+#endif /* CONFIG_BOOT_SPI_NAND */
+
+/*
+ * For spi nor
+ */
+#ifdef CONFIG_BOOT_SPI_NOR
+
+    return spinor_init();
+
+#endif /* CONFIG_BOOT_SPI_NOR */
+
+    return 0;
+}
+
+static int load(uint32_t offset, uint32_t length, uint32_t load_addr) {
+/*
+ * For mmc
+ */
+#ifdef CONFIG_BOOT_MMC
+
+    return mmc_read(offset, length, load_addr);
+
+#endif /* CONFIG_BOOT_MMC */
+
+/*
+ * For spi nand
+ */
+#ifdef CONFIG_BOOT_SPI_NAND
+
+    return spinand_read(offset, length, load_addr);
+
+#endif /* CONFIG_BOOT_SPI_NAND */
+
+/*
+ * For spi nor
+ */
+#ifdef CONFIG_BOOT_SPI_NOR
+
+    return spinor_read(offset, length, load_addr);
+
+#endif /* CONFIG_BOOT_SPI_NOR */
+
+    return 0;
+}
+
+static int pre_handle_before_jump(void* arg) {
+    if (arg == NULL)
+        return 0;
+
+#ifdef CONFIG_GET_WIFI_MAC
+    int error = 0;
+    char *wifi_mac_str = NULL;
+    uint8_t mac_addr[12] = {0};
+
+    error = load(CONFIG_WIFI_MAC_ADDR, sizeof(mac_addr), (uint32_t) &mac_addr);
+    if (error < 0)
+        return error;
+
+    wifi_mac_str = strstr(arg, "wifi_mac");
+    if (wifi_mac_str != NULL)
+        memcpy(wifi_mac_str + 9, mac_addr, sizeof(mac_addr));
+#endif
+
+    return 0;
 }
 
 void boot_next_stage(void) {
@@ -57,77 +150,63 @@ void boot_next_stage(void) {
     uint32_t argv = 0;
 
     entry_addr = CONFIG_BOOT_NEXT_STAGE_ENTRY_ADDR;
+    load_addr = CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR;
 
+    /*
+     * Step 1: init controller & device
+     */
+    error = load_init();
+    if (error)
+        panic("\n\tLoad init failed.\n");
+
+    /*
+     * Step 2: install sleep lib
+     */
+    error = load(SLEEP_LIB_OFFSET, SLEEP_LIB_LENGTH, SLEEP_LIB_TCSM);
+    if (error)
+        panic("\n\tInstall sleep lib failed.\n");
+
+    /*
+     * Step 3: prepare kernel parameter
+     */
+/*
+ * For boot kernel
+ */
 #if (defined CONFIG_BOOT_KERNEL)
     int boot_sel = -1;
 
     if (get_boot_sel() == RECOVERY_BOOT) {
-        uart_puts("Mod: Recovery\n");
+        uart_puts("Mod: Recovery.\n");
         boot_sel = RECOVERY_BOOT;
         argv = (uint32_t) CONFIG_RECOVERY_ARGS;
+
     } else {
-        uart_puts("Mod: Normal\n");
+        uart_puts("Mod: Normal.\n");
         boot_sel = NORMAL_BOOT;
         argv = (uint32_t) CONFIG_KERNEL_ARGS;
     }
 
-    load_addr = CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR;
+    if (boot_sel == RECOVERY_BOOT) {
+        error = load(CONFIG_RECOVERY_OFFSET, CONFIG_RECOVERY_LENGTH, load_addr);
 
-#elif (defined CONFIG_BOOT_UBOOT) /* CONFIG_BOOT_KERNEL */
+    } else {
 
-    load_addr = CONFIG_BOOT_NEXT_STAGE_LOAD_ADDR;
+       #ifdef CONFIG_BEIJING_OTA
+           error = ota_load(&argv, load_addr);
+       #else
+           error = load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
+       #endif
+
+    }
+
+/*
+ * For boot u-boot
+ */
+#elif (defined CONFIG_BOOT_UBOOT)
+
+    error = load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
 
 #endif
-
-    /*
-     * For mmc
-     */
-#ifdef CONFIG_BOOT_MMC
-    #if (defined CONFIG_BOOT_UBOOT)
-        error = mmc_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
-
-    #elif (defined CONFIG_BOOT_KERNEL)
-        if (boot_sel == RECOVERY_BOOT)
-            error = mmc_load(CONFIG_RECOVERY_OFFSET, CONFIG_RECOVERY_LENGTH, load_addr);
-        else
-            error = mmc_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
-    #endif
-#endif /* CONFIG_BOOT_MMC */
-
-    /*
-     * For spi nand
-     */
-#ifdef CONFIG_BOOT_SPI_NAND
-    #if (defined CONFIG_BOOT_UBOOT)
-        error = spinand_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
-
-    #elif (defined CONFIG_BOOT_KERNEL)
-        if (boot_sel == RECOVERY_BOOT)
-            error = spinand_load(CONFIG_RECOVERY_OFFSET, CONFIG_RECOVERY_LENGTH, load_addr);
-        else
-            error = spinand_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
-    #endif
-#endif /* CONFIG_BOOT_SPI_NAND */
-
-    /*
-     * For spi nor
-     */
-#ifdef CONFIG_BOOT_SPI_NOR
-    #if (defined CONFIG_BOOT_UBOOT)
-        error = spinor_load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
-
-    #elif (defined CONFIG_BOOT_KERNEL)
-        if (boot_sel == RECOVERY_BOOT)
-            error = spinor_load(CONFIG_RECOVERY_OFFSET, CONFIG_RECOVERY_LENGTH, load_addr);
-        else {
-		#ifdef CONFIG_BEIJING_OTA
-			error = ota_load(&argv, load_addr);
-		#else
-			error = spinor_load(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, load_addr);
-		#endif
-		}
-    #endif
-#endif /* CONFIG_BOOT_SPI_NOR */
 
     printf("Load address:  0x%x\n", load_addr);
     printf("Entry address: 0x%x\n", entry_addr);
@@ -135,10 +214,17 @@ void boot_next_stage(void) {
     if (error < 0)
         panic("\n\tLoad next stage failed.\n");
 
+    /*
+     * Step 4: prepare jump to next stage
+     */
+    error = pre_handle_before_jump((void *) argv);
+    if (error < 0)
+        panic("\n\tPre handle before jump failed.\n");
+
     uart_puts("\nJump...\n\n");
 
     /*
-     * We will nerver return here
+     * Step 5: we will nerver return here
      */
-    jump_to_image(entry_addr, argv);
+    jump_to_next_stage(entry_addr, argv);
 }

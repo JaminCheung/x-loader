@@ -52,7 +52,7 @@ void spinor_set_quad_mode(void)
 }
 #endif
 
-static int spinor_read(unsigned int offset, unsigned int len, void *data)
+int spinor_read(uint32_t offset, uint32_t len, uint32_t data)
 {
     int addr_len = 3;
     struct jz_sfc sfc;
@@ -65,34 +65,19 @@ static int spinor_read(unsigned int offset, unsigned int len, void *data)
     SFC_SEND_COMMAND(&sfc,SPI_MODE_STANDARD,len,offset,addr_len,0,1,0);
 #endif
 
-    ret = sfc_read_data(data, len);
+    ret = sfc_read_data((void *) data, len);
     if (ret)
         return ret;
     else
         return 0;
 }
 
-static void spinor_init(void) {
+int spinor_init(void) {
 #ifndef CONFIG_SPI_STANDARD
     spinor_set_quad_mode();
 #endif
-}
 
-static int install_sleep_lib(void) {
-    return spinor_read(SLEEP_LIB_OFFSET, SLEEP_LIB_LENGTH, (void *)SLEEP_LIB_TCSM);
-}
-
-int spinor_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr)
-{
-    sfc_init();
-    spinor_init();
-
-    if (install_sleep_lib() < 0){
-        printf("install sleep lib failed\n");
-        return -1;
-    }
-
-    return spinor_read(src_addr, count, (void *)dst_addr);
+    return 0;
 }
 
 #ifdef CONFIG_BEIJING_OTA
@@ -128,14 +113,6 @@ int ota_load(unsigned int *argv, unsigned int dst_addr)
 	unsigned int nv_buf[4];
 	unsigned int count = 16;
 	unsigned int src_addr, updata_flag;
-
-	sfc_init();
-	spinor_init();
-
-	if (install_sleep_lib() < 0) {
-		printf("install sleep lib failed\n");
-		return -1;
-	}
 
 	nv_map_area((unsigned int *)&src_addr);
 	spinor_read(src_addr, count, (void *)nv_buf);

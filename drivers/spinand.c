@@ -28,7 +28,7 @@ struct spiflash_desc spinand_descs[] = {
     {MANUFACTURE_WINBOND_ID, {FEATURE_REG_FEATURE1, BITS_BUF_EN, VALUE_SET}},
 };
 
-static inline int spinand_bad_block_check(int len,unsigned char *buf)
+static inline int spinand_bad_block_check(int len,uint8_t *buf)
 {
     int i,bit0_cnt = 0;
     unsigned short *check_buf = (unsigned short *)buf;
@@ -44,10 +44,10 @@ static inline int spinand_bad_block_check(int len,unsigned char *buf)
     return 0;
 }
 
-static int spinand_read_page(unsigned int page, unsigned char *dst_addr,
+static int spinand_read_page(uint32_t page, uint8_t *dst_addr,
         int pagesize, int blksize)
 {
-    unsigned int read_buf;
+    uint32_t read_buf;
     int column = 0;
     int oob_flag = 0;
     struct jz_sfc sfc;
@@ -56,7 +56,7 @@ static int spinand_read_page(unsigned int page, unsigned char *dst_addr,
     if (oob_flag){
         column = pagesize;
         pagesize = 4;
-        dst_addr = (unsigned char *)&read_buf;
+        dst_addr = (uint8_t *)&read_buf;
     }
 
     SFC_SEND_COMMAND(&sfc,CMD_PARD,0,page,3,0,0,0);
@@ -80,25 +80,74 @@ static int spinand_read_page(unsigned int page, unsigned char *dst_addr,
 #else
     SFC_SEND_COMMAND(&sfc,SPI_MODE_STANDARD,pagesize,column,3,0,1,0);
 #endif
-    sfc_read_data((unsigned int *)dst_addr,pagesize);
+    sfc_read_data((uint32_t *)dst_addr,pagesize);
 
     if (!oob_flag && !(page % (blksize/pagesize))){
         oob_flag = 1;
         goto read_oob;
     }else if (oob_flag){
-        if (spinand_bad_block_check(2, (unsigned char *)&read_buf))
+        if (spinand_bad_block_check(2, (uint8_t *)&read_buf))
             return 1;
     }
     return 0;
 }
 
-static int spinand_read(unsigned int src_addr, unsigned int count,
-        unsigned int dst_addr)
+static int spinand_dev_special_init(struct jz_sfc *sfc, uint32_t id)
 {
+    int i;
+    int num = sizeof(spinand_descs) / sizeof(spinand_descs[0]);
+    struct spiflash_register *regs;
+    uint32_t x;
+    int ret = 0;
+
+    for (i = 0; i < num; i++) {
+        if (id == spinand_descs[i].id){
+            regs = &spinand_descs[i].regs;
+            SFC_SEND_COMMAND(sfc,CMD_GET_FEATURE,1,regs->addr,1,0,1,0);
+            sfc_read_data(&x, 1);
+            OPERAND_CONTROL(regs->action, regs->val, x);
+            SFC_SEND_COMMAND(sfc,CMD_SET_FEATURE,1,regs->addr,1,0,1,1);
+            sfc_write_data(&x, 1);
+            SFC_SEND_COMMAND(sfc,CMD_GET_FEATURE,1,regs->addr,1,0,1,0);
+            sfc_read_data(&x, 1);
+        }
+    }
+
+    return ret;
+}
+
+int spinand_init(void) {
+
+    uint8_t id[4];
+    uint32_t x;
+    struct jz_sfc sfc;
+
+    /* get id */
+    SFC_SEND_COMMAND(&sfc,CMD_RDID,2,0,1,0,1,0);
+    sfc_read_data((uint32_t *)id,2);
+    /* disable write protect */
+    x = 0;
+    SFC_SEND_COMMAND(&sfc,CMD_SET_FEATURE,1,FEATURE_REG_PROTECT,1,0,1,1);
+    sfc_write_data(&x,1);
+
+    /* enable ecc */
+    x = BITS_ECC_EN;
+#ifndef CONFIG_SPI_STANDARD
+    x |= BITS_QUAD_EN;
+#endif
+    SFC_SEND_COMMAND(&sfc,CMD_SET_FEATURE,1,FEATURE_REG_FEATURE1,1,0,1,1);
+    sfc_write_data(&x,1);
+
+    spinand_dev_special_init(&sfc, id[0]);
+
+    return 0;
+}
+
+int spinand_read(uint32_t src_addr, uint32_t count, uint32_t dst_addr) {
     int blksize, pagesize, page;
     int pagecopy_cnt = 0;
-    unsigned int ret;
-    unsigned char *buf = (unsigned char *)dst_addr;
+    uint32_t ret;
+    uint8_t *buf = (uint8_t *)dst_addr;
 
     pagesize = CONFIG_NAND_BPP;
     blksize = CONFIG_NAND_PPB * pagesize;
@@ -119,68 +168,3 @@ static int spinand_read(unsigned int src_addr, unsigned int count,
 
     return 0;
 }
-static int spinand_dev_special_init(struct jz_sfc *sfc, unsigned int id)
-{
-    int i;
-    int num = sizeof(spinand_descs) / sizeof(spinand_descs[0]);
-    struct spiflash_register *regs;
-    unsigned int x;
-    int ret = 0;
-
-    for (i = 0; i < num; i++) {
-        if (id == spinand_descs[i].id){
-            regs = &spinand_descs[i].regs;
-            SFC_SEND_COMMAND(sfc,CMD_GET_FEATURE,1,regs->addr,1,0,1,0);
-            sfc_read_data(&x, 1);
-            OPERAND_CONTROL(regs->action, regs->val, x);
-            SFC_SEND_COMMAND(sfc,CMD_SET_FEATURE,1,regs->addr,1,0,1,1);
-            sfc_write_data(&x, 1);
-            SFC_SEND_COMMAND(sfc,CMD_GET_FEATURE,1,regs->addr,1,0,1,0);
-            sfc_read_data(&x, 1);
-        }
-    }
-
-    return ret;
-}
-
-static void spinand_init(void) {
-
-    unsigned char id[4];
-    unsigned int x;
-    struct jz_sfc sfc;
-
-    /* get id */
-    SFC_SEND_COMMAND(&sfc,CMD_RDID,2,0,1,0,1,0);
-    sfc_read_data((unsigned int *)id,2);
-    /* disable write protect */
-    x = 0;
-    SFC_SEND_COMMAND(&sfc,CMD_SET_FEATURE,1,FEATURE_REG_PROTECT,1,0,1,1);
-    sfc_write_data(&x,1);
-
-    /* enable ecc */
-    x = BITS_ECC_EN;
-#ifndef CONFIG_SPI_STANDARD
-    x |= BITS_QUAD_EN;
-#endif
-    SFC_SEND_COMMAND(&sfc,CMD_SET_FEATURE,1,FEATURE_REG_FEATURE1,1,0,1,1);
-    sfc_write_data(&x,1);
-
-    spinand_dev_special_init(&sfc, id[0]);
-}
-
-static int install_sleep_lib(void) {
-    return spinand_read(SLEEP_LIB_OFFSET, SLEEP_LIB_LENGTH, SLEEP_LIB_TCSM);
-}
-
-int spinand_load(unsigned int src_addr, unsigned int count, unsigned int dst_addr)
-{
-    sfc_init();
-    spinand_init();
-
-    if (install_sleep_lib() < 0){
-        printf("install sleep lib failed\n");
-        return -1;
-    }
-    return spinand_read(src_addr, count, dst_addr);
-}
-

@@ -19,6 +19,7 @@
 #ifndef MMC_H
 #define MMC_H
 
-int mmc_load(uint32_t offset, uint32_t length, uint32_t dest);
+int mmc_init(void);
+int mmc_read(uint32_t offset, uint32_t length, uint32_t dest);
 
 #endif /* MMC_H */

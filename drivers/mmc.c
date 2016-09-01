@@ -545,6 +545,7 @@ struct jz_mmc {
 };
 
 static struct jz_mmc jz_mmc_dev;
+struct jz_mmc* mmc = &jz_mmc_dev;
 
 #ifdef CONFIG_BOOT_MMC_PA_8BIT
 static void set_gpio_pa_as_mmc0_8bit(void) {
@@ -1334,26 +1335,8 @@ static int mmc_controller_init(struct jz_mmc* mmc) {
     return 0;
 }
 
-static int install_sleep_lib(struct jz_mmc* mmc) {
-    uint32_t start_blk = 0;
-    uint32_t blkcnt = 0;
-
-    start_blk = (SLEEP_LIB_OFFSET + mmc->read_bl_len - 1) / mmc->read_bl_len;
-    blkcnt = (SLEEP_LIB_LENGTH + mmc->read_bl_len - 1) / mmc->read_bl_len;
-
-    if (mmc_bread(mmc, start_blk, blkcnt, (void*) SLEEP_LIB_TCSM) != blkcnt) {
-        printf("Install sleep lib failed\n");
-        return -1;
-    }
-
-    return 0;
-}
-
-int mmc_load(uint32_t offset, uint32_t length, uint32_t dest) {
+int mmc_init(void) {
     int error = 0;
-    uint32_t blkcnt = 0;
-    uint32_t start_blk = 0;
-    struct jz_mmc* mmc = &jz_mmc_dev;
 
     mmc->send_cmd = mmc_send_cmd;
     mmc->set_ios = mmc_set_ios;
@@ -1376,27 +1359,21 @@ int mmc_load(uint32_t offset, uint32_t length, uint32_t dest) {
     mmc->init(mmc);
 
     error = mmc_card_probe(mmc);
-    if (error < 0)
-        goto error;
 
-    error = install_sleep_lib(mmc);
-    if (error < 0)
-        goto error;
+    return error;
+}
+
+int mmc_read(uint32_t offset, uint32_t length, uint32_t dest) {
+    uint32_t blkcnt = 0;
+    uint32_t start_blk = 0;
 
     start_blk = (offset + mmc->read_bl_len - 1) / mmc->read_bl_len;
     blkcnt =  (length + mmc->read_bl_len - 1) / mmc->read_bl_len;
 
     if (mmc_bread(mmc, start_blk, blkcnt, (void *) dest) != blkcnt) {
-        error = -1;
-        goto error;
+        msc_dump_reg();
+        return -1;
     }
 
-    dump_mem_content((uint32_t *) dest, 200);
-
     return 0;
-
-error:
-    msc_dump_reg();
-
-    return error;
 }

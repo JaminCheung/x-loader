@@ -67,4 +67,10 @@
 
 #endif /* CONFIG_BOOT_SPI_NAND */
 
+/*
+ * WIFI MAC
+ */
+#undef CONFIG_GET_WIFI_MAC
+#define KERNEL_ARGS_WIFI_MAC    "wifi_mac=xxxxxxxxxxxx "
+
 #endif /* BOARDS_COMMON_H */
