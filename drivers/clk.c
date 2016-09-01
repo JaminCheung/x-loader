@@ -302,6 +302,13 @@ void enable_uart_clk(void) {
     cpm_outl(clkgr, CPM_CLKGR);
 }
 
+uint32_t get_ahb_rate(void) {
+    uint32_t freq = CONFIG_DDR_SEL_PLL == APLL ? CONFIG_APLL_FREQ / CONFIG_AHB_CLK_DIV
+            : CONFIG_MPLL_FREQ / CONFIG_AHB_CLK_DIV;
+
+    return freq * 1000 * 1000;
+}
+
 uint32_t get_ddr_rate(void) {
     uint32_t freq = CONFIG_DDR_SEL_PLL == APLL ? CONFIG_APLL_FREQ / CONFIG_DDR_FREQ_DIV
             : CONFIG_MPLL_FREQ / CONFIG_DDR_FREQ_DIV;

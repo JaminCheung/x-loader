@@ -598,10 +598,6 @@ void mdelay(unsigned long ms);
 #endif
 
 #ifndef __ASSEMBLY__
-uint32_t get_ddr_rate(void);
-#endif
-
-#ifndef __ASSEMBLY__
 __attribute__((noreturn)) void hang(void);
 __attribute__((noreturn)) void hang_reason(const char* reason);
 #endif
