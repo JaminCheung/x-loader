@@ -40,6 +40,10 @@
 #define BYPASS_DISABLE      0
 #define IS_BYPASS_MODE(x)     (((x) & 1) == BYPASS_ENABLE)
 
+static int sdram_resized;
+static int ddr_row = DDR_ROW;
+static int ddr_col = DDR_COL;
+
 static void dump_ddrc_register(void)
 {
 #ifdef CONFIG_DWC_DEBUG
@@ -89,6 +93,41 @@ static void dump_ddrp_register(void)
     }
 #endif
 }
+
+#ifdef CONFIG_PROBE_MEM_SIZE
+static void sdram_resize_to_32m(void) {
+    uint32_t ddrc_cfg = 0;
+
+    ddrc_cfg = ddr_readl(DDRC_CFG);
+
+    ddrc_cfg &= ~((0x3f << 24) | (0x3f << 8));
+    ddrc_cfg |= ((0x9 << 24) | (0x09 << 8));
+
+    ddr_writel(ddrc_cfg, DDRC_CFG);
+    ddr_writel(0x000020fe, DDRC_MMAP0);
+    ddr_writel(0x00002200, DDRC_MMAP1);
+
+    dwc_debug("DDRC_CFG    0x%x\n", ddr_readl(DDRC_CFG));
+    dwc_debug("DDRC_MMAP0  0x%x\n", ddr_readl(DDRC_MMAP0));
+    dwc_debug("DDRC_MMAP1  0x%x\n", ddr_readl(DDRC_MMAP1));
+
+    ddr_row = DDR_ROW;
+    ddr_col = DDR_COL - 1;
+
+    sdram_resized = 1;
+}
+
+static void probe_sdram_size(void) {
+    uint32_t addr = CKSEG1ADDR(0);
+    uint32_t mirror_addr = CKSEG1ADDR(1 << DDR_COL);
+
+    writew(0x5555, addr);
+    writew(0xaaaa, mirror_addr);
+
+    if (readw(addr) == readw(mirror_addr))
+        sdram_resize_to_32m();
+}
+#endif
 
 static void reset_dll(void) {
     writel(0x73 | (1 << 6) , CPM_DRCG);
@@ -409,8 +448,8 @@ static void mem_remap(void)
     uint32_t start = 0, num = 0;
     int row, col, dw32, bank8, cs0, cs1;
 
-    row = DDR_ROW;
-    col = DDR_COL;
+    row = ddr_row;
+    col = ddr_col;
     dw32 = 0;
     bank8 = DDR_BANK8;
 
@@ -488,6 +527,14 @@ void lpddr_init(void) {
      * DDR controller init
      */
     ddr_controller_init();
+
+    /*
+     * Probe sdram size for X1000/X1000E
+     */
+#ifdef CONFIG_PROBE_MEM_SIZE
+    probe_sdram_size();
+#endif
+
     dump_ddrc_register();
 
     /*
@@ -502,5 +549,16 @@ void lpddr_init(void) {
         ddr_writel(0 , DDRC_DLP);
     ddr_writel(0x1 ,DDRC_AUTOSR_EN);
 #endif
+
     dwc_debug("sdram init finished\n");
+}
+
+uint32_t get_lpddr_size(void) {
+    uint32_t ram_size;
+    ram_size = (unsigned int)(DDR_CHIP_0_SIZE) + (unsigned int)(DDR_CHIP_1_SIZE);
+
+    if (sdram_resized)
+        return ram_size / 2;
+
+    return ram_size;
 }

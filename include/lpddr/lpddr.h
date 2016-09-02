@@ -1050,5 +1050,6 @@ struct ddrp_reg {
 };
 
 void lpddr_init(void);
+uint32_t get_lpddr_size(void);
 
 #endif

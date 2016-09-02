@@ -139,6 +139,30 @@ static int pre_handle_before_jump(void* arg) {
         memcpy(wifi_mac_str + 9, mac_addr, sizeof(mac_addr));
 #endif
 
+#ifdef CONFIG_PROBE_MEM_SIZE
+    uint32_t mem_size = 0;
+    char* mem_str = NULL;
+
+    mem_str = strstr(arg, "mem");
+    if (mem_str == NULL)
+        return -1;
+
+    mem_size = get_lpddr_size();
+
+    switch (mem_size) {
+    case SZ_64M:
+        memcpy(mem_str + 4, "64", 2);
+        break;
+
+    case SZ_32M:
+        memcpy(mem_str + 4, "32", 2);
+        break;
+
+    default:
+        return -1;
+    }
+#endif
+
     return 0;
 }
 
@@ -157,14 +181,14 @@ void boot_next_stage(void) {
      */
     error = load_init();
     if (error)
-        panic("\n\tLoad init failed.\n");
+        hang_reason("\n\tLoad init failed.\n");
 
     /*
      * Step 2: install sleep lib
      */
     error = load(SLEEP_LIB_OFFSET, SLEEP_LIB_LENGTH, SLEEP_LIB_TCSM);
     if (error)
-        panic("\n\tInstall sleep lib failed.\n");
+        hang_reason("\n\tInstall sleep lib failed.\n");
 
     /*
      * Step 3: prepare kernel parameter
@@ -212,14 +236,14 @@ void boot_next_stage(void) {
     printf("Entry address: 0x%x\n", entry_addr);
 
     if (error < 0)
-        panic("\n\tLoad next stage failed.\n");
+        hang_reason("\n\tLoad next stage failed.\n");
 
     /*
      * Step 4: prepare jump to next stage
      */
     error = pre_handle_before_jump((void *) argv);
     if (error < 0)
-        panic("\n\tPre handle before jump failed.\n");
+        hang_reason("\n\tPre handle before jump failed.\n");
 
     uart_puts("\nJump...\n\n");
 

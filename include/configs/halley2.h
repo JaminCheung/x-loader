@@ -32,10 +32,14 @@
  */
 #ifdef CONFIG_BOOT_KERNEL
 
-#ifdef CONFIG_MEM_SIZE_64M
-#define KERNEL_ARGS_MEM         "mem=64M@0x0 "
+#ifndef CONFIG_PROBE_MEM_SIZE
+    #ifdef CONFIG_MEM_SIZE_64M
+        #define KERNEL_ARGS_MEM         "mem=64M@0x0 "
+    #else
+        #define KERNEL_ARGS_MEM         "mem=32M@0x0 "
+    #endif
 #else
-#define KERNEL_ARGS_MEM         "mem=32M@0x0 "
+    #define KERNEL_ARGS_MEM         "mem=xxM@0x0 "
 #endif
 
 #define KERNEL_ARGS_CONSOLE     "no_console_suspend console=ttyS2,3000000n8 "

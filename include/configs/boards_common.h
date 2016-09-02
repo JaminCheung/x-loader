@@ -43,7 +43,11 @@
  * DDR
  */
 #define CONFIG_MDDR_H5MS5122DFR_J3M
-#undef CONFIG_MEM_SIZE_64M
+#define CONFIG_PROBE_MEM_SIZE
+
+#ifdef CONFIG_PROBE_MEM_SIZE
+#define CONFIG_MEM_SIZE_64M
+#endif
 
 /*
  * SFC
