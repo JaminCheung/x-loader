@@ -121,11 +121,14 @@ static void probe_sdram_size(void) {
     uint32_t addr = CKSEG1ADDR(0);
     uint32_t mirror_addr = CKSEG1ADDR(1 << DDR_COL);
 
-    writew(0x5555, addr);
-    writew(0xaaaa, mirror_addr);
+    writew(0x5555, mirror_addr);
 
-    if (readw(addr) == readw(mirror_addr))
-        sdram_resize_to_32m();
+    if (readw(addr) == readw(mirror_addr)) {
+        writew(0xaaaa, addr);
+
+        if (readw(addr) == readw(mirror_addr))
+            sdram_resize_to_32m();
+    }
 }
 #endif
 
