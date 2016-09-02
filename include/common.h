@@ -34,6 +34,7 @@
 #include <lpddr/lpddr.h>
 #include <lpddr/lpddr_chip.h>
 #include <i2c.h>
+#include <efuse.h>
 #endif
 
 /*

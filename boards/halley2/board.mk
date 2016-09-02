@@ -57,3 +57,12 @@ KERNEL_IN_XIMAGE := 1
 endif
 
 BOARD_CFLAGS :=
+
+#
+#For compiling efuse
+#
+CONFIG_EFUSE := n
+
+ifeq ($(CONFIG_EFUSE), y)
+BOARD_CFLAGS += -DCONFIG_EFUSE
+endif

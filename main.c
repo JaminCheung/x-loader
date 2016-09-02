@@ -50,6 +50,13 @@ void x_loader_main(void) {
     lpddr_init();
 
     /*
+     * Init efuse
+     */
+#ifdef CONFIG_EFUSE
+    efuse_init();
+#endif
+
+    /*
      * Init board
      */
     board_init();
