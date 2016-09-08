@@ -98,7 +98,8 @@ BOOT_NEXT_STAGE_LOAD_ADDR := 0x80f00000
 
 ifeq ($(KERNEL_IN_XIMAGE), 1)
 OFFSET_LEN := 0x40
-BOOT_NEXT_STAGE_LOAD_ADDR := $(shell $(AWK) 'BEGIN{printf("0x%x\n",            \
+BOOT_NEXT_STAGE_LOAD_ADDR := $(BOOT_NEXT_STAGE_LOAD_ADDR)-$(OFFSET_LEN)
+#BOOT_NEXT_STAGE_LOAD_ADDR := $(shell $(AWK) 'BEGIN{printf("0x%x\n",            \
 	'$(BOOT_NEXT_STAGE_LOAD_ADDR)'-$(OFFSET_LEN));                             \
 	}')
 endif
