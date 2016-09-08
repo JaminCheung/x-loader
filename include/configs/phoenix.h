@@ -64,7 +64,7 @@
  */
 #ifdef CONFIG_BOOT_SPI_NAND
 
-#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "ubi.mtd=5 root=ubi0:rootfs ubi.mtd=6 rootfstype=ubifs rw"
+#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "ubi.mtd=2 root=ubi0:rootfs ubi.mtd=3 rootfstype=ubifs rw"
 
 /*
  * unit(byte)
@@ -73,7 +73,7 @@
 #define CONFIG_UBOOT_LENGTH         0x40000
 
 #define CONFIG_KERNEL_OFFSET        0x100000
-#define CONFIG_KERNEL_LENGTH        0x300000
+#define CONFIG_KERNEL_LENGTH        0x800000
 
 #define CONFIG_RECOVERY_OFFSET      0x400000
 #define CONFIG_RECOVERY_LENGTH      0x300000
@@ -139,7 +139,7 @@
 
 #ifdef CONFIG_BEIJING_OTA
 #define CONFIG_OTA_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "rootfstype=cramfs root=/dev/mtdblock4 rw"
-#define CONFIG_OTG_STEP2_KERNEL_OFFSET    0xd00000
+#define CONFIG_OTA_STEP2_KERNEL_OFFSET    0xd00000
 #endif
 
 #endif /* PHOENIX_H */

@@ -122,7 +122,7 @@ int ota_load(unsigned int *argv, unsigned int dst_addr)
 		return spinor_read(CONFIG_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, (void *)dst_addr);
 	else {
 		*argv = (unsigned int)CONFIG_OTA_KERNEL_ARGS;
-		return spinor_read(CONFIG_OTG_STEP2_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, (void *)dst_addr);
+		return spinor_read(CONFIG_OTA_STEP2_KERNEL_OFFSET, CONFIG_KERNEL_LENGTH, (void *)dst_addr);
 	}
 }
 #endif
