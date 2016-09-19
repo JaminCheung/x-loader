@@ -87,7 +87,7 @@
  */
 #ifdef CONFIG_BOOT_SPI_NOR
 
-#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "rootfstype=jffs2 root=/dev/mtdblock2 rw"
+#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "rootfstype=jffs2 root=/dev/mtdblock3 rw"
 
 /*
  * unit(byte)
