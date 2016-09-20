@@ -61,7 +61,7 @@ boards/BOARD_NAME/board.c中board_init()用于在引导前对板子
 进行初始化，当然也可以没有
 
 如何使用efuse的读功能？
-= = = = = = = = = = = = = =
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 打开boards/BOARD_NAME/board.mk, 修改CONFIG_EFUSE := y
 定义一个buf, 然后调用 efuse_read() 函数，重用编译
 
@@ -72,10 +72,6 @@ boards/BOARD_NAME/board.c中board_init()用于在引导前对板子
 添加了代码编译不过怎么办？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 首先确认代码没有超过12KByte，如果没有继续debug
-
-如何配置内存为64MB？
-＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-打开板极头文件，添加 #define CONFIG_MEM_SIZE_64M
 
 引导不成功怎么办？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
