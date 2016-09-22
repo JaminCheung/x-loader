@@ -64,7 +64,7 @@
  */
 #ifdef CONFIG_BOOT_SPI_NAND
 
-#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "ubi.mtd=2 root=ubi0:rootfs ubi.mtd=3 rootfstype=ubifs rw"
+#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "ubi.mtd=3 root=ubi0:rootfs ubi.mtd=4 rootfstype=ubifs rw"
 
 /*
  * unit(byte)
@@ -87,7 +87,7 @@
  */
 #ifdef CONFIG_BOOT_SPI_NOR
 
-#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "rootfstype=jffs2 root=/dev/mtdblock2 rw"
+#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "rootfstype=jffs2 root=/dev/mtdblock3 rw"
 
 /*
  * unit(byte)
