@@ -23,6 +23,22 @@ struct spi_mode_peer spi_mode_local[] = {
     [SPI_MODE_QUAD] = {TRAN_SPI_QUAD, CMD_QUAD_READ},
 };
 
+void jz_sfc_reset_address_mode(void)
+{
+    unsigned int  buf = 0;
+    struct jz_sfc sfc;
+
+    SFC_SEND_COMMAND(&sfc,CMD_WREN,0,0,0,0,0,1);
+    SFC_SEND_COMMAND(&sfc,CMD_EX4B,0,0,0,0,0,1);
+    SFC_SEND_COMMAND(&sfc,CMD_RDSR,1,0,0,0,1,0);
+
+    sfc_read_data(&buf, 1);
+    while(buf & CMD_SR_WIP) {
+        SFC_SEND_COMMAND(&sfc,CMD_RDSR,1,0,0,0,1,0);
+        sfc_read_data(&buf, 1);
+    }
+}
+
 #ifndef CONFIG_SPI_STANDARD
 void spinor_set_quad_mode(void)
 {
@@ -73,6 +89,7 @@ int spinor_read(uint32_t offset, uint32_t len, uint32_t data)
 }
 
 int spinor_init(void) {
+    jz_sfc_reset_address_mode();
 #ifndef CONFIG_SPI_STANDARD
     spinor_set_quad_mode();
 #endif
