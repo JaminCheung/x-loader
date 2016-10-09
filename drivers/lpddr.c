@@ -237,10 +237,8 @@ static void ddr_phy_param_init(unsigned int mode) {
                     | DDRP_PGSR_ZCDONE))
             && (ddr_readl(DDRP_PGSR) != 0x1f)
             && --timeout);
-    if (timeout == 0) {
-        printf("DDR PHY init timeout: PGSR=%X\n", ddr_readl(DDRP_PGSR));
-        hang();
-    }
+    if (timeout == 0)
+        panic("DDR PHY init timeout: PGSR=%X\n", ddr_readl(DDRP_PGSR));
 }
 
 static void ddr_chip_init(unsigned int mode)
@@ -294,10 +292,8 @@ static void ddr_chip_init(unsigned int mode)
                       | DDRP_PGSR_DIDONE))
            && (ddr_readl(DDRP_PGSR) != 0x1f)
            && --timeout);
-    if (timeout == 0) {
-        printf("DDR init timeout: PGSR=%X\n", ddr_readl(DDRP_PGSR));
-        hang();
-    }
+    if (timeout == 0)
+        panic("DDR init timeout: PGSR=%X\n", ddr_readl(DDRP_PGSR));
 }
 
 static int ddr_training_hardware(unsigned int mode)
@@ -361,7 +357,7 @@ static void ddr_training(unsigned int mode)
 #endif // CONFIG_SPL_DDR_SOFT_TRAINING
     }
     if(training_state)
-        hang();
+        hang_reason("DDR training failed!\n");
 }
 
 static void ddr_impedance_matching(void)
