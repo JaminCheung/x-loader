@@ -133,8 +133,11 @@ static void ddrc_params_creat(struct ddrc_reg *ddrc, struct ddr_params *p) {
     ddrc->cfg.b.BA1 = p->bank8;
     ddrc->cfg.b.IMBA = 1;
     ddrc->cfg.b.BSL = (p->bl == 8) ? 1 : 0;
+#ifdef CONFIG_DDR_CHIP_ODT
+    ddrc->cfg.b.ODTEN = 1;
+#else
     ddrc->cfg.b.ODTEN = 0;
-
+#endif
     ddrc->cfg.b.MISPE = 1;
     ddrc->cfg.b.ROW0 = p->row - 12;
     ddrc->cfg.b.COL0 = p->col - 8;
