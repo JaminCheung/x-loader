@@ -113,8 +113,31 @@ int test_bit(int nr, const volatile void *addr)
     return ((1UL << (nr & 31)) & (((const unsigned int *) addr)[nr >> 5])) != 0;
 }
 
-void udelay(unsigned long usec) {
-    unsigned long loops = usec * (CONFIG_APLL_FREQ / 2);
+/* Note:
+ * avoid delay time overflow
+ * the longest delay time:
+ * 12MHz    357s
+ * 24MHz    178s
+ * 48MHz    89s
+ * */
+void udelay(uint64_t usec) {
+    pmon_stop();
+    pmon_clear_cnt();
+    pmon_start();
+
+    while (!((get_pmon_rc()) >= (cpu_freq * usec)));
+
+    pmon_stop();
+
+}
+
+void mdelay(uint32_t msec) {
+    udelay(msec * 1000);
+}
+
+#if 0
+void udelay(uint64_t usec) {
+    unsigned long loops = usec * (cpu_freq / 2);
 
     __asm__ __volatile__ (
             ".set noreorder \n"
@@ -127,10 +150,11 @@ void udelay(unsigned long usec) {
     );
 }
 
-void mdelay(unsigned long msec) {
+void mdelay(uint32_t msec) {
     while (msec--)
         udelay(1000);
 }
+#endif
 
 __attribute__((noreturn)) void hang() {
     uart_puts("\n### Hang-up - Please reset board ###\n");

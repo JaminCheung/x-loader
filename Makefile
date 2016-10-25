@@ -321,6 +321,14 @@ halley2_nand_config: unconfig
 halley2_mmc_config: unconfig
 	@./mkconfig $(@:_config) halley2 mmc
 
+yak_nor_config: unconfig
+	@./mkconfig $(@:_config) yak nor
+
+yak_nand_config: unconfig
+	@./mkconfig $(@:_config) yak nand
+
+yak_mmc_config: unconfig
+	@./mkconfig $(@:_config) yak mmc
 #
 # Put your board's config here
 #

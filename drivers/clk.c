@@ -255,6 +255,8 @@ static void clk_tree_init(void) {
      */
     regval = (cpccr & (0xff << 24)) | (cpm_inl(CPM_CPCCR) & ~(0xff << 24));
     cpm_outl(regval, CPM_CPCCR);
+
+    cpu_freq = CONFIG_APLL_FREQ;
 }
 
 void clk_init(void) {

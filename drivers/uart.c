@@ -39,17 +39,7 @@ void uart_init(void) {
 
     uart = (struct jz_uart *)(UART0_BASE + CONFIG_CONSOLE_INDEX * 0x1000);
 
-    /* init gpio function & open uart clk gate */
-#ifdef CONFIG_UART_PORTD
-    gpio_set_func(GPIO_PD(4), GPIO_FUNC_0);
-    gpio_set_func(GPIO_PD(5), GPIO_FUNC_0);
-#elif (defined CONFIG_UART_PORTC)
-    gpio_set_func(GPIO_PC(30), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PC(31), GPIO_FUNC_1);
-#else
-#error Unknow uart I/O port!
-#endif
-
+    /* open uart clk gate */
     enable_uart_clk();
 
     /* Disable port interrupts while changing hardware */

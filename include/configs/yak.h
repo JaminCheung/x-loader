@@ -16,14 +16,17 @@
  *
  */
 
-#ifndef HALLEY2_H
-#define HALLEY2_H
+#ifndef YAK_H
+#define YAK_H
 
 /*
  * Console
  */
 #define CONFIG_CONSOLE_BAUDRATE      3000000
 #define CONFIG_CONSOLE_INDEX         2
+
+#undef CONFIG_PROBE_MEM_SIZE
+#undef CONFIG_MEM_SIZE_64M
 
 /*
  * The following configure only for boot kernel
@@ -51,7 +54,7 @@
 
 #define KERNEL_ARGS_INIT        "init=/linuxrc "
 
-#define CONFIG_RECOVERY_BOOT_KEY            GPIO_PA(10)
+#define CONFIG_RECOVERY_BOOT_KEY            -1
 #define CONFIG_RECOVERY_BOOT_KEY_ENLEVEL    0
 #define CONFIG_RECOVERY_ARGS KERNEL_ARGS_COMMON
 
@@ -140,4 +143,4 @@
 #define CONFIG_OTA_STEP2_KERNEL_OFFSET    0xd00000
 #endif
 
-#endif /* HALLEY2_H */
+#endif /* YAK_H */

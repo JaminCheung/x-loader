@@ -24,8 +24,6 @@
  */
 #define CONFIG_CONSOLE_BAUDRATE      3000000
 #define CONFIG_CONSOLE_INDEX         2
-#undef CONFIG_UART_PORTD
-#define CONFIG_UART_PORTC
 
 /*
  * The following configure only for boot kernel

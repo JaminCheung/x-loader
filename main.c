@@ -18,9 +18,21 @@
 
 #include <common.h>
 
+#ifdef CONFIG_BOOT_MMC
+uint32_t cpu_freq = CONFIG_APLL_FREQ;
+#else
+uint32_t cpu_freq = CONFIG_EXTAL_FREQ;
+#endif
+
 __attribute__((weak, alias("board_init"))) void board_init(void) {}
+__attribute__((weak, alias("board_early_init"))) void board_early_init(void) {}
 
 void x_loader_main(void) {
+    /*
+     * Init board early
+     */
+    board_early_init();
+
     /*
      * Init uart
      */
