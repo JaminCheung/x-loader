@@ -18,7 +18,7 @@
 
 #include <common.h>
 
-void boar_early_init(void) {
+void board_early_init(void) {
     gpio_set_func(GPIO_PC(30), GPIO_FUNC_1);
     gpio_set_func(GPIO_PC(31), GPIO_FUNC_1);
 }
