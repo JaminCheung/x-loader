@@ -160,7 +160,8 @@ OBJS-y := start.o                                                              \
           drivers/uart.o                                                       \
           drivers/clk.o                                                        \
           drivers/gpio.o                                                       \
-          drivers/i2c.o
+          drivers/i2c.o                                                        \
+          drivers/rtc.o
 
 OBJS-$(CONFIG_BOOT_KERNEL) += boot_sel.o
 OBJS-$(CONFIG_EFUSE) += drivers/efuse.o

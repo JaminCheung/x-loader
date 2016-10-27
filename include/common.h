@@ -36,6 +36,7 @@
 #include <i2c.h>
 #include <efuse.h>
 #include <pmon.h>
+#include <rtc.h>
 #endif
 
 /*

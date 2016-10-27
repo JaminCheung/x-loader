@@ -72,6 +72,11 @@
 #endif /* CONFIG_BOOT_SPI_NAND */
 
 /*
+ * RTC clk sel
+ */
+#undef CONFIG_RTCCLK_SEL
+
+/*
  * WIFI MAC
  */
 #undef CONFIG_GET_WIFI_MAC
