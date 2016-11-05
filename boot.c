@@ -87,7 +87,7 @@ static int load_init(void) {
 
 #endif /* CONFIG_BOOT_SPI_NOR */
 
-    return 0;
+    return -1;
 }
 
 static int load(uint32_t offset, uint32_t length, uint32_t load_addr) {
@@ -118,7 +118,7 @@ static int load(uint32_t offset, uint32_t length, uint32_t load_addr) {
 
 #endif /* CONFIG_BOOT_SPI_NOR */
 
-    return 0;
+    return -1;
 }
 
 static int pre_handle_before_jump(void* arg) {
