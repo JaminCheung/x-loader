@@ -54,9 +54,11 @@
 
 #define KERNEL_ARGS_INIT        "init=/linuxrc "
 
+#ifdef CONFIG_RECOVERY
 #define CONFIG_RECOVERY_BOOT_KEY            -1
 #define CONFIG_RECOVERY_BOOT_KEY_ENLEVEL    0
 #define CONFIG_RECOVERY_ARGS KERNEL_ARGS_COMMON
+#endif /* CONFIG_RECOVERY */
 
 #endif /* CONFIG_BOOT_KERNEL */
 
@@ -65,7 +67,11 @@
  */
 #ifdef CONFIG_BOOT_SPI_NAND
 
+#ifdef CONFIG_RECOVERY
+#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "ubi.mtd=4 root=ubi0:rootfs ubi.mtd=5 rootfstype=ubifs rw"
+#else
 #define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "ubi.mtd=3 root=ubi0:rootfs ubi.mtd=4 rootfstype=ubifs rw"
+#endif /* CONFIG_RECOVERY */
 
 /*
  * unit(byte)

@@ -59,10 +59,18 @@ endif
 BOARD_CFLAGS :=
 
 #
-#For compiling efuse
+# For efuse
 #
 CONFIG_EFUSE := n
 
 ifeq ($(CONFIG_EFUSE), y)
 BOARD_CFLAGS += -DCONFIG_EFUSE
+endif
+
+#
+# For recovery
+#
+CONFIG_RECOVERY := n
+ifeq ($(CONFIG_RECOVERY), y)
+BOARD_CFLAGS += -DCONFIG_RECOVERY
 endif

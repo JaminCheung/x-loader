@@ -18,6 +18,8 @@
 
 #include <common.h>
 
+#ifdef CONFIG_RECOVERY
+
 #if (CONFIG_RECOVERY_BOOT_KEY > 0)
 static int get_key_level(unsigned pin)
 {
@@ -60,9 +62,10 @@ static int get_signature(const int signature)
         return KEY_UNPRESS;
     }
 }
+#endif /* CONFIG_RECOVERY */
 
-int get_boot_sel(void)
-{
+int get_boot_sel(void) {
+#ifdef CONFIG_RECOVERY
     /* Recovery signature */
     if (get_signature(RECOVERY_SIGNATURE))
         return RECOVERY_BOOT;
@@ -72,6 +75,8 @@ int get_boot_sel(void)
     if (get_key_status(CONFIG_RECOVERY_BOOT_KEY, CONFIG_RECOVERY_BOOT_KEY_ENLEVEL))
         return RECOVERY_BOOT;
 #endif
+
+#endif /* CONFIG_RECOVERY */
 
     return NORMAL_BOOT;
 }

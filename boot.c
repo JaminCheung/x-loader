@@ -200,9 +200,12 @@ void boot_next_stage(void) {
     int boot_sel = -1;
 
     if (get_boot_sel() == RECOVERY_BOOT) {
+
+#ifdef CONFIG_RECOVERY
         uart_puts("Mod: Recovery.\n");
         boot_sel = RECOVERY_BOOT;
         argv = (uint32_t) CONFIG_RECOVERY_ARGS;
+#endif /* CONFIG_RECOVERY  */
 
     } else {
         uart_puts("Mod: Normal.\n");
@@ -211,7 +214,10 @@ void boot_next_stage(void) {
     }
 
     if (boot_sel == RECOVERY_BOOT) {
+
+ #ifdef CONFIG_RECOVERY
         error = load(CONFIG_RECOVERY_OFFSET, CONFIG_RECOVERY_LENGTH, load_addr);
+#endif /* CONFIG_RECOVERY */
 
     } else {
 
