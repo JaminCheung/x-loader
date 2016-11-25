@@ -18,8 +18,6 @@
 
 #include <common.h>
 
-#define  CONFIG_SFC_FREQ    (150 * 1000 * 1000)
-
 #define src_readl(offset) readl(SFC_BASE + offset)
 #define sfc_writel(value, offset) writel(value, SFC_BASE + offset);
 

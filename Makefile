@@ -325,20 +325,8 @@ halley2_mmc_config: unconfig
 yak_nor_config: unconfig
 	@./mkconfig $(@:_config) yak nor
 
-yak_nand_config: unconfig
-	@./mkconfig $(@:_config) yak nand
-
-yak_mmc_config: unconfig
-	@./mkconfig $(@:_config) yak mmc
-
-speaker_nor_config: unconfig
-	@./mkconfig $(@:_config) speaker nor
-
 speaker_nand_config: unconfig
 	@./mkconfig $(@:_config) speaker nand
-
-speaker_mmc_config: unconfig
-	@./mkconfig $(@:_config) speaker mmc
 
 #
 # Put your board's config here

@@ -54,6 +54,8 @@
  */
 #ifdef CONFIG_BOOT_SFC
 
+#define  CONFIG_SFC_FREQ    (150 * 1000 * 1000)
+
 #undef CONFIG_SPI_STANDARD
 
 #endif /* CONFIG_BOOT_SFC */
