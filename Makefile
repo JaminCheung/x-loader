@@ -328,6 +328,9 @@ yak_nor_config: unconfig
 speaker_nand_config: unconfig
 	@./mkconfig $(@:_config) speaker nand
 
+media_nor_config: unconfig
+	@./mkconfig $(@:_config) media nor
+
 #
 # Put your board's config here
 #
