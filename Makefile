@@ -331,6 +331,8 @@ speaker_nand_config: unconfig
 media_nor_config: unconfig
 	@./mkconfig $(@:_config) media nor
 
+qrcode_nor_config: unconfig
+	@./mkconfig $(@:_config) qrcode nor
 #
 # Put your board's config here
 #
