@@ -23,62 +23,57 @@ struct spi_mode_peer spi_mode_local[] = {
     [SPI_MODE_QUAD] = {TRAN_SPI_QUAD, CMD_QUAD_READ},
 };
 
-void jz_sfc_reset_address_mode(void)
-{
-    unsigned int  buf = 0;
+void jz_sfc_reset_address_mode(void) {
+    uint32_t buf = 0;
     struct jz_sfc sfc;
 
-    SFC_SEND_COMMAND(&sfc,CMD_WREN,0,0,0,0,0,1);
-    SFC_SEND_COMMAND(&sfc,CMD_EX4B,0,0,0,0,0,1);
-    SFC_SEND_COMMAND(&sfc,CMD_RDSR,1,0,0,0,1,0);
+    SFC_SEND_COMMAND(&sfc, CMD_WREN, 0, 0, 0, 0, 0, 1);
+    SFC_SEND_COMMAND(&sfc, CMD_EX4B, 0, 0, 0, 0, 0, 1);
+    SFC_SEND_COMMAND(&sfc, CMD_RDSR, 1, 0, 0, 0, 1, 0);
 
     sfc_read_data(&buf, 1);
     while(buf & CMD_SR_WIP) {
-        SFC_SEND_COMMAND(&sfc,CMD_RDSR,1,0,0,0,1,0);
+        SFC_SEND_COMMAND(&sfc, CMD_RDSR, 1, 0, 0, 0, 1, 0);
         sfc_read_data(&buf, 1);
     }
 }
 
-#ifndef CONFIG_SPI_STANDARD
-void spinor_set_quad_mode(void)
-{
-    unsigned int buf;
-    unsigned int tmp;
+void spinor_set_quad_mode(void) {
+    uint32_t buf;
+    uint32_t tmp;
     int i = 10;
     struct jz_sfc sfc;
 
-    SFC_SEND_COMMAND(&sfc,CMD_WREN,0,0,0,0,0,1);
-    SFC_SEND_COMMAND(&sfc,CMD_WRSR_1,1,0,0,0,1,1);
+    SFC_SEND_COMMAND(&sfc, CMD_WREN, 0, 0, 0, 0, 0, 1);
+    SFC_SEND_COMMAND(&sfc, CMD_WRSR_1, 1, 0, 0, 0, 1, 1);
     tmp = 0x02;
-    sfc_write_data(&tmp,1);
+    sfc_write_data(&tmp, 1);
 
-    SFC_SEND_COMMAND(&sfc,CMD_RDSR,1,0,0,0,1,0);
+    SFC_SEND_COMMAND(&sfc, CMD_RDSR, 1, 0, 0, 0, 1, 0);
     sfc_read_data(&tmp, 1);
     while(tmp & CMD_SR_WIP) {
-        SFC_SEND_COMMAND(&sfc,CMD_RDSR,1,0,0,0,1,0);
+        SFC_SEND_COMMAND(&sfc, CMD_RDSR, 1, 0, 0, 0, 1, 0);
         sfc_read_data(&tmp, 1);
     }
 
-    SFC_SEND_COMMAND(&sfc,CMD_RDSR_1,1,0,0,0,1,0);
+    SFC_SEND_COMMAND(&sfc, CMD_RDSR_1, 1, 0, 0, 0, 1, 0);
     sfc_read_data(&buf, 1);
-    while(!(buf & 0x2)&&((i--) > 0)) {
-        SFC_SEND_COMMAND(&sfc,CMD_RDSR_1,1,0,0,0,1,0);
+    while(!(buf & 0x2) && ((i--) > 0)) {
+        SFC_SEND_COMMAND(&sfc, CMD_RDSR_1, 1, 0, 0, 0, 1, 0);
         sfc_read_data(&buf, 1);
     }
 }
-#endif
 
-int spinor_read(uint32_t offset, uint32_t len, uint32_t data)
-{
+int spinor_read(uint32_t offset, uint32_t len, uint32_t data) {
     int addr_len = 3;
     struct jz_sfc sfc;
     int ret;
 
 #ifndef CONFIG_SPI_STANDARD
     int dummy_byte = 8;
-    SFC_SEND_COMMAND(&sfc,SPI_MODE_QUAD,len,offset,addr_len,dummy_byte,1,0);
+    SFC_SEND_COMMAND(&sfc, SPI_MODE_QUAD, len, offset, addr_len, dummy_byte, 1, 0);
 #else
-    SFC_SEND_COMMAND(&sfc,SPI_MODE_STANDARD,len,offset,addr_len,0,1,0);
+    SFC_SEND_COMMAND(&sfc, SPI_MODE_STANDARD, len, offset, addr_len, 0, 1, 0);
 #endif
 
     ret = sfc_read_data((void *) data, len);
@@ -90,6 +85,7 @@ int spinor_read(uint32_t offset, uint32_t len, uint32_t data)
 
 int spinor_init(void) {
     jz_sfc_reset_address_mode();
+
 #ifndef CONFIG_SPI_STANDARD
     spinor_set_quad_mode();
 #endif

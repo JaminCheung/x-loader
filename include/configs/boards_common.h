@@ -54,7 +54,10 @@
  */
 #ifdef CONFIG_BOOT_SFC
 
-#define  CONFIG_SFC_FREQ    (150 * 1000 * 1000)
+/*
+ * SFC freq - unit(MHz)
+ */
+#define  CONFIG_SFC_FREQ            (150)
 
 #undef CONFIG_SPI_STANDARD
 
@@ -72,6 +75,15 @@
 #define CONFIG_NAND_PPB             (64)
 
 #endif /* CONFIG_BOOT_SPI_NAND */
+
+#ifdef CONFIG_BOOT_MMC
+
+/*
+ * MMC freq - unit(MHz)
+ */
+#define CONFIG_MSC_FREQ             (50)
+
+#endif /* CONFIG_BOOT_MMC */
 
 /*
  * RTC clk sel

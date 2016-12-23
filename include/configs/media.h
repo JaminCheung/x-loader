@@ -34,7 +34,7 @@
 
 #define CONFIG_APLL_FREQ        916
 #define CONFIG_DDR_FREQ_DIV     4
-#define CONFIG_SFC_FREQ    (120 * 1000 * 1000)
+#define CONFIG_SFC_FREQ         120
 
 /*
  * The following configure only for boot kernel
