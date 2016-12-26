@@ -286,10 +286,12 @@ $(TOOLSDIR)/uart_baudrate_lut: $(TOOLSDIR)/uart_baudrate_lut.c
 	strip $@
 	$@ > $(TOPDIR)/include/generated/uart_baudrate_reg_values.h
 
+ifeq ($(CONFIG_EFUSE), y)
 $(TOOLSDIR)/efuse_params_creator: $(TOOLSDIR)/efuse_params_creator.c
 	gcc -o $@ -D__HOST__ -I$(TOPDIR)/include $<
 	strip $@
 	$@ > $(TOPDIR)/include/generated/efuse_reg_values.h
+endif
 
 $(TIMESTAMP_FILE):
 	@LC_ALL=C date +'#define X_LOADER_DATE "%b %d %C%y"' > $@.tmp
