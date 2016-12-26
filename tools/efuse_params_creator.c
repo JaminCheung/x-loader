@@ -24,7 +24,6 @@
 #endif
 #include <stdio.h>
 
-
 struct efuse_cfg {
     unsigned int rd_adj;
     unsigned int wr_adj;

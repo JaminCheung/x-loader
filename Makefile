@@ -227,8 +227,13 @@ $(OUTDIR)/x-loader.bin: $(OUTDIR)/x-loader.elf
 	$(OBJCOPY) $(OBJCFLAGS) -O binary $< $@
 endif
 
+ifeq ($(CONFIG_EFUSE), y)
 $(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator $(TOOLSDIR)/uart_baudrate_lut $(TOOLSDIR)/efuse_params_creator $(OBJS) $(LIBS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ -Map $(OUTDIR)/x-loader.map
+else
+$(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator $(TOOLSDIR)/uart_baudrate_lut $(OBJS) $(LIBS)
+	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ -Map $(OUTDIR)/x-loader.map
+endif
 
 ifneq ($(CONFIG_BOOT_MMC), y)
 $(TOOLSDIR)/sfc_boot_checksum: $(TOOLSDIR)/sfc_boot_checksum.c
