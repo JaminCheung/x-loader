@@ -60,10 +60,10 @@ cat x-loader-xxx.bin u-boot.bin > xxx.bin
 boards/BOARD_NAME/board.c中board_init()用于在引导前对板子
 进行初始化，当然也可以没有
 
-如何使用efuse的读功能？
+如何修改Soc各时钟频率？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-打开boards/BOARD_NAME/board.mk, 修改CONFIG_EFUSE := y
-定义一个buf, 然后调用 efuse_read() 函数，重用编译
+include/configs/boards_common.h为默认值
+打开板极头文件BOARD.h，去定义默认值再重新定义期望值
 
 烧录什么文件？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝

@@ -64,42 +64,42 @@ static int efuse_read_data(void *buf, unsigned int addr, int length) {
     return word_num;
 }
 
-int efuse_init(void) {
+int efuse_read(void *buf, int seg_id, int length) {
+    int ret = 0;
     int val = 0;
+    int bits = length * 8;
+
+    if(buf == NULL) {
+        uart_puts("Error: buf pointer cannot be NULL\n");
+        return -1;
+    }
 
     /* set efuse configure resister */
     val = EFUCFG_RD_ADJ << 20 | EFUCFG_RD_STROBE << 16;
     efuse_writel(val, EFUSE_CFG);
 
-    return 0;
-}
-
-int efuse_read(void *buf, int seg_id, int length) {
-    int ret = 0;
-    int bits = length * 8;
-
-    if(buf == NULL) {
-        printf("Error: buf pointer cannot be NULL\n");
-        return -1;
-    }
-
     switch(seg_id) {
     case CHIP_ID:
-        if(bits > CHIP_ID_SIZE)
+        if(bits > CHIP_ID_SIZE) {
+            uart_puts("Chip id size error\n");
             return -1;
+        }
 
         ret = efuse_read_data(buf, CHIP_ID_ADDR, length);
         break;
 
     case USER_ID:
-        if(bits > USER_ID_SIZE)
+        if(bits > USER_ID_SIZE) {
+            uart_puts("User id size error\n");
             return -1;
+        }
 
         ret = efuse_read_data(buf, USER_ID_ADDR, length);
         break;
 
     default:
         printf("segment_id:%d not support read\n", seg_id);
+        return -1;
     }
 
     return ret;

@@ -37,6 +37,7 @@
 #include <efuse.h>
 #include <pmon.h>
 #include <rtc.h>
+#include <pmu.h>
 #endif
 
 /*

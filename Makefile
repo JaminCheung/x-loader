@@ -161,10 +161,10 @@ OBJS-y := start.o                                                              \
           drivers/clk.o                                                        \
           drivers/gpio.o                                                       \
           drivers/i2c.o                                                        \
-          drivers/rtc.o
-
+          drivers/rtc.o                                                        \
+          drivers/efuse.o                                                      \
+          drivers/pmu.o
 OBJS-$(CONFIG_BOOT_KERNEL) += boot_sel.o
-OBJS-$(CONFIG_EFUSE) += drivers/efuse.o
 
 OBJS-y += common/printf.o                                                      \
           common/common.o
@@ -227,13 +227,8 @@ $(OUTDIR)/x-loader.bin: $(OUTDIR)/x-loader.elf
 	$(OBJCOPY) $(OBJCFLAGS) -O binary $< $@
 endif
 
-ifeq ($(CONFIG_EFUSE), y)
 $(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator $(TOOLSDIR)/uart_baudrate_lut $(TOOLSDIR)/efuse_params_creator $(OBJS) $(LIBS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ -Map $(OUTDIR)/x-loader.map
-else
-$(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator $(TOOLSDIR)/uart_baudrate_lut $(OBJS) $(LIBS)
-	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ -Map $(OUTDIR)/x-loader.map
-endif
 
 ifneq ($(CONFIG_BOOT_MMC), y)
 $(TOOLSDIR)/sfc_boot_checksum: $(TOOLSDIR)/sfc_boot_checksum.c
@@ -286,12 +281,10 @@ $(TOOLSDIR)/uart_baudrate_lut: $(TOOLSDIR)/uart_baudrate_lut.c
 	strip $@
 	$@ > $(TOPDIR)/include/generated/uart_baudrate_reg_values.h
 
-ifeq ($(CONFIG_EFUSE), y)
 $(TOOLSDIR)/efuse_params_creator: $(TOOLSDIR)/efuse_params_creator.c
 	gcc -o $@ -D__HOST__ -I$(TOPDIR)/include $<
 	strip $@
 	$@ > $(TOPDIR)/include/generated/efuse_reg_values.h
-endif
 
 $(TIMESTAMP_FILE):
 	@LC_ALL=C date +'#define X_LOADER_DATE "%b %d %C%y"' > $@.tmp

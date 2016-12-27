@@ -96,4 +96,9 @@
 #undef CONFIG_GET_WIFI_MAC
 #define KERNEL_ARGS_WIFI_MAC    "wifi_mac=xxxxxxxxxxxx "
 
+/*
+ * Recovery
+ */
+#undef CONFIG_RECOVERY
+
 #endif /* BOARDS_COMMON_H */

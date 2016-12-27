@@ -3,7 +3,7 @@
  *
  *  X1000 series bootloader for u-boot/rtos/linux
  *
- *  Wang Qiuwei <qiuwei.wang@ingenic.com>
+ *  Zhang YanMing <yanming.zhang@ingenic.com, jamincheung@126.com>
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under  the terms of the GNU General  Public License as published by the
@@ -16,15 +16,12 @@
  *
  */
 
+#include <common.h>
 
-#ifndef EFUSE_H
-#define EFUSE_H
+void pmu_init(void) {
 
-enum segment_id {
-    CHIP_ID = 0,
-    USER_ID = 2,
-};
+}
 
-int efuse_read(void *buf, int seg_id, int length);
+void pmu_set_voltage(void) {
 
-#endif /* EFUSE */
+}
