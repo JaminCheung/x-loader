@@ -68,7 +68,7 @@ int efuse_init(void) {
     int val = 0;
 
     /* set efuse configure resister */
-    val = EFUCFG_RD_ADJ << 20 | EFUCFG_RD_STROBE << 16 | EFUCFG_WR_ADJ << 12 | EFUCFG_WR_STROBE;
+    val = EFUCFG_RD_ADJ << 20 | EFUCFG_RD_STROBE << 16;
     efuse_writel(val, EFUSE_CFG);
 
     return 0;
@@ -78,8 +78,10 @@ int efuse_read(void *buf, int seg_id, int length) {
     int ret = 0;
     int bits = length * 8;
 
-    if(buf == NULL)
+    if(buf == NULL) {
+        printf("Error: buf pointer cannot be NULL\n");
         return -1;
+    }
 
     switch(seg_id) {
     case CHIP_ID:

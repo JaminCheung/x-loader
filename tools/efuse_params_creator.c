@@ -18,11 +18,13 @@
 
 #include <common.h>
 #include <string.h>
+#include <assert.h>
 
 #ifdef printf
 #undef printf
 #endif
 #include <stdio.h>
+
 
 struct efuse_cfg {
     unsigned int rd_adj;
@@ -42,29 +44,33 @@ static int efuse_adjust_cfg(struct efuse_cfg *cfg) {
     for(i = 0; i < 0x4; i++)
         if(((i + 1) * ns) > 2)
             break;
-    if(i == 0x4)
-        return -1;
 
+    assert((i < 0x4));
     cfg->rd_adj = cfg->wr_adj = i;
 
     for(i = 0; i < 0x8; i++)
         if(((cfg->rd_adj + i + 3) * ns) > 15)
             break;
-    if(i == 0x8)
-        return -1;
 
+    assert((i < 0x8));
     cfg->rd_strobe = i;
+
+    /*
+     * X-loader efuse driver not support to write efuse,
+     * so, don't need to calculate wr_adj and wr_strobe.
+     */
+#if 0
+    cfg->wr_adj = cfg->rd_adj;
 
     for(i = 0; i < 0x1f; i += 100) {
         val = (cfg->wr_adj + i + 916) * ns;
         if( val > 4 * 1000 && val < 6 *1000)
             break;
     }
-    if(i >= 0x1f)
-        return -1;
 
+    assert((i < 0x1f));
     cfg->wr_strobe = i;
-
+#endif
     return 0;
 }
 
