@@ -21,6 +21,11 @@
 void board_early_init(void) {
     gpio_set_func(GPIO_PC(30), GPIO_FUNC_1);
     gpio_set_func(GPIO_PC(31), GPIO_FUNC_1);
+
+    /*
+     * Speaker AMP shutdown
+     */
+    gpio_direction_output(GPIO_PB(9), 0);
 }
 
 void board_init(void) {
