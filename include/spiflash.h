@@ -106,8 +106,12 @@ int spinor_read(uint32_t src_addr, uint32_t count, uint32_t dst_addr);
 int spinand_init(void);
 int spinand_read(uint32_t src_addr, uint32_t count, uint32_t dst_addr);
 
+///////////////////upper layer logic depends on flash /////////////////
 #ifdef CONFIG_BEIJING_OTA
 int ota_load(uint32_t *argv, uint32_t dst_addr);
 #endif
 
+#ifdef CONFIG_RECOVERY
+int is_recovery_update_failed(void);
+#endif
 #endif /* SPIFLASH_H */

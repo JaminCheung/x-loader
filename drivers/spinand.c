@@ -167,3 +167,22 @@ int spinand_read(uint32_t src_addr, uint32_t count, uint32_t dst_addr) {
 
     return 0;
 }
+
+#ifdef CONFIG_RECOVERY
+int is_recovery_update_failed(void) {
+    uint32_t offset = RECOVERY_UPDATE_FLAG_OFFSET;
+    uint32_t length = CONFIG_NAND_BPP;
+    uint32_t buffer = 0x80f00000;
+    uint32_t flag = 0;
+
+    if (spinand_read(offset, length, (uint32_t)buffer) != 0) {
+        return -1;
+    }
+    flag = *(uint32_t*)(buffer);
+    if (flag == RECOVERY_UPDATE_FLAG_UPDATING)
+        return 1;
+
+    return 0;
+}
+
+#endif

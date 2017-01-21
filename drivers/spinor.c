@@ -139,3 +139,17 @@ int ota_load(unsigned int *argv, unsigned int dst_addr)
 	}
 }
 #endif
+
+#ifdef CONFIG_RECOVERY
+int is_recovery_update_failed(void) {
+    unsigned int update_flag = 0;
+    uint32_t offset = RECOVERY_UPDATE_FLAG_OFFSET;
+    uint32_t length = RECOVERY_UPDATE_FLAG_SIZE;
+    if (spinor_read(offset, length, (uint32_t)&update_flag) != 0) {
+        return -1;
+    }
+    if (update_flag == RECOVERY_UPDATE_FLAG_UPDATING)
+        return 1;
+    return 0;
+}
+#endif

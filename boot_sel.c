@@ -66,6 +66,12 @@ static int get_signature(const int signature)
 
 int get_boot_sel(void) {
 #ifdef CONFIG_RECOVERY
+    /* Recovery update flag check */
+#ifdef RECOVERY_UPDATE_FLAG_CHECK
+    if (is_recovery_update_failed() == 1) {
+        return RECOVERY_BOOT;
+    }
+#endif
     /* Recovery signature */
     if (get_signature(RECOVERY_SIGNATURE))
         return RECOVERY_BOOT;
