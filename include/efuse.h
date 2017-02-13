@@ -20,11 +20,24 @@
 #ifndef EFUSE_H
 #define EFUSE_H
 
-enum segment_id {
-    CHIP_ID = 0,
-    USER_ID = 2,
-};
+#define EFU_ROM_BASE  (0x200)
 
-int efuse_read(void *buf, int seg_id, int length);
+#define CHIP_ID_ADDR  (0x200)
+#define CHIP_ID_END   (0x20F)
+#define CHIP_ID_SIZE  (128)
+#define RN_ADDR       (0x210)
+#define RN_END        (0x21F)
+#define RN_SIZE       (128)
+#define CUT_ID_ADDR   (0x220)
+#define CUT_ID_END    (0x23D)
+#define CUT_ID_SIZE   (240)
+#define PTR_ADDR      (0x23E)
+#define PTR_END       (0x23F)
+#define PTR_SIZE      (16)
+
+#define efuse_readl(offset) readl(EFUSE_BASE + offset)
+#define efuse_writel(value, offset) writel(value, EFUSE_BASE + offset)
+
+int efuse_read(void *buf, uint32_t addr, int length);
 
 #endif /* EFUSE */

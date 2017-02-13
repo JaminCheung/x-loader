@@ -399,7 +399,7 @@ static void ddr_phy_init(unsigned int mode)
 void ddr_controller_init(void)
 {
     dwc_debug("DDR Controller init\n");
-// dsqiu
+//  dsqiu
 //  mdelay(1);
     ddr_writel(DDRC_CTRL_CKE | DDRC_CTRL_ALH, DDRC_CTRL);
     ddr_writel(0, DDRC_CTRL);
@@ -491,10 +491,6 @@ void lpddr_init(void) {
      */
     reset_controller();
 
-#ifdef CONFIG_DDR_AUTO_SELF_REFRESH
-    ddr_writel(0x0 ,DDRC_AUTOSR_EN);
-#endif
-
     /*
      * DDR configure
      * BL=4
@@ -543,11 +539,10 @@ void lpddr_init(void) {
 
     ddr_writel(ddr_readl(DDRC_STATUS) & ~DDRC_DSTATUS_MISS, DDRC_STATUS);
 
-#ifdef CONFIG_DDR_AUTO_SELF_REFRESH
     if(!bypass)
         ddr_writel(0 , DDRC_DLP);
-    ddr_writel(0x1 ,DDRC_AUTOSR_EN);
-#endif
+
+    ddr_writel(ddr_autosr, DDRC_AUTOSR_EN);
 
     dwc_debug("sdram init finished\n");
 }

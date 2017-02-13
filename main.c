@@ -38,6 +38,11 @@ void x_loader_main(void) {
      */
     uart_init();
 
+    /*
+     * check SOC id
+     */
+    check_socid();
+
     uart_puts("\n\nX-Loader Build: " X_LOADER_DATE " - " X_LOADER_TIME);
 
     /*

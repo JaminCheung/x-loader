@@ -17,6 +17,7 @@
  */
 
 #include <common.h>
+#include <efuse.h>
 #include <generated/efuse_reg_values.h>
 
 #define EFUSE_CTRL		0x0
@@ -24,36 +25,69 @@
 #define EFUSE_STATE		0x8
 #define EFUSE_DATA(n)   (0xC + (n)*4)
 
-#define EFU_ROM_BASE	0x200
-#define CHIP_ID_ADDR	(0x200)
-#define CHIP_ID_END	    (0x20F)
-#define CHIP_ID_SIZE	(128)
-#define USER_ID_ADDR	(0x220)
-#define USER_ID_END	    (0x23D)
-#define USER_ID_SIZE	(240)
+static int check_vaild(uint32_t addr, int length)
+{
+    uint32_t length_bits = length * 8;
 
-#define efuse_readl(offset) readl(EFUSE_BASE + offset)
-#define efuse_writel(value, offset) writel(value, EFUSE_BASE + offset)
+    if (addr >= CHIP_ID_ADDR && addr <= CHIP_ID_END) {
+        debug("chip id\n");
+        if (length_bits > CHIP_ID_SIZE) {
+            length_bits = CHIP_ID_SIZE;
+            goto error;
+        }
+    } else if ( addr >= RN_ADDR && addr <= RN_END) {
+        debug("random number\n");
+        if (length_bits > RN_SIZE) {
+            length_bits = RN_SIZE;
+            goto error;
+        }
+    } else if (addr >= CUT_ID_ADDR && addr <= CUT_ID_END) {
+        debug("customer id\n");
+        if (length_bits > CUT_ID_SIZE) {
+            length_bits = CUT_ID_SIZE;
+            goto error;
+        }
+    } else if (addr >= PTR_ADDR && addr <= PTR_END) {
+        debug("protect id\n");
+        if (length_bits > PTR_SIZE) {
+            length_bits = PTR_SIZE;
+            goto error;
+        }
+    } else {
+        printf("Err: invalid addr!\n");
+        return -1;
+    }
 
+    return 0;
+error:
+    printf("ERR: length max than %d bits\n", length_bits);
+    return -1;
+}
 
-static int efuse_read_data(void *buf, unsigned int addr, int length) {
+int efuse_read(void *buf, uint32_t addr, int length) {
     int i;
-    unsigned int *pbuf = buf;
-    unsigned int val, word_num;
+    uint32_t *pbuf = buf;
+    uint32_t val, word_num;
 
+    if (check_vaild(addr, length))
+        return -1;
+
+    addr -= EFU_ROM_BASE;
     word_num = (length + 3) / 4;
+
+    /* set efuse configure resister */
+    val = EFUCFG_RD_ADJ << 20 | EFUCFG_RD_STROBE << 16;
+    efuse_writel(val, EFUSE_CFG);
 
     /* clear read done status */
     efuse_writel(0, EFUSE_STATE);
 
-    /*indicat addr and length */
-    val = addr << 21 | length << 16;
-    /* enable read */
-    val |= 1;
+    /*indicat addr and length, enable read */
+    val = addr << 21 | length << 16 | 1;
     efuse_writel(val, EFUSE_CTRL);
 
     /* wait read done status */
-    while(!(efuse_readl(EFUSE_STATE) &1));
+    while(!(efuse_readl(EFUSE_STATE) & 1));
 
     for(i = 0; i < word_num; i ++) {
          val = efuse_readl(EFUSE_DATA(i));
@@ -62,45 +96,4 @@ static int efuse_read_data(void *buf, unsigned int addr, int length) {
     }
 
     return word_num;
-}
-
-int efuse_read(void *buf, int seg_id, int length) {
-    int ret = 0;
-    int val = 0;
-    int bits = length * 8;
-
-    if(buf == NULL) {
-        uart_puts("Error: buf pointer cannot be NULL\n");
-        return -1;
-    }
-
-    /* set efuse configure resister */
-    val = EFUCFG_RD_ADJ << 20 | EFUCFG_RD_STROBE << 16;
-    efuse_writel(val, EFUSE_CFG);
-
-    switch(seg_id) {
-    case CHIP_ID:
-        if(bits > CHIP_ID_SIZE) {
-            uart_puts("Chip id size error\n");
-            return -1;
-        }
-
-        ret = efuse_read_data(buf, CHIP_ID_ADDR, length);
-        break;
-
-    case USER_ID:
-        if(bits > USER_ID_SIZE) {
-            uart_puts("User id size error\n");
-            return -1;
-        }
-
-        ret = efuse_read_data(buf, USER_ID_ADDR, length);
-        break;
-
-    default:
-        printf("segment_id:%d not support read\n", seg_id);
-        return -1;
-    }
-
-    return ret;
 }

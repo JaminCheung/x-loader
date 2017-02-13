@@ -1528,5 +1528,9 @@ size_t strlen(const char * s);
 void dump_mem_content(uint32_t *src, uint32_t len);
 #endif
 
+#ifndef __ASSEMBLY__
+extern int ddr_autosr;
+int check_socid(void);
+#endif
 
 #endif /* COMMON_H */
