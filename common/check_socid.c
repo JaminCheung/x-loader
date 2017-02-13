@@ -59,7 +59,7 @@ int check_socid(void)
         break;
     default:
         socid = -1;
-        hang_reason("Check SOC id failed!\n");
+        uart_puts("Check SOC id failed!\n");
     }
 
     return socid;

@@ -31,36 +31,28 @@ static int check_vaild(uint32_t addr, int length)
 
     if (addr >= CHIP_ID_ADDR && addr <= CHIP_ID_END) {
         debug("chip id\n");
-        if (length_bits > CHIP_ID_SIZE) {
-            length_bits = CHIP_ID_SIZE;
+        if (length_bits > CHIP_ID_SIZE)
             goto error;
-        }
     } else if ( addr >= RN_ADDR && addr <= RN_END) {
         debug("random number\n");
-        if (length_bits > RN_SIZE) {
-            length_bits = RN_SIZE;
+        if (length_bits > RN_SIZE)
             goto error;
-        }
     } else if (addr >= CUT_ID_ADDR && addr <= CUT_ID_END) {
         debug("customer id\n");
-        if (length_bits > CUT_ID_SIZE) {
-            length_bits = CUT_ID_SIZE;
+        if (length_bits > CUT_ID_SIZE)
             goto error;
-        }
     } else if (addr >= PTR_ADDR && addr <= PTR_END) {
         debug("protect id\n");
-        if (length_bits > PTR_SIZE) {
+        if (length_bits > PTR_SIZE)
             length_bits = PTR_SIZE;
-            goto error;
-        }
     } else {
-        printf("Err: invalid addr!\n");
+        printf("Invalid addr\n");
         return -1;
     }
 
     return 0;
 error:
-    printf("ERR: length max than %d bits\n", length_bits);
+    printf("length too max\n");
     return -1;
 }
 
