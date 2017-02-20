@@ -19,6 +19,9 @@
 #ifndef BOARDS_COMMON_H
 #define BOARDS_COMMON_H
 
+#define __STR__(S)  #S
+#define STR(S)      __STR__(S)
+
 // ===========================================================
 // The following configure could be override at BOARD.h
 // ===========================================================

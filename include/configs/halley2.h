@@ -40,7 +40,7 @@
     #define KERNEL_ARGS_MEM         "mem=xxM@0x0 "
 #endif
 
-#define KERNEL_ARGS_CONSOLE     "no_console_suspend console=ttyS2,3000000n8 "
+#define KERNEL_ARGS_CONSOLE     "no_console_suspend console=ttyS"STR(CONFIG_CONSOLE_INDEX)","STR(CONFIG_CONSOLE_BAUDRATE)"n8 "
 #define KERNEL_ARGS_OTHERS      "lpj=5009408 ip=off "
 
 #ifdef CONFIG_GET_WIFI_MAC
