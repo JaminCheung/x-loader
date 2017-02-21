@@ -122,7 +122,9 @@ static int load(uint32_t offset, uint32_t length, uint32_t load_addr) {
 }
 
 static int pre_handle_before_jump(void* arg) {
+#ifdef CONFIG_PROBE_MEM_SIZE
     uint32_t mem_size = get_lpddr_size();
+#endif
 
 #if (defined CONFIG_BOOT_KERNEL)
 
@@ -147,7 +149,6 @@ static int pre_handle_before_jump(void* arg) {
     if (mem_str == NULL)
         return -1;
 
-
     switch (mem_size) {
     case SZ_64M:
         memcpy(mem_str + 4, "64", 2);
@@ -163,6 +164,8 @@ static int pre_handle_before_jump(void* arg) {
 #endif /* CONFIG_PROBE_MEM_SIZE */
 
 #elif (defined CONFIG_BOOT_UBOOT) /* CONFIG_BOOT_UBOOT */
+
+#ifdef CONFIG_PROBE_MEM_SIZE
     switch (mem_size) {
     case SZ_64M:
         writel(MEM_SIZE_FLAG_64M, arg);
@@ -175,6 +178,8 @@ static int pre_handle_before_jump(void* arg) {
     default:
         return -1;
     }
+#endif /* CONFIG_PROBE_MEM_SIZE */
+
 #endif
 
     return 0;
