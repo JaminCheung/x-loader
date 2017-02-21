@@ -74,6 +74,15 @@ extern uint32_t cpu_freq;
 #define SLEEP_LIB_TCSM    (0xb3422000)
 
 /*
+ * Memory size flag pass to u-boot
+ */
+#ifdef CONFIG_PROBE_MEM_SIZE
+#define CONFIG_MEM_SIZE_FLAG_ADDR (SLEEP_LIB_TCSM + SLEEP_LIB_LENGTH - 4)
+#define MEM_SIZE_FLAG_64M       0x6464
+#define MEM_SIZE_FLAG_32M       0x3232
+#endif
+
+/*
  * Cache defines
  */
 #define CONFIG_SYS_DCACHE_SIZE      16384

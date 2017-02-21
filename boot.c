@@ -122,8 +122,9 @@ static int load(uint32_t offset, uint32_t length, uint32_t load_addr) {
 }
 
 static int pre_handle_before_jump(void* arg) {
-    if (arg == NULL)
-        return 0;
+    uint32_t mem_size = get_lpddr_size();
+
+#if (defined CONFIG_BOOT_KERNEL)
 
 #ifdef CONFIG_GET_WIFI_MAC
     int error = 0;
@@ -137,17 +138,15 @@ static int pre_handle_before_jump(void* arg) {
     wifi_mac_str = strstr(arg, "wifi_mac");
     if (wifi_mac_str != NULL)
         memcpy(wifi_mac_str + 9, mac_addr, sizeof(mac_addr));
-#endif
+#endif /* CONFIG_GET_WIFI_MAC */
 
 #ifdef CONFIG_PROBE_MEM_SIZE
-    uint32_t mem_size = 0;
     char* mem_str = NULL;
 
     mem_str = strstr(arg, "mem");
     if (mem_str == NULL)
         return -1;
 
-    mem_size = get_lpddr_size();
 
     switch (mem_size) {
     case SZ_64M:
@@ -156,6 +155,21 @@ static int pre_handle_before_jump(void* arg) {
 
     case SZ_32M:
         memcpy(mem_str + 4, "32", 2);
+        break;
+
+    default:
+        return -1;
+    }
+#endif /* CONFIG_PROBE_MEM_SIZE */
+
+#elif (defined CONFIG_BOOT_UBOOT) /* CONFIG_BOOT_UBOOT */
+    switch (mem_size) {
+    case SZ_64M:
+        writel(MEM_SIZE_FLAG_64M, arg);
+        break;
+
+    case SZ_32M:
+        writel(MEM_SIZE_FLAG_32M, arg);
         break;
 
     default:
@@ -215,7 +229,7 @@ void boot_next_stage(void) {
 
     if (boot_sel == RECOVERY_BOOT) {
 
- #ifdef CONFIG_RECOVERY
+#ifdef CONFIG_RECOVERY
         error = load(CONFIG_RECOVERY_OFFSET, CONFIG_RECOVERY_LENGTH, load_addr);
 #endif /* CONFIG_RECOVERY */
 
@@ -233,10 +247,13 @@ void boot_next_stage(void) {
  * For boot u-boot
  */
 #elif (defined CONFIG_BOOT_UBOOT)
+    uart_puts("Mod: U-Boot.\n");
+
+    argv = (uint32_t) CONFIG_MEM_SIZE_FLAG_ADDR;
 
     error = load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
 
-#endif
+#endif /* CONFIG_BOOT_UBOOT */
 
     printf("Load address:  0x%x\n", load_addr);
     printf("Entry address: 0x%x\n", entry_addr);
