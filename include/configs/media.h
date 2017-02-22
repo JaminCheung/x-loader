@@ -41,16 +41,7 @@
  */
 #ifdef CONFIG_BOOT_KERNEL
 
-#ifndef CONFIG_PROBE_MEM_SIZE
-    #ifdef CONFIG_MEM_SIZE_64M
-        #define KERNEL_ARGS_MEM         "mem=64M@0x0 "
-    #else
-        #define KERNEL_ARGS_MEM         "mem=32M@0x0 "
-    #endif
-#else
-    #define KERNEL_ARGS_MEM         "mem=xxM@0x0 "
-#endif
-
+#define KERNEL_ARGS_MEM         "mem=xxM@0x0 "
 #define KERNEL_ARGS_CONSOLE     "no_console_suspend console=ttyS"STR(CONFIG_CONSOLE_INDEX)","STR(CONFIG_CONSOLE_BAUDRATE)"n8 "
 #define KERNEL_ARGS_OTHERS      "lpj=5009408 ip=off "
 

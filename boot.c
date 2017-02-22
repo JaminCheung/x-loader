@@ -122,8 +122,14 @@ static int load(uint32_t offset, uint32_t length, uint32_t load_addr) {
 }
 
 static int pre_handle_before_jump(void* arg) {
+    uint32_t mem_size;
+
 #ifdef CONFIG_PROBE_MEM_SIZE
-    uint32_t mem_size = get_lpddr_size();
+    mem_size = get_lpddr_size();
+#elif (defined CONFIG_MEM_SIZE_64M)
+    mem_size = SZ_64M;
+#else
+    mem_size = SZ_32M;
 #endif
 
 #if (defined CONFIG_BOOT_KERNEL)
@@ -142,7 +148,6 @@ static int pre_handle_before_jump(void* arg) {
         memcpy(wifi_mac_str + 9, mac_addr, sizeof(mac_addr));
 #endif /* CONFIG_GET_WIFI_MAC */
 
-#ifdef CONFIG_PROBE_MEM_SIZE
     char* mem_str = NULL;
 
     mem_str = strstr(arg, "mem");
@@ -161,11 +166,9 @@ static int pre_handle_before_jump(void* arg) {
     default:
         return -1;
     }
-#endif /* CONFIG_PROBE_MEM_SIZE */
 
 #elif (defined CONFIG_BOOT_UBOOT) /* CONFIG_BOOT_UBOOT */
 
-#ifdef CONFIG_PROBE_MEM_SIZE
     switch (mem_size) {
     case SZ_64M:
         writel(MEM_SIZE_FLAG_64M, arg);
@@ -178,8 +181,6 @@ static int pre_handle_before_jump(void* arg) {
     default:
         return -1;
     }
-#endif /* CONFIG_PROBE_MEM_SIZE */
-
 #endif
 
     return 0;
@@ -254,9 +255,7 @@ void boot_next_stage(void) {
 #elif (defined CONFIG_BOOT_UBOOT)
     uart_puts("Mod: U-Boot.\n");
 
-#ifdef CONFIG_PROBE_MEM_SIZE
     argv = (uint32_t) CONFIG_MEM_SIZE_FLAG_ADDR;
-#endif
 
     error = load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
 
