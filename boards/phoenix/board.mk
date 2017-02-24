@@ -17,6 +17,13 @@
  #
 
 #
+# Next stage:
+#    u-boot: 0
+#    kernel: 1
+#
+BOOT_NEXT_STAGE := 1
+
+#
 # For boot from mmc/sdcard
 #
 ifeq ($(BOOT_FROM), mmc)

@@ -22,10 +22,10 @@ bootloader - 用于加载引导u-boot/linux/rtos，支持spi nand/nor, mmc/sdcar
 
 如何编译？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-以phoenix板(spi nor)为例
+以halley2板(spi nor)为例
 
 第一步： 配置
-	make phoenix_nor_config
+	make halley2_nor_config
 
 第二步：编译
 	make
@@ -37,19 +37,19 @@ bootloader - 用于加载引导u-boot/linux/rtos，支持spi nand/nor, mmc/sdcar
 
 如何引到u-boot？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-打开config.mk，修改BOOT_NEXT_STAGE := 0，重新编译
+打开boards/BOARD_NAME/board.mk，修改BOOT_NEXT_STAGE := 0，重新编译
 将编译出的x-loader-xxx.bin和u-boot.bin cat在一起
 cat x-loader-xxx.bin u-boot.bin > xxx.bin
 
 如何引导zImage？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-打开config.mk，修改BOOT_NEXT_STAGE := 1
-打开boards/BOARD_NAME/board.mk，修改KERNEL_IN_XIMAGE := 0，重新编译
+打开boards/BOARD_NAME/board.mk，修改BOOT_NEXT_STAGE := 1，
+KERNEL_IN_XIMAGE := 0，重新编译
 
 如何引导xImage？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-打开config.mk，修改BOOT_NEXT_STAGE := 1
-打开boards/BOARD_NAME/board.mk，修改KERNEL_IN_XIMAGE := 1，重新编译
+打开boards/BOARD_NAME/board.mk，修改BOOT_NEXT_STAGE := 1，
+KERNEL_IN_XIMAGE := 1，重新编译
 
 板极配置文件在哪里？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
