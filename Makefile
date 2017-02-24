@@ -333,6 +333,10 @@ media_nor_config: unconfig
 
 qrcode_nor_config: unconfig
 	@./mkconfig $(@:_config) qrcode nor
+
+zlm60_nand_config: unconfig
+	@./mkconfig $(@:_config) zlm60 nand
+
 #
 # Put your board's config here
 #
