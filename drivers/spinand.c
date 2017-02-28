@@ -24,6 +24,7 @@ static uint8_t addr_len;
 
 struct spi_mode_peer spi_mode_local[] = {
     [SPI_MODE_STANDARD] = {TRAN_SPI_STANDARD, CMD_R_CACHE},
+    [SPI_MODE_STANDARD2] = {TRAN_SPI_STANDARD, CMD_FR_CACHE},
     [SPI_MODE_QUAD] = {TRAN_SPI_QUAD, CMD_FR_CACHE_QUAD},
 };
 
@@ -120,15 +121,18 @@ read_oob:
     }
 
     if (error) {
-        printf("ecc error at page%d\n", page);
+        printf("ecc error at page %d\n", page);
         return -1;
     }
 
     column = (column << 8) & 0xffffff00;
 #ifndef CONFIG_SPI_STANDARD
-    SFC_SEND_COMMAND(&sfc, SPI_MODE_QUAD, pagesize, column, addr_len, 0, 1, 0);
+        SFC_SEND_COMMAND(&sfc, SPI_MODE_QUAD, pagesize, column, addr_len, 0, 1, 0);
 #else
-    SFC_SEND_COMMAND(&sfc, SPI_MODE_STANDARD, pagesize, column, addr_len, 0, 1, 0);
+    if (addr_len == 4)
+        SFC_SEND_COMMAND(&sfc, SPI_MODE_STANDARD2, pagesize, column, addr_len, 0, 1, 0);
+    else
+        SFC_SEND_COMMAND(&sfc, SPI_MODE_STANDARD, pagesize, column, addr_len, 0, 1, 0);
 #endif
 
     sfc_read_data((uint32_t *)dst_addr, pagesize);

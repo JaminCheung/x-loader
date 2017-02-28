@@ -39,6 +39,7 @@ struct spi_mode_peer {
 
 enum {
     SPI_MODE_STANDARD,
+    SPI_MODE_STANDARD2,
     SPI_MODE_QUAD,
 };
 
