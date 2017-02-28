@@ -29,7 +29,7 @@ struct jz_sfc {
     unsigned char addr_len;
     unsigned char pollen;
     unsigned char phase;
-    unsigned char dummy_byte;
+    unsigned char dummy_bits;
 };
 
 struct spi_mode_peer {
@@ -190,7 +190,7 @@ enum {
         ((struct jz_sfc *)sfc)->addr = c;                                       \
         ((struct jz_sfc *)sfc)->addr_len = d;                                   \
         ((struct jz_sfc *)sfc)->addr_plus = 0;                                  \
-        ((struct jz_sfc *)sfc)->dummy_byte = e;                                 \
+        ((struct jz_sfc *)sfc)->dummy_bits = e;                                \
         ((struct jz_sfc *)sfc)->daten = f;                                      \
         SFC_MODE_GENERATE(sfc, a);                                              \
         sfc_send_cmd(sfc, g);                                                   \

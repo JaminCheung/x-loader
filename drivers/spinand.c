@@ -18,13 +18,52 @@
 
 #include <common.h>
 
+static uint8_t gd5fxfq4xc_series;
+static uint8_t gd5fxgq4xbxig_series;
+static uint8_t addr_len;
+
 struct spi_mode_peer spi_mode_local[] = {
     [SPI_MODE_STANDARD] = {TRAN_SPI_STANDARD, CMD_R_CACHE},
     [SPI_MODE_QUAD] = {TRAN_SPI_QUAD, CMD_FR_CACHE_QUAD},
 };
 
-struct spiflash_desc spinand_descs[] = {
-    {MANUFACTURE_WINBOND_ID, {FEATURE_REG_FEATURE1, BITS_BUF_EN, VALUE_SET}},
+struct special_spiflash_desc spinand_descs[] = {
+    {
+            WINBOND_VID,
+            WINBOND_PID0,
+            WINBOND_PID1,
+            {
+                    FEATURE_REG_FEATURE1,
+                    BITS_BUF_EN,
+                    VALUE_SET
+            }
+    },
+
+    /* ======================== GD5FxGQ4xC ======================= */
+    {
+            GIGADEVICE_VID,
+            GD5F1GQ4UC_PID0,
+            GD5FxGQ4xC_PID1,
+    },
+
+    {
+            GIGADEVICE_VID,
+            GD5F2GQ4UC_PID0,
+            GD5FxGQ4xC_PID1,
+    },
+
+    {
+            GIGADEVICE_VID,
+            GD5F1GQ4RC_PID0,
+            GD5FxGQ4xC_PID1,
+    },
+
+    {
+            GIGADEVICE_VID,
+            GD5F2GQ4RC_PID0,
+            GD5FxGQ4xC_PID1,
+    },
+    /* ====================== GD5FxGQ4xC end ===================== */
 };
 
 static inline int spinand_bad_block_check(uint32_t len, uint8_t *buf) {
@@ -50,6 +89,7 @@ static int spinand_read_page(uint32_t page, uint8_t *dst_addr,
     int column = 0;
     int oob_flag = 0;
     struct jz_sfc sfc;
+    uint8_t error = 0;
 
 read_oob:
     if (oob_flag) {
@@ -67,16 +107,28 @@ read_oob:
         sfc_read_data(&read_buf, 1);
     }
 
-    if(read_buf & 0x20) {
+    if (gd5fxgq4xbxig_series) {
+        if ((read_buf >> 4) == 0x02)
+            error = 1;
+
+    } else if (gd5fxfq4xc_series){
+        if ((read_buf >> 4) == 0x07)
+            error = 1;
+    } else {
+        if(read_buf & 0x20)
+            error = 1;
+    }
+
+    if (error) {
         printf("ecc error at page%d\n", page);
         return -1;
     }
 
     column = (column << 8) & 0xffffff00;
 #ifndef CONFIG_SPI_STANDARD
-    SFC_SEND_COMMAND(&sfc, SPI_MODE_QUAD, pagesize, column, 3, 0, 1, 0);
+    SFC_SEND_COMMAND(&sfc, SPI_MODE_QUAD, pagesize, column, addr_len, 0, 1, 0);
 #else
-    SFC_SEND_COMMAND(&sfc, SPI_MODE_STANDARD, pagesize, column, 3, 0, 1, 0);
+    SFC_SEND_COMMAND(&sfc, SPI_MODE_STANDARD, pagesize, column, addr_len, 0, 1, 0);
 #endif
 
     sfc_read_data((uint32_t *)dst_addr, pagesize);
@@ -93,20 +145,22 @@ read_oob:
     return 0;
 }
 
-static void spinand_dev_special_init(struct jz_sfc *sfc, uint32_t id) {
+static void spinand_dev_special_init(struct jz_sfc *sfc, uint32_t vid) {
     struct spiflash_register *regs;
     uint32_t x = 0;
 
     for (int i = 0; i < ARRAY_SIZE(spinand_descs); i++) {
-        if (id == spinand_descs[i].id) {
-            regs = &spinand_descs[i].regs;
-            SFC_SEND_COMMAND(sfc, CMD_GET_FEATURE, 1, regs->addr, 1, 0, 1, 0);
-            sfc_read_data(&x, 1);
-            OPERAND_CONTROL(regs->action, regs->val, x);
-            SFC_SEND_COMMAND(sfc, CMD_SET_FEATURE, 1, regs->addr, 1, 0, 1, 1);
-            sfc_write_data(&x, 1);
-            SFC_SEND_COMMAND(sfc, CMD_GET_FEATURE, 1, regs->addr, 1, 0, 1, 0);
-            sfc_read_data(&x, 1);
+        if (vid == spinand_descs[i].vid) {
+            if ((uint8_t *)&spinand_descs[i].regs != NULL) {
+                regs = &spinand_descs[i].regs;
+                SFC_SEND_COMMAND(sfc, CMD_GET_FEATURE, 1, regs->addr, 1, 0, 1, 0);
+                sfc_read_data(&x, 1);
+                OPERAND_CONTROL(regs->action, regs->val, x);
+                SFC_SEND_COMMAND(sfc, CMD_SET_FEATURE, 1, regs->addr, 1, 0, 1, 1);
+                sfc_write_data(&x, 1);
+                SFC_SEND_COMMAND(sfc, CMD_GET_FEATURE, 1, regs->addr, 1, 0, 1, 0);
+                sfc_read_data(&x, 1);
+            }
         }
     }
 }
@@ -114,11 +168,40 @@ static void spinand_dev_special_init(struct jz_sfc *sfc, uint32_t id) {
 int spinand_init(void) {
     uint8_t id[4];
     uint32_t x;
+    uint8_t i;
     struct jz_sfc sfc;
 
-    /* get id */
-    SFC_SEND_COMMAND(&sfc, CMD_RDID, 2, 0, 1, 0, 1, 0);
-    sfc_read_data((uint32_t *)id, 2);
+    /*
+     * Read vid, pid0, pid1
+     *
+     * cmd-->vid-->pid0-->pid1
+     */
+    SFC_SEND_COMMAND(&sfc, CMD_RDID, 3, 0, 0, 0, 1, 0);
+    sfc_read_data((uint32_t *)id, 3);
+
+    for (i = 0; i < ARRAY_SIZE(spinand_descs); i++) {
+        if (spinand_descs[i].vid == id[0] &&
+                spinand_descs[i].pid0 == id[1] &&
+                spinand_descs[i].pid1 == id[2])
+            break;
+    }
+
+    if (i == ARRAY_SIZE(spinand_descs)) {
+        addr_len = 3;
+        /*
+         * cmd-->addr-->pid0
+         */
+        SFC_SEND_COMMAND(&sfc, CMD_RDID, 2, 0, 1, 0, 1, 0);
+        sfc_read_data((uint32_t *)id, 2);
+        if (id[0] == GIGADEVICE_VID)
+            gd5fxgq4xbxig_series = 1;
+    } else {
+        addr_len = 4;
+        if (id[0] == GIGADEVICE_VID)
+            gd5fxfq4xc_series = 1;
+    }
+
+    debug("vid=0x%x, pid0=0x%x, pid1=0x%x\n", id[0], id[1], id[2]);
 
     /* disable write protect */
     x = 0;

@@ -30,7 +30,7 @@ inline void sfc_set_mode(uint32_t channel, uint32_t value) {
     sfc_writel(tmp, SFC_TRAN_CONF(channel));
 }
 
-inline void sfc_dev_addr_dummy_bytes(uint32_t channel, uint32_t value) {
+inline void sfc_dev_addr_dummy_bits(uint32_t channel, uint32_t value) {
     uint32_t tmp;
 
     tmp = src_readl(SFC_TRAN_CONF(channel));
@@ -121,7 +121,7 @@ inline void sfc_set_transfer(struct jz_sfc *sfc, uint32_t dir) {
     sfc_write_cmd(0, sfc->cmd);
     sfc_dev_addr(0, sfc->addr);
     sfc_dev_addr_plus(0, sfc->addr_plus);
-    sfc_dev_addr_dummy_bytes(0, sfc->dummy_byte);
+    sfc_dev_addr_dummy_bits(0, sfc->dummy_bits);
     sfc_set_mode(0, sfc->sfc_mode);
 }
 
@@ -242,7 +242,7 @@ void sfc_init(void) {
     sfc_writel(tmp, SFC_DEV_CONF);
 
     for (int i = 0; i < 6; i++)
-        sfc_writel((src_readl(SFC_TRAN_CONF(i))& (~(TRAN_MODE_MSK | FMAT))),
+        sfc_writel((src_readl(SFC_TRAN_CONF(i)) & (~(TRAN_MODE_MSK | FMAT))),
                 SFC_TRAN_CONF(i));
 
     sfc_writel((CLR_END | CLR_TREQ | CLR_RREQ | CLR_OVER | CLR_UNDER),
