@@ -337,6 +337,9 @@ qrcode_nor_config: unconfig
 zlm60_nand_config: unconfig
 	@./mkconfig $(@:_config) zlm60 nand
 
+skyworth_nor_config: unconfig
+	@./mkconfig $(@:_config) skyworth nor
+
 #
 # Put your board's config here
 #
