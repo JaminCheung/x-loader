@@ -28,43 +28,24 @@ struct spi_mode_peer spi_mode_local[] = {
     [SPI_MODE_QUAD] = {TRAN_SPI_QUAD, CMD_FR_CACHE_QUAD},
 };
 
+struct special_spiflash_id spiflash_id[] = {
+    /* ======================== GD5FxGQ4xC ======================= */
+    { GIGADEVICE_VID, GD5F1GQ4UC_PID },
+    { GIGADEVICE_VID, GD5F2GQ4UC_PID },
+    { GIGADEVICE_VID, GD5F1GQ4RC_PID },
+    { GIGADEVICE_VID, GD5F2GQ4RC_PID },
+    /* ====================== GD5FxGQ4xC end ===================== */
+};
+
 struct special_spiflash_desc spinand_descs[] = {
     {
             WINBOND_VID,
-            WINBOND_PID0,
-            WINBOND_PID1,
             {
                     FEATURE_REG_FEATURE1,
                     BITS_BUF_EN,
                     VALUE_SET
             }
     },
-
-    /* ======================== GD5FxGQ4xC ======================= */
-    {
-            GIGADEVICE_VID,
-            GD5F1GQ4UC_PID0,
-            GD5FxGQ4xC_PID1,
-    },
-
-    {
-            GIGADEVICE_VID,
-            GD5F2GQ4UC_PID0,
-            GD5FxGQ4xC_PID1,
-    },
-
-    {
-            GIGADEVICE_VID,
-            GD5F1GQ4RC_PID0,
-            GD5FxGQ4xC_PID1,
-    },
-
-    {
-            GIGADEVICE_VID,
-            GD5F2GQ4RC_PID0,
-            GD5FxGQ4xC_PID1,
-    },
-    /* ====================== GD5FxGQ4xC end ===================== */
 };
 
 static inline int spinand_bad_block_check(uint32_t len, uint8_t *buf) {
@@ -155,57 +136,85 @@ static void spinand_dev_special_init(struct jz_sfc *sfc, uint32_t vid) {
 
     for (int i = 0; i < ARRAY_SIZE(spinand_descs); i++) {
         if (vid == spinand_descs[i].vid) {
-            if ((uint8_t *)&spinand_descs[i].regs != NULL) {
-                regs = &spinand_descs[i].regs;
-                SFC_SEND_COMMAND(sfc, CMD_GET_FEATURE, 1, regs->addr, 1, 0, 1, 0);
-                sfc_read_data(&x, 1);
-                OPERAND_CONTROL(regs->action, regs->val, x);
-                SFC_SEND_COMMAND(sfc, CMD_SET_FEATURE, 1, regs->addr, 1, 0, 1, 1);
-                sfc_write_data(&x, 1);
-                SFC_SEND_COMMAND(sfc, CMD_GET_FEATURE, 1, regs->addr, 1, 0, 1, 0);
-                sfc_read_data(&x, 1);
-            }
+            regs = &spinand_descs[i].regs;
+            SFC_SEND_COMMAND(sfc, CMD_GET_FEATURE, 1, regs->addr, 1, 0, 1, 0);
+            sfc_read_data(&x, 1);
+            OPERAND_CONTROL(regs->action, regs->val, x);
+            SFC_SEND_COMMAND(sfc, CMD_SET_FEATURE, 1, regs->addr, 1, 0, 1, 1);
+            sfc_write_data(&x, 1);
+            SFC_SEND_COMMAND(sfc, CMD_GET_FEATURE, 1, regs->addr, 1, 0, 1, 0);
+            sfc_read_data(&x, 1);
         }
     }
 }
 
-int spinand_init(void) {
-    uint8_t id[4];
-    uint32_t x;
+inline static uint8_t probe_id_list(uint8* id) {
     uint8_t i;
-    struct jz_sfc sfc;
 
-    /*
-     * Read vid, pid0, pid1
-     *
-     * cmd-->vid-->pid0-->pid1
-     */
-    SFC_SEND_COMMAND(&sfc, CMD_RDID, 3, 0, 0, 0, 1, 0);
-    sfc_read_data((uint32_t *)id, 3);
-
-    for (i = 0; i < ARRAY_SIZE(spinand_descs); i++) {
-        if (spinand_descs[i].vid == id[0] &&
-                spinand_descs[i].pid0 == id[1] &&
-                spinand_descs[i].pid1 == id[2])
+    for (i = 0; i < ARRAY_SIZE(spiflash_id); i++) {
+        if (spiflash_id[i].vid == id[0] &&
+                spiflash_id[i].pid == id[1])
             break;
     }
 
-    if (i == ARRAY_SIZE(spinand_descs)) {
-        addr_len = 3;
+    if (i == ARRAY_SIZE(spiflash_id))
+        return 0;
+
+    return 1;
+}
+
+static void spinand_probe_id(struct jz_sfc* sfc, uint8* id) {
+    /*
+     * cmd-->addr-->pid
+     */
+    SFC_SEND_COMMAND(sfc, CMD_RDID, 2, 0, 1, 0, 1, 0);
+    sfc_read_data((uint32_t *)id, 2);
+
+    if (probe_id_list(id))
+        goto id_found_out;
+
+    else {
         /*
-         * cmd-->addr-->pid0
+         * cmd-->vid-->pid
          */
-        SFC_SEND_COMMAND(&sfc, CMD_RDID, 2, 0, 1, 0, 1, 0);
-        sfc_read_data((uint32_t *)id, 2);
-        if (id[0] == GIGADEVICE_VID)
-            gd5fxgq4xbxig_series = 1;
-    } else {
-        addr_len = 4;
-        if (id[0] == GIGADEVICE_VID)
-            gd5fxfq4xc_series = 1;
+        SFC_SEND_COMMAND(sfc, CMD_RDID, 3, 0, 0, 0, 1, 0);
+        sfc_read_data((uint32_t *)id, 3);
+
+        if (probe_id_list(id))
+            goto id_found_out;
+
+        else {
+            /*
+             * cmd-->addr-->pid
+             */
+            SFC_SEND_COMMAND(sfc, CMD_RDID, 2, 0, 1, 0, 1, 0);
+            sfc_read_data((uint32_t *)id, 2);
+
+            addr_len = 3;
+            if (id[0] == GIGADEVICE_VID)
+                gd5fxgq4xbxig_series = 1;
+
+            return;
+        }
     }
 
-    debug("vid=0x%x, pid0=0x%x, pid1=0x%x\n", id[0], id[1], id[2]);
+id_found_out:
+    addr_len = 4;
+    if (id[0] == GIGADEVICE_VID)
+        gd5fxfq4xc_series = 1;
+}
+
+int spinand_init(void) {
+    uint8_t id[4] = {0, 0, 0, 0};
+    uint32_t x;
+    struct jz_sfc sfc;
+
+    /*
+     * Probe nand vid/pid
+     */
+    spinand_probe_id(&sfc, id);
+
+    debug("%d, VID=0x%x, PID=0x%x\n", __LINE__, id[0], id[1]);
 
     /* disable write protect */
     x = 0;

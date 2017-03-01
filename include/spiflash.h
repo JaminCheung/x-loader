@@ -82,11 +82,11 @@
 
 #define GIGADEVICE_VID          0xc8
 
-#define GD5F1GQ4UC_PID0         0xb1
-#define GD5F2GQ4UC_PID0         0xb2
-#define GD5F1GQ4RC_PID0         0xa1
-#define GD5F2GQ4RC_PID0         0xa2
-#define GD5FxGQ4xC_PID1         0x48
+#define GD5F1GQ4UC_PID          0xb1
+#define GD5F2GQ4UC_PID          0xb2
+#define GD5F1GQ4RC_PID          0xa1
+#define GD5F2GQ4RC_PID          0xa2
+//#define GD5FxGQ4xC_PID1         0x48
 
 #define BITS_BUF_EN                 (1 << 3)
 
@@ -108,10 +108,13 @@ struct spiflash_register {
     uint8_t action;
 };
 
+struct special_spiflash_id {
+    uint8_t vid;
+    uint8_t pid;
+};
+
 struct special_spiflash_desc {
     uint8_t vid;
-    uint8_t pid0;
-    uint8_t pid1;
     struct spiflash_register regs;
 };
 
