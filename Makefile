@@ -347,8 +347,7 @@ skyworth_nor_config: unconfig
 #===============================================================================
 
 clean:
-	rm -rf $(OUTDIR)/* \
-			$(OBJS) \
+	rm -rf	$(OBJS) \
 			$(TOOLSDIR)/sfc_boot_checksum \
 			$(TOOLSDIR)/ddr_params_creator \
 			$(TOOLSDIR)/uart_baudrate_lut \
