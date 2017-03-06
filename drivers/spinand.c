@@ -48,20 +48,21 @@ struct special_spiflash_desc spinand_descs[] = {
     },
 };
 
-static inline int spinand_bad_block_check(uint32_t len, uint8_t *buf) {
-    uint32_t bit0_cnt = 0;
-    uint16_t *check_buf = (uint16_t *) buf;
+static int spinand_bad_block_check(int len,unsigned char *buf)
+{
+    int i, j, bit0_cnt = 0;
+    unsigned char *check_buf = buf;
 
-    if(check_buf[0] != 0xff) {
-        for(int i = 0; i < len * 8; i++) {
-            if(!((check_buf[0] >> 1) & 0x1))
-                bit0_cnt++;
+    for(j = 0; j < len; j++){
+        if(check_buf[j] != 0xff){
+            for(i = 0; i < 8; i++){
+                if(!((check_buf[j] >> i) & 0x1))
+                    bit0_cnt++;
+            }
         }
     }
-
     if(bit0_cnt > 6 * len)
         return 1;
-
     return 0;
 }
 
@@ -72,6 +73,7 @@ static int spinand_read_page(uint32_t page, uint8_t *dst_addr,
     int oob_flag = 0;
     struct jz_sfc sfc;
     uint8_t error = 0;
+    uint8_t checklen = 1;
 
 read_oob:
     if (oob_flag) {
@@ -123,7 +125,10 @@ read_oob:
         goto read_oob;
 
     } else if (oob_flag) {
-        if (spinand_bad_block_check(2, (uint8_t *)&read_buf))
+        #if NAND_BUSWIDTH == NAND_BUSWIDTH_16
+            checklen = 2;
+        #endif
+        if (spinand_bad_block_check(checklen, (uint8_t *)&read_buf))
             return 1;
     }
 

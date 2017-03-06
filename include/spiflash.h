@@ -90,6 +90,10 @@
 
 #define BITS_BUF_EN                 (1 << 3)
 
+/* Buswidth is 16 bit */
+#define NAND_BUSWIDTH_16    0x00000002
+#define NAND_BUSWIDTH_8      0x00000001
+
 enum {
     VALUE_SET,
     VALUE_CLR,

@@ -77,6 +77,10 @@
  */
 #define CONFIG_NAND_PPB             (64)
 
+/*
+ * Nand - bus width
+ */
+#define NAND_BUSWIDTH          NAND_BUSWIDTH_8
 #endif /* CONFIG_BOOT_SPI_NAND */
 
 #ifdef CONFIG_BOOT_MMC
