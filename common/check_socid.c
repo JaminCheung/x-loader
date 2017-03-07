@@ -36,7 +36,6 @@ enum socid {
 
 int ddr_autosr = 0;
 
-
 int check_socid(void)
 {
     int socid;

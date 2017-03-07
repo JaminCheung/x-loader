@@ -17,11 +17,20 @@
  #
 
 #
+# Function:
+#	bootloader: 0
+#	burner: 1
+#
+FUNCTION := 0
+
+#
 # Next stage:
 #    u-boot: 0
 #    kernel: 1
 #
+ifeq ($(FUNCTION), 0)
 BOOT_NEXT_STAGE := 1
+endif
 
 #
 # For boot from mmc/sdcard

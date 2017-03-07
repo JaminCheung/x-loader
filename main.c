@@ -20,12 +20,42 @@
 
 #ifdef CONFIG_BOOT_MMC
 uint32_t cpu_freq = CONFIG_APLL_FREQ;
+
+#elif (defined CONFIG_BOOT_USB)
+/*
+ * Bootrom set apll freq for usb boot
+ */
+#if (CONFIG_EXTAL_FREQ == 24)
+uint32_t cpu_freq = 576;
+#elif (CONFIG_EXTAL_FREQ == 26)
+uint32_t cpu_freq = 624;
+#endif
+
 #else
 uint32_t cpu_freq = CONFIG_EXTAL_FREQ;
 #endif
 
 __attribute__((weak, alias("board_init"))) void board_init(void) {}
 __attribute__((weak, alias("board_early_init"))) void board_early_init(void) {}
+
+#ifdef CONFIG_BOOT_USB
+static void pass_params_to_burner(void) {
+    uint32_t mem_size;
+
+#ifdef CONFIG_PROBE_MEM_SIZE
+    mem_size = get_lpddr_size();
+#elif (defined CONFIG_MEM_SIZE_64M)
+    mem_size = SZ_64M;
+#else
+    mem_size = SZ_32M;
+#endif
+
+    if (mem_size == SZ_64M)
+        writel(MEM_SIZE_FLAG_64M, CONFIG_MEM_SIZE_FLAG_ADDR);
+    else
+        writel(MEM_SIZE_FLAG_32M, CONFIG_MEM_SIZE_FLAG_ADDR);
+}
+#endif
 
 void x_loader_main(void) {
     /*
@@ -71,10 +101,22 @@ void x_loader_main(void) {
      */
     board_init();
 
+#ifndef CONFIG_BOOT_USB
     uart_puts("Going to boot next stage.\n");
 
     /*
      * Boot next stage(kernel/u-boot/rtos)
      */
     boot_next_stage();
+
+#else /* CONFIG_BOOT_USB */
+    pass_params_to_burner();
+
+    uart_puts("Going to start burner.\n");
+
+    /*
+     * Return to rom
+     */
+    return;
+#endif
 }

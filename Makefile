@@ -45,8 +45,10 @@ $(if $(OUTDIR),,$(error output directory "$(OUTDIR)" does not exist))
 TOOLSDIR := $(TOPDIR)/tools
 SLEEPLIB := $(TOPDIR)/sleep-lib/sleep_lib_tcsm_pad.bin
 
+ifeq ($(FUNCTION), 0)
 ifneq ($(SLEEPLIB), $(wildcard $(SLEEPLIB)))
 $(error Could not found sleep lib!)
+endif
 endif
 
 #
@@ -71,15 +73,18 @@ else
 $(error Please define BOARD first!)
 endif
 
+ifeq ($(FUNCTION), 0)
+CONFIG_BOOTLOADER := y
+
 ifeq ($(BOOT_NEXT_STAGE), 0)
 CONFIG_BOOT_UBOOT := y
-else
-ifeq ($(BOOT_NEXT_STAGE), 1)
+else ifeq ($(BOOT_NEXT_STAGE), 1)
 CONFIG_BOOT_KERNEL := y
 else
 $(error Boot next stage "$(BOOT_NEXT_STAGE)" has not support yet!)
 endif
-endif
+
+endif # FUNCTION := 0
 
 #
 # U-boot load & entry address
@@ -109,27 +114,35 @@ endif
 #
 # Configure flags
 #
+ifeq ($(CONFIG_BOOTLOADER), y)
 CFGFLAGS := -DCONFIG_BOOT_NEXT_STAGE_LOAD_ADDR=$(BOOT_NEXT_STAGE_LOAD_ADDR)    \
             -DCONFIG_BOOT_NEXT_STAGE_ENTRY_ADDR=$(BOOT_NEXT_STAGE_ENTRY_ADDR)
+endif
 
 ifeq ($(CONFIG_BOOT_KERNEL), y)
 CFGFLAGS += -DCONFIG_BOOT_KERNEL
-else
+else ifeq ($(CONFIG_BOOT_UBOOT), y)
 CFGFLAGS += -DCONFIG_BOOT_UBOOT
 endif
 
 ifdef BOOT_FROM
 	ifeq ($(BOOT_FROM), nor)
 		CFGFLAGS += -DCONFIG_BOOT_SPI_NOR -DCONFIG_BOOT_SFC
+		CONFIG_BOOT_SFC=y
 		CONFIG_BOOT_SPI_NOR=y
 	endif
 	ifeq ($(BOOT_FROM), nand)
 		CFGFLAGS += -DCONFIG_BOOT_SPI_NAND -DCONFIG_BOOT_SFC
+		CONFIG_BOOT_SFC=y
 		CONFIG_BOOT_SPI_NAND=y
 	endif
 	ifeq ($(BOOT_FROM), mmc)
 		CFGFLAGS += -DCONFIG_BOOT_MMC
 		CONFIG_BOOT_MMC=y
+	endif
+	ifeq ($(BOOT_FROM), usb)
+		CFGFLAGS += -DCONFIG_BOOT_USB
+		CONFIG_BOOT_USB=y
 	endif
 
 #
@@ -140,13 +153,19 @@ CFLAGS := -Os -g -G 0 -march=mips32r2 -mtune=mips32r2 -mabi=32 -fno-pic        \
           -I$(TOPDIR)/include -ffunction-sections -fdata-sections
 
 CHECKFLAGS := -Wall -Wuninitialized -Wstrict-prototypes -Wundef -Werror
-LDFLAGS := -nostdlib -T ldscripts/x-loader.lds -EL --gc-sections
+LDFLAGS := -nostdlib -EL --gc-sections
+ifeq ($(CONFIG_BOOTLOADER), y)
+LDFLAGS += -T ldscripts/x-loader.lds
+else
+LDFLAGS += -T ldscripts/x-loader-burner.lds
+endif
+
 OBJCFLAGS := --gap-fill=0xff --remove-section=.dynsym
 #DEBUGFLAGS := -DDEBUG
 override CFLAGS := $(CHECKFLAGS) $(DEBUGFLAGS) $(CFLAGS) $(CFGFLAGS) $(BOARD_CFLAGS)
 
 else
-$(error Please define system boot method(nor/nand/mmc)!)
+$(error Please define system boot method(nor/nand/mmc/usb)!)
 endif
 
 #
@@ -154,7 +173,6 @@ endif
 #
 OBJS-y := start.o                                                              \
           main.o                                                               \
-          boot.o                                                               \
           drivers/lpddr.o                                                      \
           drivers/uart.o                                                       \
           drivers/clk.o                                                        \
@@ -163,6 +181,7 @@ OBJS-y := start.o                                                              \
           drivers/rtc.o                                                        \
           drivers/efuse.o                                                      \
           drivers/pmu.o
+OBJS-$(CONFIG_BOOTLOADER) += boot.o
 OBJS-$(CONFIG_BOOT_KERNEL) += boot_sel.o
 
 OBJS-y += common/printf.o                                                      \
@@ -185,10 +204,12 @@ LIBS := $(addprefix $(TOPDIR)/, $(LIBS-y))
 #
 # Targets
 #
-ifneq ($(CONFIG_BOOT_MMC),y)
+ifeq ($(CONFIG_BOOT_SFC),y)
 TARGET := $(OUTDIR)/x-loader-pad-with-sleep-lib.bin
-else
+else ifeq ($(CONFIG_BOOT_MMC),y)
 TARGET := $(OUTDIR)/x-loader-pad-with-mbr-gpt-with-sleep-lib.bin
+else
+TARGET := $(OUTDIR)/spl_lpddr.bin
 endif
 
 %.o:%.c
@@ -218,23 +239,27 @@ $(OUTDIR)/x-loader-pad.bin: $(OUTDIR)/x-loader.bin
 	$(OBJDUMP) -D $(OUTDIR)/x-loader.elf > $(OUTDIR)/x-loader.elf.dump
 	$(OBJCOPY) $(OBJCFLAGS) --pad-to=16384 -I binary -O binary $< $@
 
-ifneq ($(CONFIG_BOOT_MMC),y)
+ifeq ($(CONFIG_BOOT_SFC),y)
 $(OUTDIR)/x-loader.bin: $(OUTDIR)/x-loader.elf $(TOOLSDIR)/sfc_boot_checksum
 	$(OBJCOPY) $(OBJCFLAGS) -O binary $< $@
 	$(TOOLSDIR)/sfc_boot_checksum $@
-else
+
+else ifeq ($(CONFIG_BOOT_MMC),y)
 $(OUTDIR)/x-loader.bin: $(OUTDIR)/x-loader.elf
+	$(OBJCOPY) $(OBJCFLAGS) -O binary $< $@
+
+else ifeq ($(CONFIG_BOOT_USB),y)
+$(OUTDIR)/spl_lpddr.bin: $(OUTDIR)/x-loader.elf
+	$(OBJDUMP) -D $(OUTDIR)/x-loader.elf > $(OUTDIR)/x-loader.elf.dump
 	$(OBJCOPY) $(OBJCFLAGS) -O binary $< $@
 endif
 
 $(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator $(TOOLSDIR)/uart_baudrate_lut $(TOOLSDIR)/efuse_params_creator $(OBJS) $(LIBS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ -Map $(OUTDIR)/x-loader.map
 
-ifneq ($(CONFIG_BOOT_MMC), y)
 $(TOOLSDIR)/sfc_boot_checksum: $(TOOLSDIR)/sfc_boot_checksum.c
 	gcc -o $@ -D__HOST__ -I$(TOPDIR)/include $<
 	strip $@
-else # CONFIG_BOOT_MMC #
 
 $(TOOLSDIR)/spl_params_fixer: $(TOOLSDIR)/spl_params_fixer.c
 	gcc -o $@ -D__HOST__ -DCONFIG_BOOT_MMC -I$(TOPDIR)/include $<
@@ -267,8 +292,6 @@ $(OUTDIR)/mbr.bin: $(TOOLSDIR)/mbr_creator.c
 		p2off=$(CONFIG_MBR_P2_OFF),p2end=$(CONFIG_MBR_P2_END),p2type=$(CONFIG_MBR_P2_TYPE) \
 		p3off=$(CONFIG_MBR_P3_OFF),p3end=$(CONFIG_MBR_P3_END),p3type=$(CONFIG_MBR_P3_TYPE) \
 		-o $@ > /dev/zero
-endif
-
 endif
 
 $(TOOLSDIR)/ddr_params_creator: $(TOOLSDIR)/ddr_params_creator.c
@@ -304,6 +327,9 @@ unconfig:
 	rm -f include/generated/config.h include/generated/config.mk
 
 #===============================================================================
+burner_config: unconfig
+	@./mkconfig $(@:_config) burner usb
+
 phoenix_nor_config: unconfig
 	@./mkconfig $(@:_config) phoenix nor
 
@@ -347,7 +373,7 @@ skyworth_nor_config: unconfig
 #===============================================================================
 
 clean:
-	rm -rf $(OUTDIR)/* \
+	rm -rf	$(OUTDIR)/* \
 			$(OBJS) \
 			$(TOOLSDIR)/sfc_boot_checksum \
 			$(TOOLSDIR)/ddr_params_creator \

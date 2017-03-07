@@ -135,27 +135,6 @@ void mdelay(uint32_t msec) {
     udelay(msec * 1000);
 }
 
-#if 0
-void udelay(uint64_t usec) {
-    unsigned long loops = usec * (cpu_freq / 2);
-
-    __asm__ __volatile__ (
-            ".set noreorder \n"
-            ".align 3 \n"
-            "1:bnez %0, 1b \n"
-            "subu %0, 1\n"
-            ".set reorder \n"
-            : "=r" (loops)
-            : "0" (loops)
-    );
-}
-
-void mdelay(uint32_t msec) {
-    while (msec--)
-        udelay(1000);
-}
-#endif
-
 __attribute__((noreturn)) void hang() {
     uart_puts("\n### Hang-up - Please reset board ###\n");
     while (1)

@@ -21,7 +21,7 @@
 #	bootloader: 0
 #	burner: 1
 #
-FUNCTION := 0
+FUNCTION := 1
 
 #
 # Next stage:
@@ -29,7 +29,7 @@ FUNCTION := 0
 #    kernel: 1
 #
 ifeq ($(FUNCTION), 0)
-BOOT_NEXT_STAGE := 0
+BOOT_NEXT_STAGE := 1
 endif
 
 #
