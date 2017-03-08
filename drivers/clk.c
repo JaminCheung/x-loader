@@ -52,7 +52,7 @@ struct cgu cgu_clk_sel[CGU_CNT] = {
     [MSC1]   = {0, CPM_MSC1CDR, 0,  0,                  { -1,    -1,    -1,    -1  }, 29, 28, 27, 5 },
 #endif /* CONFIG_BOOT_MMC_PC_4BIT */
 
-#if (defined CONFIG_BOOT_SFC | CONFIG_BOOT_USB)
+#if (defined CONFIG_BOOT_SFC || defined CONFIG_BOOT_USB)
     [SFC]    = {1, CPM_SSICDR,  31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  EXCLK, -1  }, 29, 28, 27, 2 },
 #else
     [SFC]    = {0, CPM_SSICDR,  31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  EXCLK, -1  }, 29, 28, 27, 2 },
