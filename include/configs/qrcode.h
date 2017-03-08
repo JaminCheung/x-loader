@@ -61,7 +61,7 @@
 /*
  * unit(byte)
  */
-#define CONFIG_UBOOT_OFFSET         0x6000
+#define CONFIG_UBOOT_OFFSET         0x6400
 #define CONFIG_UBOOT_LENGTH         0x40000
 
 #define CONFIG_KERNEL_OFFSET        0x100000
@@ -84,7 +84,7 @@
 /*
  * unit(byte)
  */
-#define CONFIG_UBOOT_OFFSET         0x6000
+#define CONFIG_UBOOT_OFFSET         0x6400
 #define CONFIG_UBOOT_LENGTH         0x40000
 
 #define CONFIG_KERNEL_OFFSET        0x8000
