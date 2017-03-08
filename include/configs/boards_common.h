@@ -107,9 +107,10 @@
  * Recovery
  */
 #undef CONFIG_RECOVERY
-/*
- * Recovery update flag
- */
+#ifdef CONFIG_RECOVERY
+#define RECOVERY_UPDATE_FLAG_CHECK
+#endif
+
 #define RECOVERY_UPDATE_FLAG_OFFSET             0x6000      //24kb
 #define RECOVERY_UPDATE_FLAG_SIZE                   4               //unit: byte
 #define RECOVERY_UPDATE_FLAG_UPDATING         0x5A5A5A5A

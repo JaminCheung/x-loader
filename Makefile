@@ -230,6 +230,9 @@ $(OUTDIR)/x-loader-pad-with-mbr-gpt-with-sleep-lib.bin: $(OUTDIR)/x-loader-pad-w
 
 $(OUTDIR)/x-loader-pad-with-sleep-lib.bin: $(OUTDIR)/x-loader-pad.bin
 	cat $< $(SLEEPLIB) > $@
+	@cp $@ $@.tmp
+	$(OBJCOPY) --gap-fill=0xff --pad-to=25600 -I binary -O binary $@.tmp $@
+	@rm $@.tmp
 
 $(OUTDIR)/x-loader-pad-with-mbr-gpt.bin: $(OUTDIR)/mbr-gpt.bin $(OUTDIR)/x-loader-pad.bin $(TOOLSDIR)/spl_params_fixer
 	cat $(OUTDIR)/mbr-gpt.bin $(OUTDIR)/x-loader-pad.bin > $@
