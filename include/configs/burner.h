@@ -49,4 +49,9 @@
 #undef CONFIG_AHB_CLK_DIV
 #define CONFIG_AHB_CLK_DIV      3
 
+/*
+ * Burn SPI flash
+ */
+#define CONFIG_BURN_SPI_FLASH
+
 #endif /* BURNER_H */
