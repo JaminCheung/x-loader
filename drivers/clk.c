@@ -33,16 +33,19 @@ struct cgu {
 struct cgu cgu_clk_sel[CGU_CNT] = {
     [DDR]    = {1, CPM_DDRCDR,  30, CONFIG_DDR_SEL_PLL, { 0,     APLL,  MPLL,  -1  }, 29, 28, 27, 31},
     [MACPHY] = {0, CPM_MACCDR,  31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  -1,    -1  }, 29, 28, 27, 25},
+
 #ifdef CONFIG_BOOT_MMC
     [MSC0]   = {1, CPM_MSC0CDR, 31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  -1,    -1  }, 29, 28, 27, 4 },
 #else
     [MSC0]   = {0, CPM_MSC0CDR, 31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  -1,    -1  }, 29, 28, 27, 4 },
 #endif /* CONFIG_BOOT_MMC */
+
 #ifndef CONFIG_BOOT_USB
     [OTG]    = {0, CPM_USBCDR,  30, EXCLK,              { EXCLK, EXCLK, APLL,  MPLL}, 29, 28, 27, 3 },
 #else
     [OTG]    = {1, CPM_USBCDR,  30, EXCLK,              { EXCLK, EXCLK, APLL,  MPLL}, 29, 28, 27, 3 },
 #endif /* CONFIG_BOOT_USB */
+
     [I2S]    = {0, CPM_I2SCDR,  30, EXCLK,              { APLL,  MPLL,  EXCLK, -1  }, 29, 0,  0,  -1},
     [LCD]    = {0, CPM_LPCDR,   31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  -1,    -1  }, 28, 27, 26, 23},
 
@@ -52,11 +55,11 @@ struct cgu cgu_clk_sel[CGU_CNT] = {
     [MSC1]   = {0, CPM_MSC1CDR, 0,  0,                  { -1,    -1,    -1,    -1  }, 29, 28, 27, 5 },
 #endif /* CONFIG_BOOT_MMC_PC_4BIT */
 
-#if (defined CONFIG_BOOT_SFC || defined CONFIG_BOOT_USB)
+#if (defined CONFIG_BOOT_SFC || defined CONFIG_BURN_SPI_FLASH)
     [SFC]    = {1, CPM_SSICDR,  31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  EXCLK, -1  }, 29, 28, 27, 2 },
 #else
     [SFC]    = {0, CPM_SSICDR,  31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  EXCLK, -1  }, 29, 28, 27, 2 },
-#endif /* CONFIG_BOOT_SFC */
+#endif /* CONFIG_BOOT_SFC || CONFIG_BURN_SPI_FLASH */
 
     [CIM]    = {0, CPM_CIMCDR,  31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  -1,    -1  }, 29, 28, 27, 22},
     [PCM]    = {0, CPM_PCMCDR,  30, EXCLK,              { APLL,  EXCLK, MPLL,  -1  }, 29, 0,  0,  26},
