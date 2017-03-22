@@ -43,12 +43,11 @@ $(shell [ -d $(OUTDIR) ] || mkdir -p $(OUTDIR))
 OUTDIR := $(shell cd $(OUTDIR) && /bin/pwd)
 $(if $(OUTDIR),,$(error output directory "$(OUTDIR)" does not exist))
 TOOLSDIR := $(TOPDIR)/tools
-SLEEPLIB := $(TOPDIR)/sleep-lib/sleep_lib_tcsm_pad.bin
+SLEEPLIB_DIR := $(TOPDIR)/sleep-lib
 
 ifeq ($(FUNCTION), 0)
-ifneq ($(SLEEPLIB), $(wildcard $(SLEEPLIB)))
-$(error Could not found sleep lib!)
-endif
+SLEEPLIB_DIR := $(shell cd $(SLEEPLIB_DIR) && /bin/pwd)
+$(if $(SLEEPLIB_DIR),,$(error sleep-lib directory "$(SLEEPLIB_DIR)" does not exist))
 endif
 
 #
@@ -159,6 +158,7 @@ LDFLAGS += -T ldscripts/x-loader.lds
 else
 LDFLAGS += -T ldscripts/x-loader-burner.lds
 endif
+SLEEPLIB_LDFLAGS := -nostdlib -T ldscripts/sleep_lib.lds -EL --gc-sections
 
 OBJCFLAGS := --gap-fill=0xff --remove-section=.dynsym
 #DEBUGFLAGS := -DDEBUG
@@ -198,8 +198,17 @@ OBJS-$(CONFIG_BOOT_SPI_NOR) +=  drivers/sfc.o                                  \
 
 OBJS := $(addprefix $(TOPDIR)/, $(OBJS-y))
 
-LIBS-y :=
-LIBS := $(addprefix $(TOPDIR)/, $(LIBS-y))
+#
+# Sleep lib source
+#
+SLEEP_LIBS-y := sleep-lib/sleep_lib_entry.o                                    \
+                sleep-lib/sleep_lib_uart.o                                     \
+                sleep-lib/sleep_lib_clk.o                                      \
+                sleep-lib/sleep_lib.o                                          \
+                common/printf.o                                                \
+                common/common.o
+
+SLEEP_LIBS := $(addprefix $(TOPDIR)/, $(SLEEP_LIBS-y))
 
 #
 # Targets
@@ -211,6 +220,8 @@ TARGET := $(OUTDIR)/x-loader-pad-with-mbr-gpt-with-sleep-lib.bin
 else
 TARGET := $(OUTDIR)/spl_lpddr.bin
 endif
+
+SLEEPLIB := $(OUTDIR)/sleep_lib_tcsm_pad.bin
 
 %.o:%.c
 	$(CC) -c $(CFLAGS) $< -o $@
@@ -225,10 +236,18 @@ all: clean $(TARGET) Tips
 Tips: $(TARGET)
 	@echo -e '\n  Image: "$(TARGET)" is ready\n'
 
-$(OUTDIR)/x-loader-pad-with-mbr-gpt-with-sleep-lib.bin: $(OUTDIR)/x-loader-pad-with-mbr-gpt.bin
+$(SLEEPLIB): $(OUTDIR)/sleep_lib_tcsm.elf
+	$(OBJDUMP) -D $< > $(OUTDIR)/sleep_lib_tcsm.elf.dump
+	$(OBJCOPY) --gap-fill=0x0 -O binary $< $(OUTDIR)/sleep_lib_tcsm.bin
+	$(OBJCOPY) --gap-fill=0x0 --pad-to=8192 -I binary -O binary $(OUTDIR)/sleep_lib_tcsm.bin $@
+
+$(OUTDIR)/sleep_lib_tcsm.elf: $(SLEEP_LIBS)
+	$(LD) $(SLEEPLIB_LDFLAGS) $(SLEEP_LIBS) -o $@ -Map $(OUTDIR)/sleep_lib_tcsm.map
+
+$(OUTDIR)/x-loader-pad-with-mbr-gpt-with-sleep-lib.bin: $(OUTDIR)/x-loader-pad-with-mbr-gpt.bin $(SLEEPLIB)
 	cat $< $(SLEEPLIB) > $@
 
-$(OUTDIR)/x-loader-pad-with-sleep-lib.bin: $(OUTDIR)/x-loader-pad.bin
+$(OUTDIR)/x-loader-pad-with-sleep-lib.bin: $(OUTDIR)/x-loader-pad.bin $(SLEEPLIB)
 	cat $< $(SLEEPLIB) > $@
 	@cp $@ $@.tmp
 	$(OBJCOPY) --gap-fill=0xff --pad-to=25600 -I binary -O binary $@.tmp $@
@@ -257,8 +276,8 @@ $(OUTDIR)/spl_lpddr.bin: $(OUTDIR)/x-loader.elf
 	$(OBJCOPY) $(OBJCFLAGS) -O binary $< $@
 endif
 
-$(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator $(TOOLSDIR)/uart_baudrate_lut $(TOOLSDIR)/efuse_params_creator $(OBJS) $(LIBS)
-	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ -Map $(OUTDIR)/x-loader.map
+$(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator $(TOOLSDIR)/uart_baudrate_lut $(TOOLSDIR)/efuse_params_creator $(OBJS)
+	$(LD) $(LDFLAGS) $(OBJS) -o $@ -Map $(OUTDIR)/x-loader.map
 
 $(TOOLSDIR)/sfc_boot_checksum: $(TOOLSDIR)/sfc_boot_checksum.c
 	gcc -o $@ -D__HOST__ -I$(TOPDIR)/include $<
@@ -377,6 +396,7 @@ skyworth_nor_config: unconfig
 
 clean:
 	rm -rf	$(OUTDIR)/* \
+			$(SLEEP_LIBS) \
 			$(OBJS) \
 			$(TOOLSDIR)/sfc_boot_checksum \
 			$(TOOLSDIR)/ddr_params_creator \

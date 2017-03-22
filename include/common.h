@@ -215,6 +215,55 @@ extern uint32_t cpu_freq;
 #define SZ_2G               0x80000000
 
 /*
+ * Status register bits available in all MIPS CPUs.
+ */
+#define ST0_IM          0x0000ff00
+#define  STATUSB_IP0        8
+#define  STATUSF_IP0        (_ULCAST_(1) <<  8)
+#define  STATUSB_IP1        9
+#define  STATUSF_IP1        (_ULCAST_(1) <<  9)
+#define  STATUSB_IP2        10
+#define  STATUSF_IP2        (_ULCAST_(1) << 10)
+#define  STATUSB_IP3        11
+#define  STATUSF_IP3        (_ULCAST_(1) << 11)
+#define  STATUSB_IP4        12
+#define  STATUSF_IP4        (_ULCAST_(1) << 12)
+#define  STATUSB_IP5        13
+#define  STATUSF_IP5        (_ULCAST_(1) << 13)
+#define  STATUSB_IP6        14
+#define  STATUSF_IP6        (_ULCAST_(1) << 14)
+#define  STATUSB_IP7        15
+#define  STATUSF_IP7        (_ULCAST_(1) << 15)
+#define  STATUSB_IP8        0
+#define  STATUSF_IP8        (_ULCAST_(1) <<  0)
+#define  STATUSB_IP9        1
+#define  STATUSF_IP9        (_ULCAST_(1) <<  1)
+#define  STATUSB_IP10       2
+#define  STATUSF_IP10       (_ULCAST_(1) <<  2)
+#define  STATUSB_IP11       3
+#define  STATUSF_IP11       (_ULCAST_(1) <<  3)
+#define  STATUSB_IP12       4
+#define  STATUSF_IP12       (_ULCAST_(1) <<  4)
+#define  STATUSB_IP13       5
+#define  STATUSF_IP13       (_ULCAST_(1) <<  5)
+#define  STATUSB_IP14       6
+#define  STATUSF_IP14       (_ULCAST_(1) <<  6)
+#define  STATUSB_IP15       7
+#define  STATUSF_IP15       (_ULCAST_(1) <<  7)
+#define ST0_CH          0x00040000
+#define ST0_SR          0x00100000
+#define ST0_TS          0x00200000
+#define ST0_BEV         0x00400000
+#define ST0_RE          0x02000000
+#define ST0_FR          0x04000000
+#define ST0_CU          0xf0000000
+#define ST0_CU0         0x10000000
+#define ST0_CU1         0x20000000
+#define ST0_CU2         0x40000000
+#define ST0_CU3         0x80000000
+#define ST0_XX          0x80000000  /* MIPS IV naming */
+
+/*
  * Symbolic register names for 32 bit ABI
  */
 #define zero    $0  /* wired zero */
@@ -255,40 +304,52 @@ extern uint32_t cpu_freq;
 /*
  * Coprocessor 0 register names
  */
-#define CP0_INDEX       $0
-#define CP0_RANDOM      $1
-#define CP0_ENTRYLO0    $2
-#define CP0_ENTRYLO1    $3
-#define CP0_CONF        $3
-#define CP0_CONTEXT     $4
-#define CP0_PAGEMASK    $5
-#define CP0_WIRED       $6
-#define CP0_INFO        $7
-#define CP0_BADVADDR    $8
-#define CP0_COUNT       $9
-#define CP0_ENTRYHI     $10
-#define CP0_COMPARE     $11
-#define CP0_STATUS      $12
-#define CP0_CAUSE       $13
-#define CP0_EPC         $14
-#define CP0_PRID        $15
-#define CP0_CONFIG      $16
-#define CP0_LLADDR      $17
-#define CP0_WATCHLO     $18
-#define CP0_WATCHHI     $19
-#define CP0_XCONTEXT    $20
-#define CP0_FRAMEMASK   $21
-#define CP0_DIAGNOSTIC  $22
-#define CP0_DEBUG       $23
-#define CP0_DEPC        $24
-#define CP0_PERFORMANCE $25
-#define CP0_ECC         $26
-#define CP0_CACHEERR    $27
-#define CP0_TAGLO       $28
-#define CP0_TAGHI       $29
-#define CP0_ERROREPC    $30
-#define CP0_DESAVE      $31
+#define CP0_INDEX           $0
+#define CP0_RANDOM          $1
+#define CP0_ENTRYLO0        $2
+#define CP0_ENTRYLO1        $3
+#define CP0_CONF            $3
+#define CP0_CONTEXT         $4
+#define CP0_PAGEMASK        $5
+#define CP0_WIRED           $6
+#define CP0_INFO            $7
+#define CP0_BADVADDR        $8
+#define CP0_COUNT           $9
+#define CP0_ENTRYHI         $10
+#define CP0_COMPARE         $11
+#define CP0_STATUS          $12
+#define CP0_CAUSE           $13
+#define CP0_EPC             $14
+#define CP0_PRID            $15
+#define CP0_EBASE           $15
+#define CP0_CONFIG          $16
+#define CP0_CONFIG1         $16
+#define CP0_CONFIG7         $16
+#define CP0_LLADDR          $17
+#define CP0_WATCHLO         $18
+#define CP0_WATCHHI         $19
+#define CP0_XCONTEXT        $20
+#define CP0_FRAMEMASK       $21
+#define CP0_DIAGNOSTIC      $22
+#define CP0_DEBUG           $23
+#define CP0_DEPC            $24
+#define CP0_PERFORMANCE     $25
+#define CP0_ECC             $26
+#define CP0_CACHEERR        $27
+#define CP0_TAGLO           $28
+#define CP0_TAGHI           $29
+#define CP0_ERROREPC        $30
+#define CP0_DESAVE          $31
 
+#define PMON_CSR    $17, 7
+#define PMON_HIGH   $17, 4
+#define PMON_LC     $17, 5
+#define PMON_RC     $17, 6
+
+#define CORE_CTRL       $12, 2
+#define CORE_STATUS     $12, 3
+#define CORE_REIM       $12, 4
+#define CORE_REIM_LOW   $12, 7
 
 /*
  * Bits in the coprocessor 0 config register.
@@ -1373,6 +1434,70 @@ __BUILD_SET_C0(srsmap)
 #define writew(b, addr) __raw_writew(__ioswab16(b), (addr))
 #define writel(b, addr) __raw_writel(__ioswab32(b), (addr))
 
+#ifndef __ASSEMBLY__
+#define ASMMACRO(name, code...)                     \
+__asm__(".macro " #name "; " #code "; .endm");              \
+                                    \
+static inline void name(void)                       \
+{                                   \
+    __asm__ __volatile__ (#name);                   \
+}
+
+ASMMACRO(_ssnop,
+     sll    $0, $0, 1
+    )
+
+ASMMACRO(_ehb,
+     sll    $0, $0, 3
+    )
+
+ASMMACRO(mtc0_tlbw_hazard,
+    _ssnop; _ssnop; _ehb
+    )
+ASMMACRO(tlbw_use_hazard,
+    _ssnop; _ssnop; _ssnop; _ehb
+    )
+ASMMACRO(tlb_probe_hazard,
+     _ssnop; _ssnop; _ssnop; _ehb
+    )
+ASMMACRO(irq_enable_hazard,
+     _ssnop; _ssnop; _ssnop; _ehb
+    )
+ASMMACRO(irq_disable_hazard,
+    _ssnop; _ssnop; _ssnop; _ehb
+    )
+ASMMACRO(back_to_back_c0_hazard,
+     _ssnop; _ssnop; _ssnop; _ehb
+    )
+
+ASMMACRO(enable_fpu_hazard,
+     nop; nop; nop; nop
+)
+
+ASMMACRO(disable_fpu_hazard,
+     _ehb
+)
+
+#define __enable_fpu()                          \
+do {                                    \
+    set_c0_status(ST0_CU1);                     \
+    enable_fpu_hazard();                        \
+} while (0)
+
+#define __disable_fpu()                         \
+do {                                    \
+    clear_c0_status(ST0_CU1);                   \
+    disable_fpu_hazard();                       \
+} while (0)
+
+
+#define disable_fpu()                           \
+do {                                    \
+    __disable_fpu();                    \
+} while (0)
+
+#endif
+
 /*
  * Bit ops
  */
@@ -1434,6 +1559,8 @@ int get_boot_sel(void);
  * Cache ops
  */
 #ifndef __ASSEMBLY__
+void local_irq_disable(void);
+void local_irq_enable(void);
 void flush_dcache_all(void);
 void flush_icache_all(void);
 void flush_cache_all(void);
@@ -1538,6 +1665,53 @@ void dump_mem_content(uint32_t *src, uint32_t len);
 #ifndef __ASSEMBLY__
 extern int ddr_autosr;
 int check_socid(void);
+#endif
+
+#ifndef __ASSEMBLY__
+void cache_init(void);
+struct sleep_context {
+    unsigned int gpr_s[8];
+    unsigned int gpr_gp;
+    unsigned int gpr_sp;
+    unsigned int gpr_fp;
+    unsigned int gpr_ra;
+
+    unsigned int cp0_pagemask;
+    unsigned int cp0_tlb_spec;
+    unsigned int cp0_status;
+    unsigned int cp0_intctl;
+    unsigned int cp0_cause;
+    unsigned int cp0_ebase;
+    unsigned int cp0_config;
+    unsigned int cp0_config1;
+    unsigned int cp0_config2;
+    unsigned int cp0_config3;
+    unsigned int cp0_config7;
+    unsigned int cp0_lladdr;
+
+    unsigned int pmon_csr;
+    unsigned int pmon_high;
+    unsigned int pmon_lc;
+    unsigned int pmon_rc;
+
+    unsigned int cp0_watchlo;
+    unsigned int cp0_watchhi;
+
+    unsigned int cp0_ecc;
+
+    unsigned int cpm_lcr;
+    unsigned int cpm_opcr;
+    unsigned int cpm_clkgr;
+    unsigned int cpm_usbpcr;
+};
+
+struct sleep_lib_entry
+{
+    void (*restore_context)(void);
+    int (*enter_sleep)(int state);
+};
+void sleep_lib_init_clk(void);
+void sleep_lib_reset_clk_tree(void);
 #endif
 
 #endif /* COMMON_H */

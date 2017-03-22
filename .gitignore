@@ -13,8 +13,8 @@ a.out
 *.elf
 *.map
 *.temp
+*.dump
 include/generated
-!sleep-lib/sleep_lib_tcsm_pad.bin
 tools/sfc_boot_checksum
 tools/ddr_params_creator
 tools/uart_baudrate_lut

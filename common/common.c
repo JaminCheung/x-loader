@@ -128,7 +128,6 @@ void udelay(uint64_t usec) {
     while (!((get_pmon_rc()) >= (cpu_freq * usec)));
 
     pmon_stop();
-
 }
 
 void mdelay(uint32_t msec) {
@@ -201,6 +200,70 @@ char * strstr(const char * s1,const char * s2) {
     return NULL;
 }
 #endif
+
+void local_irq_disable(void) {
+    __asm__ __volatile__(
+        ".set\tpush\n\t"
+        ".set\treorder\n\t"
+        ".set\tnoat\n\t"
+        "mfc0\t$1,$12\n\t"
+        "ori\t$1,1\n\t"
+        "xori\t$1,1\n\t"
+        ".set\tnoreorder\n\t"
+        "mtc0\t$1,$12\n\t"
+        "nop\n\t"
+        "nop\n\t"
+        "nop\n\t"
+        ".set\tpop\n\t"
+        : /* no outputs */
+        : /* no inputs */
+        : "$1", "memory");
+}
+
+void local_irq_enable(void) {
+    __asm__ __volatile__(
+        ".set\tpush\n\t"
+        ".set\treorder\n\t"
+        ".set\tnoat\n\t"
+        "mfc0\t$1,$12\n\t"
+        "ori\t$1,0x1f\n\t"
+        "xori\t$1,0x1e\n\t"
+        "mtc0\t$1,$12\n\t"
+        ".set\tpop\n\t"
+        : /* no outputs */
+        : /* no inputs */
+        : "$1", "memory");
+}
+
+void cache_init(void) {
+    register unsigned long addr;
+    __asm__ __volatile__ ("mtc0 $0, $28\n\t"::);
+
+    for (addr = CKSEG0; addr < (CKSEG0 + CONFIG_SYS_DCACHE_SIZE); addr += CONFIG_SYS_CACHELINE_SIZE) {
+        __asm__ __volatile__ (".set mips32\n\t"
+                " cache %0, 0(%1)\n\t"
+                ".set mips32\n\t"
+                :
+                : "I" (INDEX_STORE_TAG_D), "r"(addr));
+    }
+    for (addr = CKSEG0; addr < (CKSEG0 + CONFIG_SYS_ICACHE_SIZE); addr += CONFIG_SYS_CACHELINE_SIZE) {
+        __asm__ __volatile__ (".set mips32\n\t"
+                " cache %0, 0(%1)\n\t"
+                ".set mips32\n\t"
+                :
+                : "I" (INDEX_STORE_TAG_I), "r"(addr));
+    }
+    /* invalidate BTB */
+    __asm__ __volatile__ (".set mips32\n\t"
+            " mfc0 $26, $16, 7\n\t"
+            " nop\n\t"
+            " ori $26, 2\n\t"
+            " mtc0 $26, $16, 7\n\t"
+            " nop\n\t"
+            "nop\n\t"
+            ".set mips32\n\t"
+            );
+}
 
 void flush_icache_all(void) {
     uint32_t addr, t = 0;
