@@ -66,10 +66,8 @@ void sleep_lib_reset_clk_tree(void)
     cpm_outl(reg, CPM_CPCCR);
     while(cpm_inl(CPM_CPCSR) & 0x7)
         continue;
-    /*
-     * xxdelay can use now
-     */
-    cpu_freq = 24;
+
+    cpu_freq = CONFIG_EXTAL_FREQ;
 }
 
 static void init_clk_tree(void)
@@ -109,6 +107,8 @@ static void init_clk_tree(void)
     /* Change sel */
     reg = (cpccr_cfg & (0xff << 24)) | (cpm_inl(CPM_CPCCR) & ~(0xff << 24));
     cpm_outl(reg, CPM_CPCCR);
+
+    cpu_freq = CONFIG_APLL_FREQ;
 
     debug("CPM_CPCCR = 0x%x\n",cpm_inl(CPM_CPCCR));
 }
