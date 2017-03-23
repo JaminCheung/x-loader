@@ -17,6 +17,8 @@ extern uint8_t sleep_lib_entry[];
 static struct sleep_context sleep_context;
 struct sleep_context* context = &sleep_context;
 
+static int exclk_enabled;
+
 void dump_sleep_context(void) {
     uint8_t i;
 
@@ -147,6 +149,7 @@ static void sleep(void)
      * For CPM LCR
      */
     volatile unsigned int temp;
+    volatile unsigned int rtccr;
 
     /*
      * Save open all clock
@@ -192,13 +195,32 @@ static void sleep(void)
     /*
      * extoscillator state wait time,
      * mask interrupt,
-     * use RTC clock,
      * L2 power down
-     * RTC clock enable
+     * Gate usb phy clk
      * Core power down
      */
-    temp |= (0xf << 8) | (1 << 30) | (1 << 2) | (1 << 25)
+    temp |= (0xf << 8) | (1 << 30) | (1 << 25)
             | (1 << 23) | (1 << 3);
+
+    rtccr = rtc_inl(RTC_RTCCR);
+    if (rtccr & RTC_RTCCR_SELEXC) {
+        /*
+         * Assert system has no 32.768KHz rtc clk
+         * 1. enable exclk
+         * 2. cpm clk select to extclk / 512
+         */
+        exclk_enabled = 1;
+        temp &= ~(1 << 2);
+    } else {
+        /*
+         * cpm clk select rtc clk
+         */
+        temp |= (1 << 2);
+    }
+
+    if (exclk_enabled)
+        temp |= (1 << 4);
+
     cpm_outl(temp, CPM_OPCR);
 
     /*
@@ -223,10 +245,21 @@ static void sleep(void)
             | (0x1f << 14) /* TCU,DMIC,UART2~0                               */
             | 0x3ffe;      /* SADC,JPEG,AIC,SMB3~0,SCC,MSC1~0,SFC,EFUSE */
     /*
-     * Enable UART2 if DEBUG
+     * Enable UART if DEBUG
      */
 #ifdef DEBUG
-    temp &= ~(0x1 << 16);                         /* UART2 */
+#if CONFIG_CONSOLE_INDEX == 0
+    temp &= ~CPM_CLKGR_UART0;
+
+#elif CONFIG_CONSOLE_INDEX == 1
+    temp &= ~CPM_CLKGR_UART1;
+
+#elif CONFIG_CONSOLE_INDEX == 2
+    temp &= ~CPM_CLKGR_UART2;
+
+#else
+#error Unknown console index!
+#endif
 #endif
     cpm_outl(temp, CPM_CLKGR);
 
@@ -318,3 +351,6 @@ int enter_sleep(int state)
     return 0;
 }
 
+void enable_exclk(void) {
+    exclk_enabled = 1;
+}

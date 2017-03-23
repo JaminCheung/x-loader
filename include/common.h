@@ -1705,10 +1705,10 @@ struct sleep_context {
     unsigned int cpm_usbpcr;
 };
 
-struct sleep_lib_entry
-{
+struct sleep_lib_entry {
     void (*restore_context)(void);
     int (*enter_sleep)(int state);
+    void (*enable_exclk)(void);
 };
 void sleep_lib_init_clk(void);
 void sleep_lib_reset_clk_tree(void);
