@@ -269,7 +269,6 @@ int spinand_read(uint32_t src_addr, uint32_t count, uint32_t dst_addr) {
     return 0;
 }
 
-#ifdef CONFIG_RECOVERY
 int is_recovery_update_failed(void) {
     uint32_t offset = RECOVERY_UPDATE_FLAG_OFFSET;
     uint32_t length = CONFIG_NAND_BPP;
@@ -285,5 +284,3 @@ int is_recovery_update_failed(void) {
 
     return 0;
 }
-
-#endif

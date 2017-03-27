@@ -14,7 +14,6 @@
 
     .extern restore_context
     .extern enter_sleep
-    .extern enable_exclk
 
     .extern context
 
@@ -24,7 +23,6 @@
 sleep_lib_entry:
     .word restore_context
     .word enter_sleep
-    .word enable_exclk
 
     .global save_context_goto
     .align  2

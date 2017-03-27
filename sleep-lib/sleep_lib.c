@@ -17,8 +17,6 @@ extern uint8_t sleep_lib_entry[];
 static struct sleep_context sleep_context;
 struct sleep_context* context = &sleep_context;
 
-static int exclk_enabled;
-
 void dump_sleep_context(void) {
     uint8_t i;
 
@@ -209,7 +207,7 @@ static void sleep(void)
          * 1. enable exclk
          * 2. cpm clk select to extclk / 512
          */
-        exclk_enabled = 1;
+        temp |= (1 << 4);
         temp &= ~(1 << 2);
     } else {
         /*
@@ -217,9 +215,6 @@ static void sleep(void)
          */
         temp |= (1 << 2);
     }
-
-    if (exclk_enabled)
-        temp |= (1 << 4);
 
     cpm_outl(temp, CPM_OPCR);
 
@@ -349,8 +344,4 @@ int enter_sleep(int state)
 #endif
 
     return 0;
-}
-
-void enable_exclk(void) {
-    exclk_enabled = 1;
 }
