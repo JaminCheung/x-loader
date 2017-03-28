@@ -250,6 +250,10 @@ int spinand_read(uint32_t src_addr, uint32_t count, uint32_t dst_addr) {
     pagesize = CONFIG_NAND_BPP;
     blksize = CONFIG_NAND_PPB * pagesize;
 
+    if (src_addr % pagesize)
+        printf("\n\tWarning: offset 0x%x not align with page size 0x%x.\n",
+                src_addr, pagesize);
+
     page = src_addr / pagesize;
     while (pagecopy_cnt * pagesize < count) {
         ret = spinand_read_page(page, buf, pagesize, blksize);

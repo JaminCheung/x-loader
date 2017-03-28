@@ -170,6 +170,11 @@ enum {
 #define SFC_FIFO_LEN    (63)
 #define THRESHOLD       (31)
 
+#define DEF_TCHSH       5
+#define DEF_TSLCH       5
+#define DEF_TSHSL_R     20
+#define DEF_TSHSL_W     50
+
 #define  SFC_MODE_GENERATE(sfc, a)    do{                                       \
         if ((a >= SPI_MODE_STANDARD) && (a <= SPI_MODE_QUAD)){                  \
             ((struct jz_sfc *)sfc)->cmd = spi_mode_local[a].device_mode;        \

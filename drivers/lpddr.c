@@ -133,9 +133,9 @@ static void probe_sdram_size(void) {
 #endif
 
 static void reset_dll(void) {
-    writel(0x73 | (1 << 6) , CPM_DRCG);
+    cpm_outl(0x73 | (1 << 6) , CPM_DRCG);
     mdelay(5);
-    writel(0x71 | (1 << 6), CPM_DRCG);
+    cpm_outl(0x71 | (1 << 6), CPM_DRCG);
     mdelay(5);
 }
 
@@ -539,8 +539,10 @@ void lpddr_init(void) {
 
     ddr_writel(ddr_readl(DDRC_STATUS) & ~DDRC_DSTATUS_MISS, DDRC_STATUS);
 
-    if(!bypass)
-        ddr_writel(0 , DDRC_DLP);
+    if (ddr_autosr) {
+        if(!bypass)
+            ddr_writel(0 , DDRC_DLP);
+    }
 
     ddr_writel(ddr_autosr, DDRC_AUTOSR_EN);
 

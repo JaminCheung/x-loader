@@ -89,8 +89,6 @@ struct ddr_params {
  *************************************************************************/
 #define DDR_MEM_PHY_BASE        0x20000000
 
-#define CPM_DRCG            0xb00000d0
-
 #define DDRC_STATUS         0x0
 #define DDRC_CFG            0x4
 #define DDRC_CTRL           0x8
@@ -107,6 +105,7 @@ struct ddr_params {
 #define DDRC_TIMING(n)          (0x60 + 4 * (n - 1))
 #define DDRC_REMAP(n)           (0x9c + 4 * (n - 1))
 
+#define DDRC_CLKSTP_CFG (DDR_PHY_OFFSET + 0x1000 + 0x68)
 #define DDRP_PIR    (DDR_PHY_OFFSET + 0x4) /* PHY Initialization Register */
 #define DDRP_PGCR   (DDR_PHY_OFFSET + 0x8) /* PHY General Configuration Register*/
 #define DDRP_PGSR   (DDR_PHY_OFFSET + 0xc) /* PHY General Status Register*/

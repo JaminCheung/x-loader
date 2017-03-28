@@ -380,6 +380,7 @@ uint32_t get_mmc_freq(void) {
     uint32_t msc_cdr_reg;
     uint32_t div;
     uint32_t freq;
+    uint32_t pll_rate = CONFIG_DDR_SEL_PLL == APLL ? CONFIG_APLL_FREQ : CONFIG_MPLL_FREQ;
 
 #if (defined CONFIG_BOOT_MMC_PA_8BIT) || (defined CONFIG_BOOT_MMC_PA_4BIT)
     msc_cdr_reg = CPM_MSC0CDR;
@@ -389,7 +390,7 @@ uint32_t get_mmc_freq(void) {
 
     div = ((cpm_inl(msc_cdr_reg) & 0xff) + 1) * 2;
 
-    freq = (CONFIG_MPLL_FREQ * 1000 * 1000) / div;
+    freq = (pll_rate * 1000 * 1000) / div;
 
     return freq;
 }
@@ -397,8 +398,9 @@ uint32_t get_mmc_freq(void) {
 void set_mmc_freq(uint32_t freq) {
     uint32_t div;
     uint32_t msc_cdr_reg;
+    uint32_t pll_rate = CONFIG_DDR_SEL_PLL == APLL ? CONFIG_APLL_FREQ : CONFIG_MPLL_FREQ;
 
-    div = ((CONFIG_MPLL_FREQ * 1000 * 1000 + freq - 1) / freq / 2 - 1) & 0xff;
+    div = ((pll_rate * 1000 * 1000 + freq - 1) / freq / 2 - 1) & 0xff;
 
 #if (defined CONFIG_BOOT_MMC_PA_8BIT) || (defined CONFIG_BOOT_MMC_PA_4BIT)
     msc_cdr_reg = CPM_MSC0CDR;
@@ -417,8 +419,9 @@ void set_mmc_freq(uint32_t freq) {
 
 void set_sfc_freq(uint32_t freq) {
     uint32_t div;
+    uint32_t pll_rate = CONFIG_DDR_SEL_PLL == APLL ? CONFIG_APLL_FREQ : CONFIG_MPLL_FREQ;
 
-    div = ((CONFIG_MPLL_FREQ * 1000 * 1000 + freq - 1) / freq - 1) & 0xff;
+    div = ((pll_rate * 1000 * 1000 + freq - 1) / freq - 1) & 0xff;
 
     uint32_t reg = cpm_inl(CPM_SSICDR);
     reg = cpm_inl(CPM_SSICDR);

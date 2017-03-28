@@ -45,6 +45,7 @@
 #define CPM_BCHCDR  (0xac)
 
 #define CPM_MPHYCR  (0xe8)
+#define CPM_DRCG    (0xd0)
 
 #define CPM_CPAPCR  (0x10)
 #define CPM_CPMPCR  (0x14)

@@ -250,7 +250,7 @@ $(OUTDIR)/x-loader-pad-with-mbr-gpt-with-sleep-lib.bin: $(OUTDIR)/x-loader-pad-w
 $(OUTDIR)/x-loader-pad-with-sleep-lib.bin: $(OUTDIR)/x-loader-pad.bin $(SLEEPLIB)
 	cat $< $(SLEEPLIB) > $@
 	@cp $@ $@.tmp
-	$(OBJCOPY) --gap-fill=0xff --pad-to=25600 -I binary -O binary $@.tmp $@
+	$(OBJCOPY) --gap-fill=0xff --pad-to=26624 -I binary -O binary $@.tmp $@
 	@rm $@.tmp
 
 $(OUTDIR)/x-loader-pad-with-mbr-gpt.bin: $(OUTDIR)/mbr-gpt.bin $(OUTDIR)/x-loader-pad.bin $(TOOLSDIR)/spl_params_fixer
@@ -276,16 +276,12 @@ $(OUTDIR)/spl_lpddr.bin: $(OUTDIR)/x-loader.elf
 	$(OBJCOPY) $(OBJCFLAGS) -O binary $< $@
 endif
 
-$(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator $(TOOLSDIR)/uart_baudrate_lut $(TOOLSDIR)/efuse_params_creator $(OBJS)
+$(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator \
+						$(TOOLSDIR)/sfc_timing_params_creator \
+						$(TOOLSDIR)/uart_baudrate_lut \
+						$(TOOLSDIR)/efuse_params_creator \
+						$(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) -o $@ -Map $(OUTDIR)/x-loader.map
-
-$(TOOLSDIR)/sfc_boot_checksum: $(TOOLSDIR)/sfc_boot_checksum.c
-	gcc -o $@ -D__HOST__ -I$(TOPDIR)/include $<
-	strip $@
-
-$(TOOLSDIR)/spl_params_fixer: $(TOOLSDIR)/spl_params_fixer.c
-	gcc -o $@ -D__HOST__ -DCONFIG_BOOT_MMC -I$(TOPDIR)/include $<
-	strip $@
 
 ifeq ($(CONFIG_GPT_TABLE), y)
 ifneq ($(TOPDIR)/boards/$(BOARD)/partitions.tab, $(wildcard $(TOPDIR)/boards/$(BOARD)/partitions.tab))
@@ -316,6 +312,9 @@ $(OUTDIR)/mbr.bin: $(TOOLSDIR)/mbr_creator.c
 		-o $@ > /dev/zero
 endif
 
+#
+# Host tools
+#
 $(TOOLSDIR)/ddr_params_creator: $(TOOLSDIR)/ddr_params_creator.c
 	gcc -o $@ -D__HOST__ -I$(TOPDIR)/include $<
 	strip $@
@@ -330,6 +329,19 @@ $(TOOLSDIR)/efuse_params_creator: $(TOOLSDIR)/efuse_params_creator.c
 	gcc -o $@ -D__HOST__ -I$(TOPDIR)/include $<
 	strip $@
 	$@ > $(TOPDIR)/include/generated/efuse_reg_values.h
+
+$(TOOLSDIR)/sfc_boot_checksum: $(TOOLSDIR)/sfc_boot_checksum.c
+	gcc -o $@ -D__HOST__ -I$(TOPDIR)/include $<
+	strip $@
+
+$(TOOLSDIR)/sfc_timing_params_creator: $(TOOLSDIR)/sfc_timing_params_creator.c
+	gcc -o $@ -D__HOST__ -DCONFIG_BOOT_SFC -I$(TOPDIR)/include $<
+	strip $@
+	$@ > $(TOPDIR)/include/generated/sfc_timing_params.h
+
+$(TOOLSDIR)/spl_params_fixer: $(TOOLSDIR)/spl_params_fixer.c
+	gcc -o $@ -D__HOST__ -DCONFIG_BOOT_MMC -I$(TOPDIR)/include $<
+	strip $@
 
 $(TIMESTAMP_FILE):
 	@LC_ALL=C date +'#define X_LOADER_DATE "%b %d %C%y"' > $@.tmp
@@ -404,8 +416,10 @@ clean:
 			$(TOOLSDIR)/mbr_creator \
 			$(TOOLSDIR)/spl_params_fixer \
 			$(TOOLSDIR)/efuse_params_creator \
+			$(TOOLSDIR)/sfc_timing_params_creator \
 			$(TOPDIR)/include/generated/ddr_reg_values.h \
 			$(TOPDIR)/include/generated/uart_baudrate_reg_values.h \
+			$(TOPDIR)/include/generated/sfc_timing_params.h \
 			$(TOPDIR)/include/generated/efuse_reg_values.h \
 			$(TIMESTAMP_FILE)
 

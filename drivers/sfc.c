@@ -17,6 +17,7 @@
  */
 
 #include <common.h>
+#include <generated/sfc_timing_params.h>
 
 #define src_readl(offset)   readl(SFC_BASE + offset)
 #define sfc_writel(value, offset)   writel(value, SFC_BASE + offset);
@@ -235,11 +236,10 @@ void sfc_init(void) {
     tmp |= WP_EN;
     sfc_writel(tmp, SFC_GLB);
 
-    tmp = src_readl(SFC_DEV_CONF);
-    tmp &= ~(CMD_TYPE | CPHA | CPOL | SMP_DELAY_MSK |
-            THOLD_MSK | TSETUP_MSK | TSH_MSK);
-    tmp |= (CEDL | HOLDDL | WPDL | 1 << SMP_DELAY_OFFSET);
-    sfc_writel(tmp, SFC_DEV_CONF);
+    /*
+     * Set sfc timing
+     */
+    sfc_writel(DEF_TIM_VAL, SFC_DEV_CONF);
 
     for (int i = 0; i < 6; i++)
         sfc_writel((src_readl(SFC_TRAN_CONF(i)) & (~(TRAN_MODE_MSK | FMAT))),
