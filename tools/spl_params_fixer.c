@@ -215,7 +215,9 @@ int main(int argc, char *argv[]) {
             (cdiv - 1) << 0 |
             (0x7) << 20;
 
-    params->pll_freq = CONFIG_APLL_FREQ * 1000 * 1000;
+    uint32_t pll_rate = CONFIG_CPU_SEL_PLL == APLL ? CONFIG_APLL_FREQ : CONFIG_MPLL_FREQ;
+
+    params->pll_freq = pll_rate * 1000 * 1000;
     params->cpccr.d32 = cpccr;
 
     desc = params->cpm_desc;

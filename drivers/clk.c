@@ -180,47 +180,60 @@ static void start_clk(void) {
 static void pll_init(void) {
     uint8_t n, m, od, bs;
     uint32_t regval = 0;
+    uint32_t timeout = 0;
 
-    /*
-     * Configure APLL
-     */
-    bs = 1;
-    n = 0;
-    m = CONFIG_APLL_FREQ / CONFIG_EXTAL_FREQ - 1;
-    od = 0;
+    if (CONFIG_APLL_FREQ > 0) {
+        /*
+         * Configure APLL
+         */
+        bs = 1;
+        n = 0;
+        m = CONFIG_APLL_FREQ / CONFIG_EXTAL_FREQ - 1;
+        od = 0;
 
-    regval |= (1 << CPM_CPAPCR_PLLEN_BIT) |
-              (0x20 << CPM_CPAPCR_PLLST_BIT) |
-              (bs << CPM_CPAPCR_BS_BIT) |
-              (m << CPM_CPAPCR_PLLM_BIT) |
-              (n << CPM_CPAPCR_PLLN_BIT) |
-              (od << CPM_CPAPCR_PLLOD_BIT);
-    cpm_outl(regval, CPM_CPAPCR);
+        regval |= (1 << CPM_CPAPCR_PLLEN_BIT) |
+                  (0x20 << CPM_CPAPCR_PLLST_BIT) |
+                  (bs << CPM_CPAPCR_BS_BIT) |
+                  (m << CPM_CPAPCR_PLLM_BIT) |
+                  (n << CPM_CPAPCR_PLLN_BIT) |
+                  (od << CPM_CPAPCR_PLLOD_BIT);
+        cpm_outl(regval, CPM_CPAPCR);
 
-    /*
-     * Wait APLL stable
-     */
-    while(!(cpm_inl(CPM_CPAPCR) & (1 << CPM_CPAPCR_PLLON_BIT)));
+        /*
+         * Wait APLL stable
+         */
+        timeout = 0x10000;
+        while(!(cpm_inl(CPM_CPAPCR) & (1 << CPM_CPAPCR_PLLON_BIT)) && --timeout) {
+            if (timeout == 0)
+                panic("\n\tAPLL init timeout.\n");
+        }
+    }
 
-    /*
-     * Configure MPLL
-     */
-    bs = 1;
-    n = 0;
-    m = CONFIG_MPLL_FREQ / CONFIG_EXTAL_FREQ - 1;
-    od = 0;
-    regval = 0;
-    regval |= (1 << CPM_CPMPCR_PLLEN_BIT) |
-            (bs << CPM_CPMPCR_BS_BIT) |
-            (m << CPM_CPMPCR_PLLM_BIT) |
-            (n << CPM_CPMPCR_PLLN_BIT) |
-            (od << CPM_CPMPCR_PLLOD_BIT);
-    cpm_outl(regval, CPM_CPMPCR);
+    if (CONFIG_MPLL_FREQ > 0) {
+        /*
+         * Configure MPLL
+         */
+        bs = 1;
+        n = 0;
+        m = CONFIG_MPLL_FREQ / CONFIG_EXTAL_FREQ - 1;
+        od = 0;
+        regval = 0;
+        regval |= (1 << CPM_CPMPCR_PLLEN_BIT) |
+                (bs << CPM_CPMPCR_BS_BIT) |
+                (m << CPM_CPMPCR_PLLM_BIT) |
+                (n << CPM_CPMPCR_PLLN_BIT) |
+                (od << CPM_CPMPCR_PLLOD_BIT);
+        cpm_outl(regval, CPM_CPMPCR);
 
-    /*
-     * Wait MPLL stable
-     */
-    while(!(cpm_inl(CPM_CPMPCR) & (1 << CPM_CPMPCR_PLLON_BIT)));
+        /*
+         * Wait MPLL stable
+         */
+        timeout = 0x10000;
+        while(!(cpm_inl(CPM_CPMPCR) & (1 << CPM_CPMPCR_PLLON_BIT)) && --timeout) {
+            if (timeout == 0)
+                panic("\n\tMPLL init timeout.\n");
+        }
+    }
 }
 
 static void clk_tree_init(void) {
@@ -262,42 +275,29 @@ static void clk_tree_init(void) {
      */
     regval = (cpccr & (0xff << 24)) | (cpm_inl(CPM_CPCCR) & ~(0xff << 24));
     cpm_outl(regval, CPM_CPCCR);
+    while(!(cpm_inl(CPM_CPCSR) & 0xf0000000));
 
-    cpu_freq = CONFIG_APLL_FREQ;
+    cpu_freq = CONFIG_CPU_SEL_PLL == APLL ? CONFIG_APLL_FREQ : CONFIG_MPLL_FREQ;
 }
 
 #ifdef CONFIG_BOOT_USB
-static void cpu_clk_to_ext(void) {
-    uint32_t cpccr = 0,regval = 0;
+static void reset_clk_tree(void) {
+    uint32_t cpccr = 0x55000000;
+    uint32_t regval = 0;
 
-    uint8_t cdiv, l2div, h0div, h2div, pdiv;
-    uint8_t src_sel, cpu_clk_sel, h0_clk_sel, h2_clk_sel;
+    cpccr |= ((1 - 1) << 16)  /* PDIV                   */
+          | ((1 - 1) << 12)   /* H2DIV                  */
+          | ((1 - 1) << 8)    /* H0DIV                  */
+          | ((1 - 1) << 4)    /* L2DIV                  */
+          | (1 - 1);          /* CDIV                   */
 
-    src_sel = 0x01; // EXCLK
-    cpu_clk_sel = 0x1; //SCLK_A
-    h0_clk_sel = 0x1; //SCLK_A
-    h2_clk_sel = h0_clk_sel;
 
-    cdiv = 1;
-    l2div = 1;
-    h0div = 1;
-    h2div = h0div;
-    pdiv = h2div * 1;
-
-    cpccr = (src_sel << 30) |
-            (cpu_clk_sel << 28) |
-            (h0_clk_sel << 26) |
-            (h2_clk_sel << 24) |
-            (pdiv - 1) << 16 |
-            (h2div - 1) << 12 |
-            (h0div - 1) << 8 |
-            (l2div - 1) << 4 |
-            (cdiv - 1) << 0;
     /*
      * Change sel
      */
     regval = (cpccr & (0xff << 24)) | (cpm_inl(CPM_CPCCR) & ~(0xff << 24));
     cpm_outl(regval, CPM_CPCCR);
+    while(!(cpm_inl(CPM_CPCSR) & 0xf0000000));
 
     /*
      * Change div
@@ -312,10 +312,7 @@ static void cpu_clk_to_ext(void) {
 
 void clk_init(void) {
 #ifdef CONFIG_BOOT_USB
-    /*
-     * CPU clk change to ext clk
-     */
-    cpu_clk_to_ext();
+    reset_clk_tree();
 #endif
 
     /*

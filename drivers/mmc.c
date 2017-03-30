@@ -729,7 +729,7 @@ static int mmc_send_cmd(struct mmc_cmd* cmd, struct mmc_data* data) {
 
     //TODO:
     if (data && (data->flags & MMC_DATA_WRITE)) {
-        printf("MSC: Unsupport write\n");
+        msc_debug("MSC: Unsupport write\n");
         return -1;
     }
 

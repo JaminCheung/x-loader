@@ -27,18 +27,19 @@
 
 
 struct efuse_cfg {
-    unsigned int rd_adj;
-    unsigned int wr_adj;
-    unsigned int rd_strobe;
-    unsigned int wr_strobe;
+    uint32_t rd_adj;
+    uint32_t wr_adj;
+    uint32_t rd_strobe;
+    uint32_t wr_strobe;
 };
 
 static int efuse_adjust_cfg(struct efuse_cfg *cfg) {
     int i;
-    unsigned int val, ns;
-    unsigned h2clk;
+    uint32_t val, ns;
+    uint32_t h2clk;
+    uint32_t pll_rate = CONFIG_DDR_SEL_PLL == APLL ? CONFIG_APLL_FREQ : CONFIG_MPLL_FREQ;
 
-    h2clk = CONFIG_MPLL_FREQ / CONFIG_AHB_CLK_DIV * 1000000;
+    h2clk = pll_rate / CONFIG_AHB_CLK_DIV * 1000000;
     ns = 1000000000 / h2clk;
 
     for(i = 0; i < 0x4; i++)

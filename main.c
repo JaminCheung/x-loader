@@ -19,7 +19,7 @@
 #include <common.h>
 
 #ifdef CONFIG_BOOT_MMC
-uint32_t cpu_freq = CONFIG_APLL_FREQ;
+uint32_t cpu_freq = CONFIG_CPU_SEL_PLL == APLL ? CONFIG_APLL_FREQ : CONFIG_MPLL_FREQ;
 
 #elif (defined CONFIG_BOOT_USB)
 /*

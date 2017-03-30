@@ -277,13 +277,14 @@ static void ddr_params_creator(struct ddrc_reg *ddrc, struct ddrp_reg *ddrp,
 
 static void fill_in_params(struct ddr_params *ddr_params, int type) {
     struct lpddr_params *params = NULL;
+    uint32_t pll_rate = CONFIG_DDR_SEL_PLL == APLL ? CONFIG_APLL_FREQ : CONFIG_MPLL_FREQ;
 
     params = &ddr_params->lpddr_params;
 
     memset(params, 0, sizeof(struct lpddr_params));
 
     ddr_params->type = type;
-    ddr_params->freq = (CONFIG_MPLL_FREQ * 1000 * 1000 / CONFIG_DDR_FREQ_DIV);
+    ddr_params->freq = (pll_rate * 1000 * 1000 / CONFIG_DDR_FREQ_DIV);
 
     caculate_tck(ddr_params);
 

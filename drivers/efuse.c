@@ -17,7 +17,6 @@
  */
 
 #include <common.h>
-#include <efuse.h>
 #include <generated/efuse_reg_values.h>
 
 #define EFUSE_CTRL		0x0
