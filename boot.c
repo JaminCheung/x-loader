@@ -267,6 +267,9 @@ void boot_next_stage(void) {
     if (error < 0)
         hang_reason("\n\tLoad next stage failed.\n");
 
+#ifdef CONFIG_WDT
+    wdt_stop();
+#endif
     /*
      * Step 4: prepare jump to next stage
      */

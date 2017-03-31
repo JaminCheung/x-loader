@@ -91,11 +91,12 @@ void x_loader_main(void) {
      */
     clk_init();
 
+#ifdef CONFIG_WDT
     /*
      * Init wdt
      */
     wdt_init();
-
+#endif
     /*
      * Init lpddr
      */

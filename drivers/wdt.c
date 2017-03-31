@@ -18,10 +18,38 @@
 #include <generated/config.h>
 #include <common.h>
 #include <wdt.h>
+#include <clk.h>
 
+#ifdef CONFIG_WDT
 static void wdt_start(unsigned int msec)
 {
-	unsigned int t = RTC_FREQ / WDT_DIV * msec / 1000;
+
+	unsigned int freqency, prescaler, wdiv;
+
+#ifdef CONFIG_RTCCLK_SEL
+	freqency = RTC_FREQ;
+	prescaler = TCSR_RTC_EN;
+	wdiv = 64;
+#else
+	freqency = CONFIG_EXTAL_FREQ * 1024 * 1024;
+	prescaler = TCSR_EXT_EN;
+	wdiv = 1024;
+#endif
+
+	if (wdiv == 1)
+		prescaler |= TCSR_PRESCALE_1;
+	else if (wdiv == 4)
+		prescaler |= TCSR_PRESCALE_4;
+	else if (wdiv == 16)
+		prescaler |= TCSR_PRESCALE_16;
+	else if (wdiv == 64)
+		prescaler |= TCSR_PRESCALE_64;
+	else if (wdiv == 256)
+		prescaler |= TCSR_PRESCALE_256;
+	else if (wdiv == 1024)
+		prescaler |= TCSR_PRESCALE_1024;
+
+	unsigned int t =  freqency / wdiv * msec / 1000;
 	if (t > 65535)
 		t = 65535;
 
@@ -29,7 +57,7 @@ static void wdt_start(unsigned int msec)
 
 	writel(0, WDT_BASE + WDT_TCNT);
 	writel(t, WDT_BASE + WDT_TDR);
-	writel(TCSR_PRESCALE | TCSR_RTC_EN, WDT_BASE + WDT_TCSR);
+	writel(prescaler, WDT_BASE + WDT_TCSR);
 	writel(0, WDT_BASE + WDT_TCER);
 	writel(TCER_TCEN,WDT_BASE + WDT_TCER);
 }
@@ -43,3 +71,4 @@ void wdt_stop(void)
 void wdt_init(void) {
 	wdt_start(CONFIG_WDT_TIMEOUT_MS);
 }
+#endif

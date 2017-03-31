@@ -117,4 +117,9 @@
 #define RECOVERY_UPDATE_FLAG_OFFSET             0x6000      //24kb
 #define RECOVERY_UPDATE_FLAG_SIZE                   4               //unit: byte
 #define RECOVERY_UPDATE_FLAG_UPDATING         0x5A5A5A5A
+
+ /*
+ * Wdt
+ */
+#undef CONFIG_WDT
 #endif /* BOARDS_COMMON_H */

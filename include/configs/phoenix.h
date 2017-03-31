@@ -140,5 +140,6 @@
  /*
  * Wdt
  */
-#define CONFIG_WDT_TIMEOUT_MS   10000
+/*#define CONFIG_WDT */
+#define CONFIG_WDT_TIMEOUT_MS   2600
 #endif /* PHOENIX_H */
