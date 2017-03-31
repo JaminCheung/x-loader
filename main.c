@@ -92,6 +92,11 @@ void x_loader_main(void) {
     clk_init();
 
     /*
+     * Init wdt
+     */
+    wdt_init();
+
+    /*
      * Init lpddr
      */
     lpddr_init();

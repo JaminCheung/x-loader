@@ -140,4 +140,8 @@
 #define CONFIG_OTA_STEP2_KERNEL_OFFSET    0xd00000
 #endif
 
+ /*
+ * Wdt
+ */
+#define CONFIG_WDT_TIMEOUT_MS   10000
 #endif /* YAK_H */

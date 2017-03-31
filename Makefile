@@ -180,7 +180,8 @@ OBJS-y := start.o                                                              \
           drivers/i2c.o                                                        \
           drivers/rtc.o                                                        \
           drivers/efuse.o                                                      \
-          drivers/pmu.o
+          drivers/pmu.o							       \
+	  drivers/wdt.o
 OBJS-$(CONFIG_BOOTLOADER) += boot.o
 OBJS-$(CONFIG_BOOT_KERNEL) += boot_sel.o
 
