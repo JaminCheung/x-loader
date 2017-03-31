@@ -96,6 +96,15 @@ void x_loader_main(void) {
      */
     lpddr_init();
 
+#ifdef CONFIG_DDR_ACCESS_TEST
+    /*
+     * DDR R/W test
+     */
+    ddr_access_test();
+
+    hang_reason("Memory test done.\n");
+#endif
+
     /*
      * Init board
      */

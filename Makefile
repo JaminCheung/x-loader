@@ -186,6 +186,7 @@ OBJS-$(CONFIG_BOOT_KERNEL) += boot_sel.o
 
 OBJS-y += common/printf.o                                                      \
           common/common.o                                                      \
+          common/ddr_test.o                                                    \
           common/check_socid.o
 
 OBJS-y += boards/$(BOARD)/board.o

@@ -1660,6 +1660,7 @@ size_t strlen(const char * s);
 #endif
 
 #ifndef __ASSEMBLY__
+void ddr_access_test(void);
 void dump_mem_content(uint32_t *src, uint32_t len);
 #endif
 

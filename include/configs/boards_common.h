@@ -98,6 +98,11 @@
 #undef CONFIG_RTCCLK_SEL
 
 /*
+ * DDR R/W test
+ */
+#undef CONFIG_DDR_ACCESS_TEST
+
+/*
  * WIFI MAC
  */
 #undef CONFIG_GET_WIFI_MAC
