@@ -84,6 +84,13 @@ include/configs/boards_common.h为默认值
 打开include/configs/BOARD_NAME.h
 增加定义：#define CONFIG_RECOVERY
 
+如何使能watch dog功能？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+打开include/configs/BOARD_NAME.h
+增加定义：#define CONFIG_WDT
+默认timeout为1000ms
+通过#define CONFIG_WDT_TIMEOUT_MS修改默认值
+
 烧录什么文件？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 编译完成会有提示：“Image: xxxxxx” is ready

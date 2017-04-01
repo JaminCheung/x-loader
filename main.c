@@ -97,6 +97,7 @@ void x_loader_main(void) {
      */
     wdt_init();
 #endif
+
     /*
      * Init lpddr
      */

@@ -148,9 +148,4 @@
 #define CONFIG_OTA_STEP2_KERNEL_OFFSET    0xd00000
 #endif
 
- /*
- * Wdt
- */
-/*#define CONFIG_WDT */
-#define CONFIG_WDT_TIMEOUT_MS   2600
 #endif /* MEDIA_H */

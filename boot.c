@@ -267,15 +267,16 @@ void boot_next_stage(void) {
     if (error < 0)
         hang_reason("\n\tLoad next stage failed.\n");
 
-#ifdef CONFIG_WDT
-    wdt_stop();
-#endif
     /*
      * Step 4: prepare jump to next stage
      */
     error = pre_handle_before_jump((void *) argv);
     if (error < 0)
         hang_reason("\n\tPre handle before jump failed.\n");
+
+#ifdef CONFIG_WDT
+    wdt_stop();
+#endif
 
     uart_puts("\nJump...\n\n");
 

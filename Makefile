@@ -180,8 +180,9 @@ OBJS-y := start.o                                                              \
           drivers/i2c.o                                                        \
           drivers/rtc.o                                                        \
           drivers/efuse.o                                                      \
-          drivers/pmu.o							       \
-	  drivers/wdt.o
+          drivers/pmu.o                                                        \
+          drivers/wdt.o
+
 OBJS-$(CONFIG_BOOTLOADER) += boot.o
 OBJS-$(CONFIG_BOOT_KERNEL) += boot_sel.o
 
@@ -282,6 +283,7 @@ $(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator \
 						$(TOOLSDIR)/sfc_timing_params_creator \
 						$(TOOLSDIR)/uart_baudrate_lut \
 						$(TOOLSDIR)/efuse_params_creator \
+						$(TOOLSDIR)/wdt_params_creator \
 						$(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) -o $@ -Map $(OUTDIR)/x-loader.map
 
@@ -340,6 +342,11 @@ $(TOOLSDIR)/sfc_timing_params_creator: $(TOOLSDIR)/sfc_timing_params_creator.c
 	gcc -o $@ -D__HOST__ -DCONFIG_BOOT_SFC -I$(TOPDIR)/include $<
 	strip $@
 	$@ > $(TOPDIR)/include/generated/sfc_timing_params.h
+
+$(TOOLSDIR)/wdt_params_creator: $(TOOLSDIR)/wdt_params_creator.c
+	gcc -o $@ -D__HOST__ -DCONFIG_BOOT_SFC -I$(TOPDIR)/include $<
+	strip $@
+	$@ > $(TOPDIR)/include/generated/wdt_cfg_params.h
 
 $(TOOLSDIR)/spl_params_fixer: $(TOOLSDIR)/spl_params_fixer.c
 	gcc -o $@ -D__HOST__ -DCONFIG_BOOT_MMC -I$(TOPDIR)/include $<
@@ -419,10 +426,12 @@ clean:
 			$(TOOLSDIR)/spl_params_fixer \
 			$(TOOLSDIR)/efuse_params_creator \
 			$(TOOLSDIR)/sfc_timing_params_creator \
+			$(TOOLSDIR)/wdt_params_creator \
 			$(TOPDIR)/include/generated/ddr_reg_values.h \
 			$(TOPDIR)/include/generated/uart_baudrate_reg_values.h \
 			$(TOPDIR)/include/generated/sfc_timing_params.h \
 			$(TOPDIR)/include/generated/efuse_reg_values.h \
+			$(TOPDIR)/include/generated/wdt_cfg_params.h \
 			$(TIMESTAMP_FILE)
 
 distclean: clean unconfig

@@ -22,6 +22,7 @@ tools/mbr_creator
 tools/spl_params_fixer
 tools/efuse_params_creator
 tools/sfc_timing_params_creator
+tools/wdt_params_creator
 
 #
 # ignore tags files

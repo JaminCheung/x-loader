@@ -118,8 +118,11 @@
 #define RECOVERY_UPDATE_FLAG_SIZE                   4               //unit: byte
 #define RECOVERY_UPDATE_FLAG_UPDATING         0x5A5A5A5A
 
- /*
- * Wdt
+/*
+ * Watchdog
  */
 #undef CONFIG_WDT
+#define CONFIG_WDT_CLK_SRC_RTC
+#define CONFIG_WDT_TIMEOUT_MS 1000
+
 #endif /* BOARDS_COMMON_H */
