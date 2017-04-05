@@ -52,6 +52,7 @@ int main(int argc, char* argv[]) {
     uint32_t src_freq;
     uint32_t src_clk;
     int wdt_div = -1;
+    int i = 0;
 
     assert(timeout > 0);
 
@@ -71,7 +72,7 @@ int main(int argc, char* argv[]) {
 
     memset(&wdt_cfg, 0, sizeof(struct wdt_cfg));
 
-    for (int i = 0; i < sizeof(wdt_div_table); i++) {
+    for (i = 0; i < sizeof(wdt_div_table); i++) {
         timeout_min = wdt_div_table[i].div * 0x2 * 1000 / src_freq; //WDT_TDR set should bigger than 0x1
         timeout_max = wdt_div_table[i].div * 0xffff * 1000 / src_freq;
         if (timeout >= timeout_min && timeout <= timeout_max
