@@ -53,6 +53,21 @@
 #endif
 
 /*
+ * 000: Full strength driver
+ * 001: Half strength driver
+ * 110: Quarter strength driver
+ * 111: Octant strength driver
+ * 100: Three-quarters strength driver
+ */
+#define CONFIG_DDR_DRIVER_STRENGTH 4
+
+/*
+ * 1: 32bits
+ * 0: 1bits
+ */
+#define CONFIG_DDR_DW32 0
+
+/*
  * SFC
  */
 #ifdef CONFIG_BOOT_SFC

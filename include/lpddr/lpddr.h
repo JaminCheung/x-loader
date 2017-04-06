@@ -105,7 +105,9 @@ struct ddr_params {
 #define DDRC_TIMING(n)          (0x60 + 4 * (n - 1))
 #define DDRC_REMAP(n)           (0x9c + 4 * (n - 1))
 
+#define DDRC_PHYRST_CFG (DDR_PHY_OFFSET + 0x1000 + 0x80)
 #define DDRC_CLKSTP_CFG (DDR_PHY_OFFSET + 0x1000 + 0x68)
+
 #define DDRP_PIR    (DDR_PHY_OFFSET + 0x4) /* PHY Initialization Register */
 #define DDRP_PGCR   (DDR_PHY_OFFSET + 0x8) /* PHY General Configuration Register*/
 #define DDRP_PGSR   (DDR_PHY_OFFSET + 0xc) /* PHY General Status Register*/
@@ -203,9 +205,9 @@ struct ddr_params {
 //#define DDRC_CFG_COL_11   (3 << DDRC_CFG_COL_BIT) /* 11-bit Column address is used */
 #define DDRC_CFG_CS1EN_BIT  7 /* DDR Chip-Select-1 Enable */
 #define DDRC_CFG_CS0EN_BIT  6 /* DDR Chip-Select-0 Enable */
-//#define DDRC_CFG_CS1EN        (1 << 7) /* 0 DDR Pin CS1 un-used
+#define DDRC_CFG_CS1EN        (1 << 7) /* 0 DDR Pin CS1 un-used
 //                      1 There're DDR memory connected to CS1 */
-//#define DDRC_CFG_CS0EN        (1 << 6) /* 0 DDR Pin CS0 un-used
+#define DDRC_CFG_CS0EN        (1 << 6) /* 0 DDR Pin CS0 un-used
 //                      1 There're DDR memory connected to CS0 */
 #define DDRC_CFG_CL_BIT     2 /* CAS Latency */
 //#define DDRC_CFG_CL_MASK  (0xf << DDRC_CFG_CL_BIT)
@@ -428,6 +430,7 @@ struct ddr_params {
 #define DDRP_PIR_QSTRN      (1 << 7)
 #define DDRP_PIR_EYETRN     (1 << 8)
 #define DDRP_PIR_DLLBYP     (1 << 17)
+#define DDRP_PIR_LOCKBYP    (1 << 29)
 /* DDRP PHY General Configurate Register */
 #define DDRP_PGCR_ITMDMD    (1 << 0)
 #define DDRP_PGCR_DQSCFG    (1 << 1)
@@ -1032,13 +1035,50 @@ typedef union ddrp_dtpr2 {
     } b;
 } ddrp_dtpr2_t;
 
+typedef union ddrp_odtcr {
+    /** odtcr configure odt for read & write ctrl. */
+    uint32_t d32;
+    struct{
+        unsigned int RDODT0:4;
+        unsigned int RDODT1:4;
+        unsigned int RDODT2:4;
+        unsigned int RDODT3:4;
+        unsigned int WDODT0:4;
+        unsigned int WDODT1:4;
+        unsigned int WDODT2:4;
+        unsigned int WDODT3:4;
+    }b;
+}ddrp_odtcr_t;
+
+typedef union ddrp_dxngcr{
+    uint32_t d32;
+    struct {
+        unsigned int dxen:1;
+        unsigned int dqsodt:1;
+        unsigned int dqodt:1;
+        unsigned int dxiom:1;
+        unsigned int dxpdr:1;
+        unsigned int dxpdd:1;
+        unsigned int dqsrpd:1;
+        unsigned int dsen:2;
+        unsigned int dqsrtt:1;
+        unsigned int dqrtt:1;
+        unsigned int rttoh:2;
+        unsigned int rttoal:1;
+        unsigned int r0rvsl:4;
+        unsigned int r1rvsl:4;
+        unsigned int r2rvsl:4;
+        unsigned int r3rvsl:4;
+        unsigned int reserved:5;
+    }b;
+}ddrp_dxngcr_t;
+
 struct ddrp_reg {
     uint32_t dcr;
     ddrp_mr0_t mr0;
     ddrp_mr1_t mr1;
     ddrp_mr2_t mr2;
     ddrp_mr3_t mr3;
-    uint32_t odtcr;
     uint32_t pgcr;
     ddrp_ptr0_t ptr0;
     ddrp_ptr1_t ptr1;
@@ -1046,6 +1086,12 @@ struct ddrp_reg {
     ddrp_dtpr0_t dtpr0;
     ddrp_dtpr1_t dtpr1;
     ddrp_dtpr2_t dtpr2;
+    ddrp_odtcr_t odtcr;
+    ddrp_dxngcr_t dxngcrt[4];
+    unsigned int zqncr1;
+    unsigned int impedance[2]; //0-cal_value 1-req_value
+    unsigned int odt_impedance[2]; //0-cal_value 1-req_value
+    unsigned char rzq_table[32];
 };
 
 void lpddr_init(void);

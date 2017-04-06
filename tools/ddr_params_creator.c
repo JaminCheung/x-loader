@@ -150,7 +150,6 @@ static void ddrc_params_creat(struct ddrc_reg *ddrc, struct ddr_params *p) {
     if (tmp > 4)
         tmp = 4;
 
-    //TODO: why?(| 0x8)
     ddrc->cfg.b.CL = tmp | 0x8; /* NOT used in this version */
 
     ddrc->cfg.b.BA0 = p->bank8;
@@ -213,17 +212,23 @@ static void ddrp_params_creat(struct ddrp_reg *ddrp, struct ddr_params *p) {
         count++;
     ddrp->mr0.lpddr.BL = count;
 
+    ddrp->mr2.lpddr.PASR = 0;
+    ddrp->mr2.lpddr.TCSR = 3;  //85 degree centigrade.
+#ifdef CONFIG_DDR_DRIVER_STRENGTH
+    ddrp->mr2.lpddr.DS = CONFIG_DDR_DRIVER_STRENGTH;
+#endif
+
     /* PTRn registers */
     ddrp->ptr0.b.tDLLSRST = calc_nck(p->lpddr_params.tDLLSRST, tck->ps);
     ddrp->ptr0.b.tDLLLOCK = calc_nck(5120, tck->ps); /* LPDDR default 5.12us*/
-    ddrp->ptr0.b.tITMSRST = 8;
+    ddrp->ptr0.b.tITMSRST = 8; /* default 8 cycle & more than 8 */
 
     ddrp->ptr1.b.tDINIT0 = calc_nck(200000, tck->ps); /* LPDDR default 200us*/
     tmp = calc_nck(100, tck->ps);
-    ddrp->ptr1.b.tDINIT1 = tmp;
+    ddrp->ptr1.b.tDINIT1 = tmp; /* LPDDR don't used */
 
-    ddrp->ptr2.b.tDINIT2 = calc_nck(100, tck->ps); /* DDR3 default 200us*/
-    ddrp->ptr2.b.tDINIT3 = calc_nck(100, tck->ps);
+    ddrp->ptr2.b.tDINIT2 = calc_nck(100, tck->ps); /* LPDDR don't used */
+    ddrp->ptr2.b.tDINIT3 = calc_nck(100, tck->ps); /* LPDDR don't used */
 
     /* DTPR0 registers */
     ddrp->dtpr0.b.tMRD = p->lpddr_params.tMRD;
@@ -234,10 +239,12 @@ static void ddrp_params_creat(struct ddrp_reg *ddrp, struct ddr_params *p) {
     PNDEF(0, tRAS, tmp, 2, 31, tck->ps, lpddr_params);
     PNDEF(0, tRRD, tmp, 1, 8, tck->ps, lpddr_params);
     PNDEF(0, tRC, tmp, 2, 42, tck->ps, lpddr_params);
-    ddrp->dtpr0.b.tCCD = (p->lpddr_params.tCCD > (p->bl / 2)) ? 1 : 0;
+    ddrp->dtpr0.b.tCCD = 0; /* LPDDR don't used */
 
     /* DTPR1 registers */
-    PNDEF(1, tFAW, tmp, 2, 31, tck->ps, lpddr_params);
+    //PNDEF(1, tFAW, tmp, 2, 31, tck->ps, lpddr_params);
+    ddrp->dtpr1.b.tFAW = 18;
+
     PNDEF(1, tRFC, tmp, 1, 255, tck->ps, lpddr_params);
 
     /* DTPR2 registers */
@@ -254,6 +261,8 @@ static void ddrp_params_creat(struct ddrp_reg *ddrp, struct ddr_params *p) {
     BETWEEN(tmp, 2, 1023);
     ddrp->dtpr2.b.tDLLK = tmp;
 
+    ddrp->dtpr2.b.tCKE = p->lpddr_params.tCKE;
+
     /* PGCR registers */
     ddrp->pgcr =
             DDRP_PGCR_ITMDMD | DDRP_PGCR_DQSCFG | 7 << DDRP_PGCR_CKEN_BIT
@@ -261,8 +270,53 @@ static void ddrp_params_creat(struct ddrp_reg *ddrp, struct ddr_params *p) {
                     | (p->cs0 | p->cs1 << 1) << DDRP_PGCR_RANKEN_BIT
                     | DDRP_PGCR_PDDISDX;
 
+    ddrp->zqncr1 = 0x7b;   // default. lpddr do not used.
+
 #undef BETWEEN
 #undef PNDEF
+}
+
+static void ddrp_config_creat(struct ddrp_reg *ddrp, struct ddr_params *p)
+{
+    int i;
+    unsigned char rzq[]={
+        0x00,0x01,0x02,0x03,0x06,0x07,0x04,0x05,
+        0x0C,0x0D,0x0E,0x0F,0x0A,0x0B,0x08,0x09,
+        0x18,0x19,0x1A,0x1B,0x1E,0x1F,0x1C,0x1D,
+        0x14,0x15,0x16,0x17,0x12,0x13,0x10,0x11
+    };  //from ddr multiphy page 158.
+    ddrp->odtcr.d32 = 0;
+#ifdef CONFIG_DDR_CHIP_ODT
+    ddrp->odtcr.d32 = 0x84210000;   //power on default.
+#endif
+    /* DDRC registers assign */
+    for(i = 0;i < 4;i++)
+        ddrp->dxngcrt[i].d32 = 0x00090e80;
+    i = 0;
+
+#ifdef CONFIG_DDR_PHY_IO_MODE_LVCOMS
+/* only for Mobile DDR SDRM, also can be called LPDDR. */
+    for(i = 0;i < 4;i++){
+        ddrp->dxngcrt[i].b.dxiom = 1;   // 0 -> SSTL mode, 1 -> CMOS mode.
+    }
+#endif
+
+#ifdef CONFIG_DDR_PHY_ODT
+    for(i = 0;i < (CONFIG_DDR_DW32 + 1) * 2;i++){
+        ddrp->dxngcrt[i].b.dqsrtt = 1;
+        ddrp->dxngcrt[i].b.dqrtt = 1;
+        ddrp->dxngcrt[i].b.dqsodt = 1;
+        ddrp->dxngcrt[i].b.dqodt = 1;
+    }
+#else
+    for(i = 0;i < (CONFIG_DDR_DW32 + 1) * 2;i++){
+        ddrp->dxngcrt[i].b.dqsrtt = 0;
+        ddrp->dxngcrt[i].b.dqrtt = 0;
+        ddrp->dxngcrt[i].b.dxen = 1;
+    }
+#endif
+    for(i = 0;i<sizeof(rzq);i++)
+            ddrp->rzq_table[i] = rzq[i];
 }
 
 static void ddr_params_creator(struct ddrc_reg *ddrc, struct ddrp_reg *ddrp,
@@ -273,6 +327,7 @@ static void ddr_params_creator(struct ddrc_reg *ddrc, struct ddrp_reg *ddrp,
 
     ddrc_params_creat(ddrc, ddr_params);
     ddrp_params_creat(ddrp, ddr_params);
+    ddrp_config_creat(ddrp, ddr_params);
 }
 
 static void fill_in_params(struct ddr_params *ddr_params, int type) {
@@ -348,6 +403,8 @@ static void file_head_print(void) {
 }
 
 static void params_print(struct ddrc_reg *ddrc, struct ddrp_reg *ddrp) {
+    int i;
+
     /* DDRC registers print */
     printf("#define DDRC_CFG_VALUE          0x%08x\n", ddrc->cfg.d32);
     printf("#define DDRC_CTRL_VALUE         0x%08x\n", ddrc->ctrl);
@@ -374,6 +431,18 @@ static void params_print(struct ddrc_reg *ddrc, struct ddrp_reg *ddrp) {
     printf("#define DDRP_DTPR1_VALUE        0x%08x\n", ddrp->dtpr1.d32);
     printf("#define DDRP_DTPR2_VALUE        0x%08x\n", ddrp->dtpr2.d32);
     printf("#define DDRP_PGCR_VALUE         0x%08x\n", ddrp->pgcr);
+    printf("#define DDRP_ODTCR_VALUE        0x%08x\n", ddrp->odtcr.d32);
+    for(i = 0;i < 4;i++) {
+        printf("#define DDRP_DX%dGCR_VALUE       0x%08x\n",i,ddrp->dxngcrt[i].d32);
+    }
+    printf("#define DDRP_ZQNCR1_VALUE       0x%08x\n", ddrp->zqncr1);
+    printf("#define DDRP_IMPANDCE_ARRAY     {0x%08x,0x%08x} //0-cal_value 1-req_value\n", ddrp->impedance[0],ddrp->impedance[1]);
+    printf("#define DDRP_ODT_IMPANDCE_ARRAY {0x%08x,0x%08x} //0-cal_value 1-req_value\n", ddrp->odt_impedance[0],ddrp->odt_impedance[1]);
+    printf("#define DDRP_RZQ_TABLE  {0x%02x",ddrp->rzq_table[0]);
+    for(i = 1;i < sizeof(ddrp->rzq_table);i++){
+        printf(",0x%02x",ddrp->rzq_table[i]);
+    }
+    printf("}\n");
 }
 
 static void sdram_size_print(struct ddr_params *p) {

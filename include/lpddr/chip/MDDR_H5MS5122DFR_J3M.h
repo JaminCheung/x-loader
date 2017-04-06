@@ -56,7 +56,7 @@
 #define DDR_tCCD 4		/* CAS# to CAS# command delay , tCK, MDDR no*/
 #define DDR_tRTW (DDR_tRL + DDR_tCCD + 2 - DDR_tWL)	/* Read to Write delay */
 #define DDR_tFAW 50		/* Four bank activate period, ns, MDDR no */
-#define DDR_tCKE MAX(2,0)		/* CKE minimum pulse width, tCK */
+#define DDR_tCKE 3		/* CKE minimum pulse width, tCK */
 #define DDR_tXS 200		/* Exit self-refresh to next valid command delay, ns */
 #define DDR_tXSRD  DDR_GET_VALUE(DDR_tXS,tck_g.ps)		/* DDR2 only: Exit self refresh to a read command, tck */
 #define DDR_tCKSRE MAX(1,0) /* Valid Clock Requirement after Self Refresh Entry or Power-Down Entry */

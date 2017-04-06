@@ -133,9 +133,20 @@ static void probe_sdram_size(void) {
 #endif
 
 static void reset_dll(void) {
+    /*
+     * WARNING: 2015-01-08
+     *  DDR CLK GATE(CPM_DRCG 0xB00000D0), BIT6 must set to 1 (or 0x40).
+     *  If clear BIT6, chip memory will not stable, gpu hang occur.
+     */
     cpm_outl(0x73 | (1 << 6) , CPM_DRCG);
     mdelay(5);
     cpm_outl(0x71 | (1 << 6), CPM_DRCG);
+    mdelay(5);
+
+    /* reset phy dll dfi and cfg */
+    ddr_writel(0xd << 21 | 1, DDRC_PHYRST_CFG);
+    mdelay(5);
+    ddr_writel(0, DDRC_PHYRST_CFG);
     mdelay(5);
 }
 
@@ -146,8 +157,15 @@ static void reset_controller(void) {
     mdelay(5);
 }
 
+static void soft_reset_controller(void) {
+    /* reset DDR ctrl */
+    ddr_writel(0x2 << 21, DDRC_PHYRST_CFG);
+    mdelay(5);
+    ddr_writel(0, DDRC_PHYRST_CFG);
+    mdelay(5);
+}
+
 static void ddr_phy_param_init(unsigned int mode) {
-    int i;
     unsigned int timeout = 10000;
 
     ddr_writel(DDRP_DCR_VALUE, DDRP_DCR);
@@ -155,6 +173,7 @@ static void ddr_phy_param_init(unsigned int mode) {
 
     switch(DDR_TYPE_MODE(mode)){
     case LPDDR:
+        ddr_writel(DDRP_MR2_VALUE, DDRP_MR2);
         break;
     //note: lpddr2 should set mr1 mr2 mr3.
     case LPDDR2:
@@ -181,21 +200,11 @@ static void ddr_phy_param_init(unsigned int mode) {
     ddr_writel(DDRP_DTPR1_VALUE, DDRP_DTPR1);
     ddr_writel(DDRP_DTPR2_VALUE, DDRP_DTPR2);
 
-    for (i = 0; i < 4; i++) {
-        unsigned int tmp = ddr_readl(DDRP_DXGCR(i));
+    ddr_writel(DDRP_DX0GCR_VALUE,DDRP_DXGCR(0));
+    ddr_writel(DDRP_DX1GCR_VALUE,DDRP_DXGCR(1));
+    ddr_writel(DDRP_DX2GCR_VALUE,DDRP_DXGCR(2));
+    ddr_writel(DDRP_DX3GCR_VALUE,DDRP_DXGCR(3));
 
-        tmp &= ~(3 << 9);
-#ifdef CONFIG_DDR_PHY_ODT
-#ifdef CONFIG_DDR_PHY_DQ_ODT
-        tmp |= 1 << 10;
-#endif /* CONFIG_DDR_PHY_DQ_ODT */
-#ifdef CONFIG_DDR_PHY_DQS_ODT
-        tmp |= 1 << 9;
-#endif /* CONFIG_DDR_PHY_DQS_ODT */
-#endif /* CONFIG_DDR_PHY_ODT */
-
-        ddr_writel(tmp, DDRP_DXGCR(i));
-    }
     ddr_writel(DDRP_PGCR_VALUE, DDRP_PGCR);
 
     /***************************************************************
@@ -218,11 +227,18 @@ static void ddr_phy_param_init(unsigned int mode) {
      *      Note: DQS resistor must be connected for LPDDR/LPDDR2    *
      *****************************************************************
      *     the config will affect power and stablity
+     *
+     *     DXIOM: 1bit
+     *           Data I/O Mode: Selects SSTL mode (when set to 0)
+     *                           or CMOS mode (when set to 1)
+     *     I/O Mode: I/O Mode select
+     *           0 = DDR2/DDR3/DDR3L/LPDDR2 mode
+     *           1 = Mobile DDR mode
      */
     switch(DDR_TYPE_MODE(mode)){
     case LPDDR:
         ddr_writel(0x30c00813, DDRP_ACIOCR);
-        ddr_writel(0x4910, DDRP_DXCCR);
+        ddr_writel(0x4912, DDRP_DXCCR);
         break;
     case DDR3:
         break;
@@ -249,7 +265,6 @@ static void ddr_chip_init(unsigned int mode)
     dwc_debug("DDR chip init\n");
 
     // DDRP_PIR_DRAMRST for ddr3 only
-#ifndef CONFIG_FPGA
     switch(DDR_TYPE_MODE(mode)){
     case DDR3:
         pir_val |= DDRP_PIR_DRAMINT | DDRP_PIR_DRAMRST | DDRP_PIR_DLLSRST;
@@ -264,22 +279,22 @@ static void ddr_chip_init(unsigned int mode)
         pir_val |= DDRP_PIR_DRAMINT | DDRP_PIR_DRAMINT;
         break;
     }
-#else
-    pir_val |= DDRP_PIR_DRAMINT | DDRP_PIR_DRAMRST | DDRP_PIR_DLLBYP;
-#endif
+
     if(IS_BYPASS_MODE(mode)) {
-        pir_val |= DDRP_PIR_DLLBYP | (1 << 29);
+        pir_val |= DDRP_PIR_DLLBYP | DDRP_PIR_LOCKBYP;
         pir_val &= ~DDRP_PIR_DLLSRST;
         // DLL Disable: only bypassmode
         ddr_writel(0x1 << 31, DDRP_ACDLLCR);
-        val = ddr_readl(DDRP_DSGCR);
+
         /*  LPDLLPD:  only for ddr bypass mode
          * Low Power DLL Power Down: Specifies if set that the PHY should respond to the *
          * DFI low power opportunity request and power down the DLL of the PHY if the *
          * wakeup time request satisfies the DLL lock time */
+        val = ddr_readl(DDRP_DSGCR);
         val &= ~(1 << 4);
         ddr_writel(val,DDRP_DSGCR);
 
+        // 200M bypass.
         val = ddr_readl(DDRP_DLLGCR);
         val |= 1 << 23;
         ddr_writel(val,DDRP_DLLGCR);
@@ -314,7 +329,7 @@ static int ddr_training_hardware(unsigned int mode)
         break;
     }
     if(IS_BYPASS_MODE(mode)) {
-        pir_val |= DDRP_PIR_DLLBYP | (1 << 29);
+        pir_val |= DDRP_PIR_DLLBYP | DDRP_PIR_LOCKBYP;
         pir_val &= ~(DDRP_PIR_DLLLOCK);
     }
     ddr_writel(pir_val, DDRP_PIR);
@@ -334,6 +349,7 @@ static int ddr_training_hardware(unsigned int mode)
            & (DDRP_PGSR_DTERR | DDRP_PGSR_DTIERR)) {
         dwc_debug("DDR hardware training error\n");
         result = ddr_readl(DDRP_PGSR);
+        debug("DDRP_PGSR=0x%x\n", result);
     }
     return result;
 }
@@ -342,19 +358,14 @@ static void ddr_training(unsigned int mode)
 {
     unsigned int training_state = -1;
     dwc_debug("DDR training\n");
-#ifndef CONFIG_DDR_FORCE_SOFT_TRAINING
+
     training_state = ddr_training_hardware(mode);
-#endif
-    if(training_state)
-    {
+    if(training_state) {
         int i = 0;
-        for (i = 0; i < 4; i++) {
+        for (i = 0; i < 4; i++)
             dwc_debug("DX%dGSR0: %x\n", i, ddr_readl(DDRP_DXGSR0(i)));
-        }
+
         dump_ddrp_register();
-#ifdef CONFIG_SPL_DDR_SOFT_TRAINING
-        training_state = ddr_training_software(mode);
-#endif // CONFIG_SPL_DDR_SOFT_TRAINING
     }
     if(training_state)
         hang_reason("DDR training failed!\n");
@@ -384,6 +395,12 @@ static void ddr_impedance_matching(void)
 #endif
 }
 
+static void force_no_selfresh(void) {
+    /* force CKE1 CS1 HIGH */
+    ddr_writel(DDRC_CFG_VALUE | DDRC_CFG_CS1EN |  DDRC_CFG_CS0EN, DDRC_CFG);
+    ddr_writel((1 << 1), DDRC_CTRL);
+}
+
 static void ddr_phy_init(unsigned int mode)
 {
     dwc_debug("DDR PHY init\n");
@@ -391,6 +408,13 @@ static void ddr_phy_init(unsigned int mode)
     /* DDR training address set*/
     ddr_phy_param_init(mode);
     ddr_chip_init(mode);
+
+    /*
+     * reset controller through APB and enable CS0&CS1 for DDRP training
+     */
+    soft_reset_controller();
+    force_no_selfresh();
+
     ddr_training(mode);
     ddr_impedance_matching();
     dwc_debug("DDR PHY init OK\n");
@@ -542,6 +566,8 @@ void lpddr_init(void) {
     if (ddr_autosr) {
         if(!bypass)
             ddr_writel(0 , DDRC_DLP);
+        else
+            ddr_writel((9 << 28) | 0xf, DDRC_CLKSTP_CFG);
     }
 
     ddr_writel(ddr_autosr, DDRC_AUTOSR_EN);

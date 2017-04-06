@@ -39,6 +39,34 @@ static int cpu_test_ddr(uint32_t start_addr, uint32_t end_addr,
         }
     }
 
+    for (uint32_t i = start_addr; i < end_addr; i += sizeof(uint32_t))
+        writel(end_addr - i, i);
+
+    if (KSEG0_REGION == region)
+        flush_dcache_all();
+
+    for (uint32_t i = start_addr; i < end_addr; i += sizeof(uint32_t)) {
+        if ((end_addr - i) != readl(i)) {
+            printf("Error: write value: 0x%x, read value: 0x%x\n",
+                    end_addr - i, readl(i));
+            return -1;
+        }
+    }
+
+    for (uint32_t i = start_addr; i < end_addr; i += sizeof(uint32_t))
+        writel(0x5a5a5a5a, i);
+
+    if (KSEG0_REGION == region)
+        flush_dcache_all();
+
+    for (uint32_t i = start_addr; i < end_addr; i += sizeof(uint32_t)) {
+        if (0x5a5a5a5a != readl(i)) {
+            printf("Error: write value: 0x5a5a5a5a, read value: 0x%x\n",
+                    readl(i));
+            return -1;
+        }
+    }
+
     return 0;
 }
 
