@@ -22,7 +22,7 @@
 /*
  * Console
  */
-#define CONFIG_CONSOLE_BAUDRATE      115200
+#define CONFIG_CONSOLE_BAUDRATE      3000000
 #define CONFIG_CONSOLE_INDEX         2
 
 /*
@@ -50,8 +50,18 @@
 #define CONFIG_AHB_CLK_DIV      3
 
 /*
- * Burn SPI flash
+ * Support burn SPI flash
  */
 #define CONFIG_BURN_SPI_FLASH
+
+/*
+ * Support burn emmc / sdcard
+ */
+#define CONFIG_BURN_MMC
+
+/*
+ * Ignore RTC 32KHz clk
+ */
+#define CONFIG_RTCCLK_SEL
 
 #endif /* BURNER_H */
