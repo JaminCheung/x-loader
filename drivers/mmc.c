@@ -643,7 +643,7 @@ static int mmc_polling_status(uint32_t status) {
 
 static int mmc_wait_cmd_response(void) {
     if (mmc_polling_status(STAT_END_CMD_RES) < 0) {
-        printf("wait commond response error\n");
+        msc_debug("wait commond response error\n");
         return -1;
     }
 
@@ -741,12 +741,12 @@ static int mmc_send_cmd(struct mmc_cmd* cmd, struct mmc_data* data) {
             status = msc_readl(MSC_STAT);
 
             if (status & STAT_TIME_OUT_READ) {
-                printf("MSC: read timeout\n");
+                msc_debug("MSC: read timeout\n");
                 return -1;
             }
 
             if (status & STAT_CRC_READ_ERROR) {
-                printf("MSC: read crc error\n");
+                msc_debug("MSC: read crc error\n");
                 return -1;
             }
 
@@ -1089,7 +1089,7 @@ static int mmc_read_blocks(void* dest, lbaint_t start,
         cmd.arg = 0;
         cmd.resp_type = MMC_RSP_R1b;
         if (mmc_send_cmd(&cmd, NULL)) {
-            printf("mmc failed to send stop cmd\n");
+            msc_debug("mmc failed to send stop cmd\n");
             return 0;
         }
     }
@@ -1254,7 +1254,7 @@ static int mmc_card_probe(void) {
     if (error < 0) {
         error = mmc_send_op_cond();
         if (error) {
-            printf("MSC: card did not respond to voltage select!\n");
+            msc_debug("MSC: card did not respond to voltage select!\n");
             return -1;
         }
     }
@@ -1284,7 +1284,7 @@ static int mmc_reset(void) {
     msc_writel(ctrl, MSC_CTRL);
 
     while ((msc_readl(MSC_STAT) & STAT_IS_RESETTING) && (--timeout)) {
-        printf("MSC: controller reset timeout!");
+        msc_debug("MSC: controller reset timeout!");
         return -1;
     }
 

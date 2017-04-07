@@ -109,7 +109,7 @@
 #undef CONFIG_BOOT_MMC_PA_8BIT
 #undef CONFIG_BOOT_MMC_PC_4BIT
 
-#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "rootfstype=jffs2 root=/dev/mtdblock2 rw"
+#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "rootfstype=ext4 root=/dev/mmcblk0p3 rw"
 
 /*
  * unit(byte)
@@ -117,8 +117,8 @@
 #define CONFIG_UBOOT_OFFSET         0xA400
 #define CONFIG_UBOOT_LENGTH         0x40000
 
-#define CONFIG_KERNEL_OFFSET        0x40000
-#define CONFIG_KERNEL_LENGTH        0x300000
+#define CONFIG_KERNEL_OFFSET        0x300000
+#define CONFIG_KERNEL_LENGTH        0x800000
 
 #define CONFIG_RECOVERY_OFFSET      0x400000
 #define CONFIG_RECOVERY_LENGTH      0x300000
