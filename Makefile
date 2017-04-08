@@ -409,6 +409,8 @@ zlm60_nand_config: unconfig
 skyworth_nor_config: unconfig
 	@./mkconfig $(@:_config) skyworth nor
 
+a0_ubi_nand_config: unconfig
+	@./mkconfig $(@:_config) a0_ubi nand
 #
 # Put your board's config here
 #
