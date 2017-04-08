@@ -30,17 +30,8 @@
  */
 #ifdef CONFIG_BOOT_KERNEL
 
-#ifndef CONFIG_PROBE_MEM_SIZE
-    #ifdef CONFIG_MEM_SIZE_64M
-        #define KERNEL_ARGS_MEM         "mem=64M@0x0 "
-    #else
-        #define KERNEL_ARGS_MEM         "mem=32M@0x0 "
-    #endif
-#else
-    #define KERNEL_ARGS_MEM         "mem=xxM@0x0 "
-#endif
-
-#define KERNEL_ARGS_CONSOLE     "no_console_suspend console=ttyS2,2000000n8 "
+#define KERNEL_ARGS_MEM         "mem=xxM@0x0 "
+#define KERNEL_ARGS_CONSOLE     "no_console_suspend console=ttyS"STR(CONFIG_CONSOLE_INDEX)","STR(CONFIG_CONSOLE_BAUDRATE)"n8 "
 #define KERNEL_ARGS_OTHERS      "lpj=5009408 ip=off "
 
 #ifdef CONFIG_GET_WIFI_MAC
@@ -74,7 +65,7 @@
 /*
  * unit(byte)
  */
-#define CONFIG_UBOOT_OFFSET         0x6000
+#define CONFIG_UBOOT_OFFSET         0x6800
 #define CONFIG_UBOOT_LENGTH         0x40000
 
 #define CONFIG_KERNEL_OFFSET        0x100000
@@ -97,7 +88,7 @@
 /*
  * unit(byte)
  */
-#define CONFIG_UBOOT_OFFSET         0x6000
+#define CONFIG_UBOOT_OFFSET         0x6800
 #define CONFIG_UBOOT_LENGTH         0x40000
 
 #define CONFIG_KERNEL_OFFSET        0x40000
@@ -119,7 +110,7 @@
 #undef CONFIG_BOOT_MMC_PA_8BIT
 #undef CONFIG_BOOT_MMC_PC_4BIT
 
-#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "rootfstype=jffs2 root=/dev/mtdblock2 rw"
+#define CONFIG_KERNEL_ARGS KERNEL_ARGS_COMMON KERNEL_ARGS_INIT "rootfstype=ext4 root=/dev/mmcblk0p3 rw"
 
 /*
  * unit(byte)
@@ -127,8 +118,8 @@
 #define CONFIG_UBOOT_OFFSET         0xA400
 #define CONFIG_UBOOT_LENGTH         0x40000
 
-#define CONFIG_KERNEL_OFFSET        0x40000
-#define CONFIG_KERNEL_LENGTH        0x300000
+#define CONFIG_KERNEL_OFFSET        0x300000
+#define CONFIG_KERNEL_LENGTH        0x800000
 
 #define CONFIG_RECOVERY_OFFSET      0x400000
 #define CONFIG_RECOVERY_LENGTH      0x300000
