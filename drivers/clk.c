@@ -46,7 +46,7 @@ struct cgu cgu_clk_sel[CGU_CNT] = {
     [OTG]    = {1, CPM_USBCDR,  30, EXCLK,              { EXCLK, EXCLK, APLL,  MPLL}, 29, 28, 27, 3 },
 #endif /* CONFIG_BOOT_USB */
 
-    [I2S]    = {0, CPM_I2SCDR,  30, EXCLK,              { APLL,  MPLL,  EXCLK, -1  }, 29, 0,  0,  -1},
+    [I2S]    = {0, CPM_I2SCDR,  30, EXCLK,              { EXCLK, APLL,  EXCLK, MPLL  }, 29, 0,  0,  -1},
     [LCD]    = {0, CPM_LPCDR,   31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  -1,    -1  }, 28, 27, 26, 23},
 
 #ifdef CONFIG_BOOT_MMC_PC_4BIT
@@ -56,9 +56,9 @@ struct cgu cgu_clk_sel[CGU_CNT] = {
 #endif /* CONFIG_BOOT_MMC_PC_4BIT */
 
 #if (defined CONFIG_BOOT_SFC || defined CONFIG_BURN_SPI_FLASH)
-    [SFC]    = {1, CPM_SSICDR,  31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  EXCLK, -1  }, 29, 28, 27, 2 },
+    [SFC]    = {1, CPM_SSICDR,  30, CONFIG_DDR_SEL_PLL, { EXCLK, APLL,  EXCLK,  MPLL}, 29, 28, 27, 2 },
 #else
-    [SFC]    = {0, CPM_SSICDR,  31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  EXCLK, -1  }, 29, 28, 27, 2 },
+    [SFC]    = {0, CPM_SSICDR,  30, CONFIG_DDR_SEL_PLL, { EXCLK, APLL,  EXCLK,  MPLL}, 29, 28, 27, 2 },
 #endif /* CONFIG_BOOT_SFC || CONFIG_BURN_SPI_FLASH */
 
     [CIM]    = {0, CPM_CIMCDR,  31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  -1,    -1  }, 29, 28, 27, 22},
