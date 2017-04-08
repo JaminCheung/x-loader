@@ -34,7 +34,11 @@ enum socid {
     X1500_NEW = 0xff0a,
 };
 
+#ifdef CONFIG_CHECK_SOC_ID
 int ddr_autosr = 0;
+#else
+int ddr_autosr = 1;
+#endif
 
 int check_socid(void)
 {

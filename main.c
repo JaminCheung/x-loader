@@ -71,7 +71,9 @@ void x_loader_main(void) {
     /*
      * check SOC id
      */
+#ifdef CONFIG_CHECK_SOC_ID
     check_socid();
+#endif
 
     uart_puts("\n\nX-Loader Build: " X_LOADER_DATE " - " X_LOADER_TIME);
 

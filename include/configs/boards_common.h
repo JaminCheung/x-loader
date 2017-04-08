@@ -68,6 +68,11 @@
 #define CONFIG_DDR_DW32 0
 
 /*
+ * Check efuse SoC id
+ */
+#define CONFIG_CHECK_SOC_ID
+
+/*
  * SFC
  */
 #ifdef CONFIG_BOOT_SFC
