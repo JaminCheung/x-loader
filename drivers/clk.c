@@ -205,7 +205,7 @@ static void pll_init(void) {
         timeout = 0x10000;
         while(!(cpm_inl(CPM_CPAPCR) & (1 << CPM_CPAPCR_PLLON_BIT)) && --timeout) {
             if (timeout == 0)
-                panic("\n\tAPLL init timeout.\n");
+                hang_reason("\n\tAPLL init timeout.\n");
         }
     }
 
@@ -231,7 +231,7 @@ static void pll_init(void) {
         timeout = 0x10000;
         while(!(cpm_inl(CPM_CPMPCR) & (1 << CPM_CPMPCR_PLLON_BIT)) && --timeout) {
             if (timeout == 0)
-                panic("\n\tMPLL init timeout.\n");
+                hang_reason("\n\tMPLL init timeout.\n");
         }
     }
 }
@@ -356,6 +356,14 @@ void enable_uart_clk(void) {
 #error Unknown console index!
 #endif
 
+    cpm_outl(clkgr, CPM_CLKGR);
+}
+
+void enable_aes_clk(void) {
+    uint32_t clkgr;
+
+    clkgr = cpm_inl(CPM_CLKGR);
+    clkgr &= ~CPM_CLKGR_AES;
     cpm_outl(clkgr, CPM_CLKGR);
 }
 

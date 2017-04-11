@@ -42,6 +42,7 @@ enum clk_id {
 
 void clk_init(void);
 void enable_uart_clk(void);
+void enable_aes_clk(void);
 uint32_t get_mmc_freq(void);
 uint32_t get_ahb_rate(void);
 uint32_t get_ddr_rate(void);

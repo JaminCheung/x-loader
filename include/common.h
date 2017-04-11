@@ -40,6 +40,7 @@
 #include <pmu.h>
 #include <efuse.h>
 #include <wdt.h>
+#include <aes.h>
 #endif
 
 /*
@@ -529,6 +530,7 @@ extern uint32_t cpu_freq;
 #define TSSI1_BASE  0xb34f0000
 #define OTG_BASE    0xb3500000
 #define EFUSE_BASE  0xb3540000
+#define AES_BASE    0xb3430000
 
 #define OST_BASE    0xb2000000
 #define HDMI_BASE   0xb0180000
@@ -1655,6 +1657,7 @@ static inline uint64_t lldiv(uint64_t dividend, uint32_t divisor)
 #ifndef __ASSEMBLY__
 #ifndef __HOST__
 void *memcpy(void *dst, const void *src, unsigned int len);
+int memcmp(const void * cs,const void * ct, size_t count);
 char * strstr(const char * s1,const char * s2);
 size_t strlen(const char * s);
 #endif
