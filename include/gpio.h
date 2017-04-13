@@ -88,4 +88,8 @@ void gpio_direction_input(unsigned gpio);
 void gpio_direction_output(unsigned gpio, int value);
 int gpio_get_value(unsigned gpio);
 
+void mmc_set_gpio(void);
+void sfc_set_gpio_pa_as_6bit(void);
+void console_set_gpio(void);
+
 #endif /* GPIO_H */

@@ -215,15 +215,6 @@ int sfc_read_data(uint32_t *data, uint32_t length) {
     return 0;
 }
 
-static void sfc_set_gpio_pa_as_6bit(void) {
-    gpio_set_func(GPIO_PA(26), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(27), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(28), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(29), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(30), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(31), GPIO_FUNC_1);
-}
-
 void sfc_init(void) {
     uint32_t tmp;
 

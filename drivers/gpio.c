@@ -96,3 +96,120 @@ void gpio_set_func(unsigned int gpio, enum gpio_function func) {
         break;
     }
 }
+
+#if (defined CONFIG_BURN_MMC || defined CONFIG_BOOT_MMC)
+
+#ifdef CONFIG_MMC_PA_8BIT
+static void set_gpio_pa_as_mmc0_8bit(void) {
+    gpio_set_func(GPIO_PA(16), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(17), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(18), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(19), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(20), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(21), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(22), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(23), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(24), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(25), GPIO_FUNC_1);
+}
+#endif
+
+#ifdef CONFIG_MMC_PA_4BIT
+static void set_gpio_pa_as_mmc0_4bit(void) {
+    gpio_set_func(GPIO_PA(20), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(21), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(22), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(23), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(24), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(25), GPIO_FUNC_1);
+}
+#endif
+
+#ifdef CONFIG_MMC_PC_4BIT
+static void set_gpio_pc_as_mmc1_4bit(void) {
+    gpio_set_func(GPIO_PC(0), GPIO_FUNC_0);
+    gpio_set_func(GPIO_PC(1), GPIO_FUNC_0);
+    gpio_set_func(GPIO_PC(2), GPIO_FUNC_0);
+    gpio_set_func(GPIO_PC(3), GPIO_FUNC_0);
+    gpio_set_func(GPIO_PC(4), GPIO_FUNC_0);
+    gpio_set_func(GPIO_PC(5), GPIO_FUNC_0);
+}
+#endif
+
+void mmc_set_gpio(void) {
+#if (defined CONFIG_MMC_PA_8BIT)
+    set_gpio_pa_as_mmc0_8bit();
+#elif (defined CONFIG_MMC_PA_4BIT)
+    set_gpio_pa_as_mmc0_4bit();
+#elif (defined CONFIG_MMC_PC_4BIT)
+    set_gpio_pc_as_mmc1_4bit();
+#else
+#error Unknown mmc I/O port!
+#endif
+}
+
+#endif /* CONFIG_BOOT_MMC || CONFIG_BURN_MMC */
+
+#if (defined CONFIG_BOOT_SFC || defined CONFIG_BURN_SPI_FLASH)
+void sfc_set_gpio_pa_as_6bit(void) {
+    gpio_set_func(GPIO_PA(26), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(27), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(28), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(29), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(30), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PA(31), GPIO_FUNC_1);
+}
+#endif /* CONFIG_BOOT_SFC || CONFIG_BURN_SPI_FLASH */
+
+#ifdef CONFIG_CONSOLE_ENABLE
+
+void console_set_gpio(void) {
+
+#if (CONFIG_CONSOLE_INDEX == 0)
+
+#ifdef CONFIG_CONSOLE_PC
+    gpio_set_func(GPIO_PC(10), GPIO_FUNC_0);
+    gpio_set_func(GPIO_PC(11), GPIO_FUNC_0);
+#else
+#error "Unknown console 0 I/O port"
+#endif
+
+#endif /* CONFIG_CONSOLE_INDEX == 0 */
+
+#if (CONFIG_CONSOLE_INDEX == 1)
+
+#if (defined CONFIG_CONSOLE_PA)
+    gpio_set_func(GPIO_PA(4), GPIO_FUNC_2);
+    gpio_set_func(GPIO_PA(5), GPIO_FUNC_2);
+
+#elif (defined CONFIG_CONSOLE_PD)
+    gpio_set_func(GPIO_PD(2), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PD(3), GPIO_FUNC_1);
+#else
+#error "Unknown console 1 I/O port"
+#endif
+
+#endif /* CONFIG_CONSOLE_INDEX == 1 */
+
+#if (CONFIG_CONSOLE_INDEX == 2)
+
+#if (defined CONFIG_CONSOLE_PD)
+    gpio_set_func(GPIO_PD(4), GPIO_FUNC_0);
+    gpio_set_func(GPIO_PD(5), GPIO_FUNC_0);
+
+#elif (defined CONFIG_CONSOLE_PA)
+    gpio_set_func(GPIO_PA(2), GPIO_FUNC_2);
+    gpio_set_func(GPIO_PA(3), GPIO_FUNC_2);
+
+#elif (defined CONFIG_CONSOLE_PC)
+    gpio_set_func(GPIO_PC(30), GPIO_FUNC_1);
+    gpio_set_func(GPIO_PC(31), GPIO_FUNC_1);
+
+#else
+#error Unknown console I/O port!
+#endif
+
+#endif /* CONFIG_CONSOLE_INDEX == 2 */
+}
+
+#endif /* CONFIG_CONSOLE_ENABLE */

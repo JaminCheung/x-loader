@@ -19,16 +19,12 @@
 #include <common.h>
 
 void board_early_init(void) {
-    gpio_set_func(GPIO_PC(30), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PC(31), GPIO_FUNC_1);
-
 #ifdef CONFIG_BURN_SPI_FLASH
-    gpio_set_func(GPIO_PA(26), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(27), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(28), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(29), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(30), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(31), GPIO_FUNC_1);
+    sfc_set_gpio_pa_as_6bit();
+#endif
+
+#ifdef CONFIG_BURN_MMC
+    mmc_set_gpio();
 #endif
 }
 

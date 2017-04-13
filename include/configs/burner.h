@@ -23,31 +23,8 @@
  * Console
  */
 #define CONFIG_CONSOLE_BAUDRATE      3000000
+#define CONFIG_CONSOLE_PC
 #define CONFIG_CONSOLE_INDEX         2
-
-/*
- * PLL freq - unit(MHz)
- */
-#undef CONFIG_APLL_FREQ
-#define CONFIG_APLL_FREQ        1008
-
-#undef CONFIG_MPLL_FREQ
-#define CONFIG_MPLL_FREQ        600
-
-#undef CONFIG_CPU_SEL_PLL
-#define CONFIG_CPU_SEL_PLL      APLL
-
-#undef CONFIG_DDR_SEL_PLL
-#define CONFIG_DDR_SEL_PLL      MPLL
-
-#undef CONFIG_DDR_FREQ_DIV
-#define CONFIG_DDR_FREQ_DIV     3
-
-#undef CONFIG_L2CACHE_CLK_DIV
-#define CONFIG_L2CACHE_CLK_DIV  2
-
-#undef CONFIG_AHB_CLK_DIV
-#define CONFIG_AHB_CLK_DIV      3
 
 /*
  * Support burn SPI flash
@@ -57,7 +34,10 @@
 /*
  * Support burn emmc / sdcard
  */
-#define CONFIG_BURN_MMC
+#undef CONFIG_BURN_MMC
+#undef CONFIG_MMC_PA_4BIT
+#undef CONFIG_MMC_PC_4BIT
+#undef CONFIG_MMC_PA_8BIT
 
 /*
  * Ignore RTC 32KHz clk

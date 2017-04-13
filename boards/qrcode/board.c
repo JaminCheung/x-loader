@@ -19,8 +19,7 @@
 #include <common.h>
 
 void board_early_init(void) {
-    gpio_set_func(GPIO_PA(2), GPIO_FUNC_2);
-    gpio_set_func(GPIO_PA(3), GPIO_FUNC_2);
+
 }
 
 void board_init(void) {

@@ -70,9 +70,13 @@ include/configs/boards_common.h为默认值
 1.打开include/configs/BOARD_NAME.h
 修改：
 #define CONFIG_CONSOLE_BAUDRATE      3000000
+#define CONFIG_CONSOLE_PC
 #define CONFIG_CONSOLE_INDEX         2
-2.打开boards/BOARD_NAME/board.c
-在board_early_init()中将对应串口IO设置为串口功能(参考X1000/X1500 DS手册)
+
+如何关闭系统串口打印？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+1.打开include/configs/BOARD_NAME.h
+#undef CONFIG_CONSOLE_ENABLE
 
 系统没有32KHz晶振如何休眠唤醒？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝

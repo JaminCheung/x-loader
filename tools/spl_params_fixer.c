@@ -110,7 +110,7 @@ struct desc descriptors[14] = {
     { 0x14,         0x14,          0x98000083,      0x01,               0 },            /* CPMPCR */
     { 0,            0xd4,          0x55752210,      0,                  0x7 },          /* CPCCR div */
     { 0,            0xffff,        0x95752210,      0,                  0 },            /* CPCCR sel */
-    #if (defined CONFIG_BOOT_MMC_PA_8BIT) || (defined CONFIG_BOOT_MMC_PA_4BIT)
+    #if (defined CONFIG_MMC_PA_8BIT) || (defined CONFIG_MMC_PA_4BIT)
     { 0x68,         0x68,          0xa0000005,      0,                  0x10000000 },   /* MSC0CDR */
     #else
     { 0xa4,         0xa4,          0xa0000005,      0,                  0x10000000 },   /* MSC1CDR */

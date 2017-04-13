@@ -49,11 +49,11 @@ struct cgu cgu_clk_sel[CGU_CNT] = {
     [I2S]    = {0, CPM_I2SCDR,  30, EXCLK,              { EXCLK, APLL,  EXCLK, MPLL  }, 29, 0,  0,  -1},
     [LCD]    = {0, CPM_LPCDR,   31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  -1,    -1  }, 28, 27, 26, 23},
 
-#if (defined CONFIG_BOOT_MMC_PC_4BIT || defined CONFIG_BURN_MMC)
+#if (defined CONFIG_MMC_PC_4BIT || defined CONFIG_BURN_MMC)
     [MSC1]   = {1, CPM_MSC1CDR, 0,  0,                  { -1,    -1,    -1,    -1  }, 29, 28, 27, 5 },
 #else
     [MSC1]   = {0, CPM_MSC1CDR, 0,  0,                  { -1,    -1,    -1,    -1  }, 29, 28, 27, 5 },
-#endif /* CONFIG_BOOT_MMC_PC_4BIT || CONFIG_BURN_MMC */
+#endif /* CONFIG_MMC_PC_4BIT || CONFIG_BURN_MMC */
 
 #if (defined CONFIG_BOOT_SFC || defined CONFIG_BURN_SPI_FLASH)
     [SFC]    = {1, CPM_SSICDR,  30, CONFIG_DDR_SEL_PLL, { EXCLK, APLL,  EXCLK,  MPLL}, 29, 28, 27, 2 },
@@ -338,6 +338,8 @@ void clk_init(void) {
     dump_clk_regs();
 }
 
+#ifdef CONFIG_CONSOLE_ENABLE
+
 void enable_uart_clk(void) {
     uint32_t clkgr;
 
@@ -358,6 +360,7 @@ void enable_uart_clk(void) {
 
     cpm_outl(clkgr, CPM_CLKGR);
 }
+#endif /* CONFIG_CONSOLE_ENABLE */
 
 void enable_aes_clk(void) {
     uint32_t clkgr;
@@ -387,7 +390,7 @@ uint32_t get_mmc_freq(void) {
     uint32_t freq;
     uint32_t pll_rate = CONFIG_DDR_SEL_PLL == APLL ? CONFIG_APLL_FREQ : CONFIG_MPLL_FREQ;
 
-#if (defined CONFIG_BOOT_MMC_PA_8BIT) || (defined CONFIG_BOOT_MMC_PA_4BIT)
+#if (defined CONFIG_MMC_PA_8BIT) || (defined CONFIG_MMC_PA_4BIT)
     msc_cdr_reg = CPM_MSC0CDR;
 #else
     msc_cdr_reg = CPM_MSC1CDR;
@@ -407,7 +410,7 @@ void set_mmc_freq(uint32_t freq) {
 
     div = ((pll_rate * 1000 * 1000 + freq - 1) / freq / 2 - 1) & 0xff;
 
-#if (defined CONFIG_BOOT_MMC_PA_8BIT) || (defined CONFIG_BOOT_MMC_PA_4BIT)
+#if (defined CONFIG_MMC_PA_8BIT) || (defined CONFIG_MMC_PA_4BIT)
     msc_cdr_reg = CPM_MSC0CDR;
 #else
     msc_cdr_reg = CPM_MSC1CDR;

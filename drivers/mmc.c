@@ -474,10 +474,10 @@
  */
 #define ERROR_STAT      0x3f
 
-#if (defined CONFIG_BOOT_MMC_PA_8BIT) || (defined CONFIG_BOOT_MMC_PA_4BIT)
+#if (defined CONFIG_MMC_PA_8BIT) || (defined CONFIG_MMC_PA_4BIT)
 #define IO_BASE MSC0_BASE
 
-#elif defined(CONFIG_BOOT_MMC_PC_4BIT)
+#elif defined(CONFIG_MMC_PC_4BIT)
 
 #define IO_BASE MSC1_BASE
 
@@ -543,56 +543,6 @@ struct jz_mmc {
 
 static struct jz_mmc jz_mmc_dev;
 struct jz_mmc *mmc;
-
-#ifdef CONFIG_BOOT_MMC_PA_8BIT
-static void set_gpio_pa_as_mmc0_8bit(void) {
-    gpio_set_func(GPIO_PA(16), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(17), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(18), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(19), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(20), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(21), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(22), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(23), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(24), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(25), GPIO_FUNC_1);
-}
-#endif
-
-#ifdef CONFIG_BOOT_MMC_PA_4BIT
-static void set_gpio_pa_as_mmc0_4bit(void) {
-    gpio_set_func(GPIO_PA(20), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(21), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(22), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(23), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(24), GPIO_FUNC_1);
-    gpio_set_func(GPIO_PA(25), GPIO_FUNC_1);
-}
-#endif
-
-#ifdef CONFIG_BOOT_MMC_PC_4BIT
-static void set_gpio_pc_as_mmc1_4bit(void) {
-    gpio_set_func(GPIO_PC(0), GPIO_FUNC_0);
-    gpio_set_func(GPIO_PC(1), GPIO_FUNC_0);
-    gpio_set_func(GPIO_PC(2), GPIO_FUNC_0);
-    gpio_set_func(GPIO_PC(3), GPIO_FUNC_0);
-    gpio_set_func(GPIO_PC(4), GPIO_FUNC_0);
-    gpio_set_func(GPIO_PC(5), GPIO_FUNC_0);
-}
-#endif
-
-
-static void gpio_init(void) {
-#if (defined CONFIG_BOOT_MMC_PA_8BIT)
-    set_gpio_pa_as_mmc0_8bit();
-#elif (defined CONFIG_BOOT_MMC_PA_4BIT)
-    set_gpio_pa_as_mmc0_4bit();
-#elif (defined CONFIG_BOOT_MMC_PC_4BIT)
-    set_gpio_pc_as_mmc1_4bit();
-#else
-#error Unknown mmc I/O port!
-#endif
-}
 
 static void msc_dump_reg(void)
 {
@@ -1314,7 +1264,7 @@ static int mmc_controller_init(void) {
     /*
      * Init gpio
      */
-    gpio_init();
+    mmc_set_gpio();
 
     /*
      * Reset mmc controller
@@ -1343,7 +1293,7 @@ int mmc_init(void) {
     mmc->f_min = 200000;
     mmc->f_max = 52000000;
 
-#ifdef CONFIG_BOOT_MMC_PA_8BIT
+#ifdef CONFIG_MMC_PA_8BIT
     mmc->host_caps = MMC_MODE_8BIT | MMC_MODE_HS_52MHz | MMC_MODE_HS | MMC_MODE_HC;
 #else
     mmc->host_caps = MMC_MODE_4BIT | MMC_MODE_HS_52MHz | MMC_MODE_HS | MMC_MODE_HC;

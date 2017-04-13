@@ -24,6 +24,7 @@
 
 struct jz_uart *uart;
 
+#ifdef CONFIG_CONSOLE_ENABLE
 static void uart_putc(const char c) {
     if (c == '\n')
         uart_putc('\r');
@@ -33,11 +34,19 @@ static void uart_putc(const char c) {
     /* Wait for fifo to shift out some bytes */
     while (!((readb(&uart->lsr) & (UART_LSR_TDRQ | UART_LSR_TEMT)) == 0x60));
 }
+#endif
 
 void uart_init(void) {
+#ifndef CONFIG_CONSOLE_ENABLE
+    return;
+
+#else
     uint8_t tmp;
 
     uart = (struct jz_uart *)(UART0_BASE + CONFIG_CONSOLE_INDEX * 0x1000);
+
+    /* init uart gpio */
+    console_set_gpio();
 
     /* open uart clk gate */
     enable_uart_clk();
@@ -73,9 +82,14 @@ void uart_init(void) {
     /* Enable UART unit, enable and clear FIFO */
     writeb(UART_FCR_UUE | UART_FCR_FE | UART_FCR_TFLS | UART_FCR_RFLS,
            &uart->iir_fcr);
+#endif
 }
 
 void uart_puts(const char* s) {
+#ifndef CONFIG_CONSOLE_ENABLE
+    return;
+#else
     while (*s)
         uart_putc(*s++);
+#endif
 }
