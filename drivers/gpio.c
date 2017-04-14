@@ -171,7 +171,7 @@ void console_set_gpio(void) {
     gpio_set_func(GPIO_PC(10), GPIO_FUNC_0);
     gpio_set_func(GPIO_PC(11), GPIO_FUNC_0);
 #else
-#error "Unknown console 0 I/O port"
+#error Unknown console 0 I/O port!
 #endif
 
 #endif /* CONFIG_CONSOLE_INDEX == 0 */
@@ -186,7 +186,7 @@ void console_set_gpio(void) {
     gpio_set_func(GPIO_PD(2), GPIO_FUNC_1);
     gpio_set_func(GPIO_PD(3), GPIO_FUNC_1);
 #else
-#error "Unknown console 1 I/O port"
+#error Unknown console 1 I/O port!
 #endif
 
 #endif /* CONFIG_CONSOLE_INDEX == 1 */
@@ -206,7 +206,7 @@ void console_set_gpio(void) {
     gpio_set_func(GPIO_PC(31), GPIO_FUNC_1);
 
 #else
-#error Unknown console I/O port!
+#error Unknown console 2 I/O port!
 #endif
 
 #endif /* CONFIG_CONSOLE_INDEX == 2 */

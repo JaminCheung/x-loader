@@ -84,6 +84,12 @@ extern uint32_t cpu_freq;
 #define MEM_SIZE_FLAG_32M       0x32323232
 
 /*
+ * Uart index and baudrate to u-boot
+ */
+#define CONFIG_UART_INDEX_ADDR  (SLEEP_LIB_TCSM + SLEEP_LIB_LENGTH - 8)
+#define CONFIG_UART_BAUDRATE_ADDR (SLEEP_LIB_TCSM + SLEEP_LIB_LENGTH - 12)
+
+/*
  * Cache defines
  */
 #define CONFIG_SYS_DCACHE_SIZE      16384

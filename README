@@ -67,7 +67,7 @@ include/configs/boards_common.h为默认值
 
 如何修改串口号以及波特率？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-1.打开include/configs/BOARD_NAME.h
+打开include/configs/BOARD_NAME.h
 修改：
 #define CONFIG_CONSOLE_BAUDRATE      3000000
 #define CONFIG_CONSOLE_PC
@@ -75,8 +75,13 @@ include/configs/boards_common.h为默认值
 
 如何关闭系统串口打印？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-1.打开include/configs/BOARD_NAME.h
+打开include/configs/BOARD_NAME.h
 #undef CONFIG_CONSOLE_ENABLE
+
+如何添加自定义的kernel cmdline？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+打开include/configs/BOARD_NAME.h
+#define KERNEL_ARGS_BOARD "xxx "
 
 系统没有32KHz晶振如何休眠唤醒？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝

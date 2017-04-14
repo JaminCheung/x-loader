@@ -40,6 +40,9 @@ __attribute__((weak, alias("board_early_init"))) void board_early_init(void) {}
 
 #ifdef CONFIG_BOOT_USB
 static void pass_params_to_burner(void) {
+    /*
+     * Memory size
+     */
     uint32_t mem_size;
 
 #ifdef CONFIG_PROBE_MEM_SIZE
@@ -54,6 +57,12 @@ static void pass_params_to_burner(void) {
         writel(MEM_SIZE_FLAG_64M, CONFIG_MEM_SIZE_FLAG_ADDR);
     else
         writel(MEM_SIZE_FLAG_32M, CONFIG_MEM_SIZE_FLAG_ADDR);
+
+    /*
+     * Uart index and baudrate
+     */
+    writel(CONFIG_CONSOLE_INDEX, CONFIG_UART_INDEX_ADDR);
+    writel(CONFIG_CONSOLE_BAUDRATE, CONFIG_UART_BAUDRATE_ADDR);
 }
 #endif
 
