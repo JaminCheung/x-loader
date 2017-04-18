@@ -1,5 +1,5 @@
 property:
-    disk_size = 8192m
+    disk_size = 4096m
     gpt_header_lba = 512
     custom_signature = 0
 
@@ -8,7 +8,7 @@ partition:
     bootloader     =     0m,     3m,
     kernel         =     3m,     8m, EMPTY
     recovery       =    12m,    16m, EMPTY
-    rootfs         =    28m,   100m, LINUX_FS
-    data           =    228m,   500m,LINUX_FS
+    rootfs         =    28m,  1024m, LINUX_FS
+    data           =   052m,  3044m, LINUX_FS
 
 #fstype could be: LINUX_FS, FAT_FS, EMPTY
