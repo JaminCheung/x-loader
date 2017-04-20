@@ -73,7 +73,6 @@ static int cpu_test_ddr(uint32_t start_addr, uint32_t end_addr,
 static int ddr_cpu_test(enum kseg_region region, uint32_t test_size) {
     uint32_t start_addr, end_addr;
     uint32_t mem_size = get_lpddr_size();
-    int error = 0;
 
     if (test_size > mem_size || test_size == 0)
         test_size = mem_size;
@@ -102,9 +101,10 @@ static int ddr_cpu_test(enum kseg_region region, uint32_t test_size) {
         break;
     }
 
-    error = cpu_test_ddr(start_addr, end_addr, region);
-
-    printf("%s\n\n", !error ? "OK" : "FAIL");
+    if (cpu_test_ddr(start_addr, end_addr, region) == 0)
+        printf("OK\n\n");
+    else
+        printf("FAIL\n\n");
 
     return 0;
 }

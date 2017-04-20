@@ -26,8 +26,9 @@
 #include <stdarg.h>
 #include <common.h>
 
-static int hex2asc(int n)
-{
+#ifdef CONFIG_CONSOLE_ENABLE
+
+static int hex2asc(int n) {
     n &= 15;
     if(n > 9){
         return ('a' - 10) + n;
@@ -36,8 +37,7 @@ static int hex2asc(int n)
     }
 }
 
-static int vsprintf(char *str, const char *fmt, va_list ap)
-{
+static int vsprintf(char *str, const char *fmt, va_list ap) {
     char scratch[16];
 
      for(;;){
@@ -96,8 +96,7 @@ static int vsprintf(char *str, const char *fmt, va_list ap)
      }
 }
 
-void serial_printf(const char *fmt, ...)
-{
+void serial_printf(const char *fmt, ...) {
     va_list args;
     char printbuffer[256];
 
@@ -120,3 +119,4 @@ void panic(const char *fmt, ...) {
 
     hang();
 }
+#endif

@@ -161,10 +161,7 @@ void sfc_set_gpio_pa_as_6bit(void) {
 }
 #endif /* CONFIG_BOOT_SFC || CONFIG_BURN_SPI_FLASH */
 
-#ifdef CONFIG_CONSOLE_ENABLE
-
 void console_set_gpio(void) {
-
 #if (CONFIG_CONSOLE_INDEX == 0)
 
 #ifdef CONFIG_CONSOLE_PC
@@ -211,5 +208,3 @@ void console_set_gpio(void) {
 
 #endif /* CONFIG_CONSOLE_INDEX == 2 */
 }
-
-#endif /* CONFIG_CONSOLE_ENABLE */

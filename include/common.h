@@ -1528,9 +1528,15 @@ void boot_next_stage(void);
  * Console
  */
 #ifndef __ASSEMBLY__
+#ifdef CONFIG_CONSOLE_ENABLE
 void serial_printf(const char *fmt, ...);
 void panic(const char *fmt, ...);
 #define printf(fmt, args...) serial_printf(fmt, ##args)
+#else
+#define panic(fmt, args...) do{}while(0)
+#define printf(fmt, args...) do{}while(0)
+#endif
+
 #ifdef DEBUG
 #define debug(fmt, args...) serial_printf(fmt, ##args)
 #else

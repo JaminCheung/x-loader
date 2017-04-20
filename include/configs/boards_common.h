@@ -137,11 +137,6 @@
  * Kernel args common
  */
 #define KERNEL_ARGS_MEM         "mem=xxM@0x0 "
-#ifdef CONFIG_CONSOLE_ENABLE
-#define KERNEL_ARGS_CONSOLE     "no_console_suspend console=ttyS"STR(CONFIG_CONSOLE_INDEX)","STR(CONFIG_CONSOLE_BAUDRATE)"n8 "
-#else
-#define KERNEL_ARGS_CONSOLE     "console=null "
-#endif
 #define KERNEL_ARGS_OTHERS      "lpj=5009408 ip=off "
 #define KERNEL_ARGS_INIT        "init=/linuxrc "
 

@@ -37,10 +37,6 @@ static void uart_putc(const char c) {
 #endif
 
 void uart_init(void) {
-#ifndef CONFIG_CONSOLE_ENABLE
-    return;
-
-#else
     uint8_t tmp;
 
     uart = (struct jz_uart *)(UART0_BASE + CONFIG_CONSOLE_INDEX * 0x1000);
@@ -82,13 +78,10 @@ void uart_init(void) {
     /* Enable UART unit, enable and clear FIFO */
     writeb(UART_FCR_UUE | UART_FCR_FE | UART_FCR_TFLS | UART_FCR_RFLS,
            &uart->iir_fcr);
-#endif
 }
 
 void uart_puts(const char* s) {
-#ifndef CONFIG_CONSOLE_ENABLE
-    return;
-#else
+#ifdef CONFIG_CONSOLE_ENABLE
     while (*s)
         uart_putc(*s++);
 #endif

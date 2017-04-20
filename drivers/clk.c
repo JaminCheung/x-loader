@@ -338,8 +338,6 @@ void clk_init(void) {
     dump_clk_regs();
 }
 
-#ifdef CONFIG_CONSOLE_ENABLE
-
 void enable_uart_clk(void) {
     uint32_t clkgr;
 
@@ -360,7 +358,6 @@ void enable_uart_clk(void) {
 
     cpm_outl(clkgr, CPM_CLKGR);
 }
-#endif /* CONFIG_CONSOLE_ENABLE */
 
 void enable_aes_clk(void) {
     uint32_t clkgr;
