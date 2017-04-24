@@ -20,17 +20,21 @@
 
 void board_early_init(void) {
     /*
-     * Speaker AMP shutdown
+     * Speaker AMP mute
      */
-    gpio_direction_output(GPIO_PB(9), 0);
+    gpio_direction_output(GPIO_PB(7), 1);
 
     /*
      * set pwm_led
      */
     gpio_direction_output(GPIO_PC(24), 0);
     gpio_direction_output(GPIO_PC(25), 0);
-    gpio_direction_output(GPIO_PC(26), 0);
-    gpio_direction_output(GPIO_PC(27), 1);
+    gpio_direction_output(GPIO_PC(26), 1);
+    gpio_direction_output(GPIO_PC(27), 0);
+    /*
+     * entable mcu_power
+     */
+    gpio_direction_output(GPIO_PC(22), 1);
 }
 
 void board_init(void) {
