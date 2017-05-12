@@ -345,3 +345,26 @@ int enter_sleep(int state)
 
     return 0;
 }
+
+void enter_idle(void)
+{
+    __asm__ volatile ("sync\n\t"::);
+
+    __asm__ volatile (
+        ".set push\n\t"
+        ".set noreorder\n\t"
+        "lw $0,%0\n\t"
+        "nop\n\t"
+        ".set pop"
+        : /* no output */
+        : "m" (*(int *)0xa0000000)
+        : "memory");
+
+    __asm__(
+        ".set\tmips3\n\t"
+        "wait\n\t"
+        "nop\n\t"
+        "nop\n\t"
+        ".set\tmips0"
+        );
+}

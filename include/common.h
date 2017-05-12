@@ -1726,6 +1726,7 @@ struct sleep_context {
 struct sleep_lib_entry {
     void (*restore_context)(void);
     int (*enter_sleep)(int state);
+    void (*enter_idle)(void);
 };
 
 void sleep_lib_init_clk(void);

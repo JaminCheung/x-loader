@@ -14,6 +14,7 @@
 
     .extern restore_context
     .extern enter_sleep
+    .extern enter_idle
 
     .extern context
 
@@ -23,6 +24,7 @@
 sleep_lib_entry:
     .word restore_context
     .word enter_sleep
+    .word enter_idle
 
     .global save_context_goto
     .align  2
