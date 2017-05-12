@@ -280,7 +280,6 @@ static void clk_tree_init(void) {
     cpu_freq = CONFIG_CPU_SEL_PLL == APLL ? CONFIG_APLL_FREQ : CONFIG_MPLL_FREQ;
 }
 
-#ifdef CONFIG_BOOT_USB
 static void reset_clk_tree(void) {
     uint32_t cpccr = 0x55000000;
     uint32_t regval = 0;
@@ -308,12 +307,12 @@ static void reset_clk_tree(void) {
 
     cpu_freq = CONFIG_EXTAL_FREQ;
 }
-#endif
 
 void clk_init(void) {
-#ifdef CONFIG_BOOT_USB
+    /*
+     * For usb boot and security boot change cpu freq in rom, reset clk tree first.
+     */
     reset_clk_tree();
-#endif
 
     /*
      * Stop all clock
