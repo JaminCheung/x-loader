@@ -16,15 +16,18 @@
  *
  */
 
-#ifndef SPEAKER_H
-#define SPEAKER_H
+#ifndef YAK_MINIOS_H
+#define YAK_MINIOS_H
 
 /*
  * Console
  */
-#define CONFIG_CONSOLE_BAUDRATE      3000000
-#define CONFIG_CONSOLE_PC
+#define CONFIG_CONSOLE_BAUDRATE      115200
+#define CONFIG_CONSOLE_PA
 #define CONFIG_CONSOLE_INDEX         2
+
+#undef CONFIG_PROBE_MEM_SIZE
+#undef CONFIG_MEM_SIZE_64M
 
 /*
  * The following configure only for boot kernel
@@ -49,7 +52,7 @@
 #define CONFIG_RECOVERY_BOOT_KEY            -1
 #define CONFIG_RECOVERY_BOOT_KEY_ENLEVEL    0
 #define CONFIG_RECOVERY_ARGS KERNEL_ARGS_COMMON
-#endif
+#endif /* CONFIG_RECOVERY */
 
 #endif /* CONFIG_BOOT_KERNEL */
 
@@ -76,8 +79,8 @@
 #define CONFIG_KERNEL_OFFSET        0x100000
 #define CONFIG_KERNEL_LENGTH        0x800000
 
-#define CONFIG_RECOVERY_OFFSET      0x980000
-#define CONFIG_RECOVERY_LENGTH      0x800000
+#define CONFIG_RECOVERY_OFFSET      0x400000
+#define CONFIG_RECOVERY_LENGTH      0x300000
 
 #define CONFIG_WIFI_MAC_ADDR        0x901000
 
@@ -149,4 +152,4 @@
 #define CONFIG_OTA_STEP2_KERNEL_OFFSET    0xd00000
 #endif
 
-#endif /* SPEAKER_H */
+#endif /* YAK_MINIOS_H */

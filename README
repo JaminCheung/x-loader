@@ -41,6 +41,10 @@ bootloader - 用于加载引导u-boot/linux/rtos，支持spi nand/nor, mmc/sdcar
 将编译出的x-loader-xxx.bin和u-boot.bin cat在一起
 cat x-loader-xxx.bin u-boot.bin > xxx.bin
 
+如何引导RTOS？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+打开boards/BOARD_NAME/board.mk，修改BOOT_NEXT_STAGE := 2，重新编译
+
 如何引导zImage？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 打开boards/BOARD_NAME/board.mk，修改BOOT_NEXT_STAGE := 1，

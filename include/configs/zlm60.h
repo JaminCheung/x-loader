@@ -73,6 +73,9 @@
 #define CONFIG_UBOOT_OFFSET         0x4000
 #define CONFIG_UBOOT_LENGTH         0x40000
 
+#define CONFIG_RTOS_OFFSET          0x40000
+#define CONFIG_RTOS_LENGTH          0x40000
+
 #define CONFIG_KERNEL_OFFSET        0x100000
 #define CONFIG_KERNEL_LENGTH        0x800000
 
@@ -95,6 +98,9 @@
  */
 #define CONFIG_UBOOT_OFFSET         0x6800
 #define CONFIG_UBOOT_LENGTH         0x40000
+
+#define CONFIG_RTOS_OFFSET          0x40000
+#define CONFIG_RTOS_LENGTH          0x40000
 
 #define CONFIG_KERNEL_OFFSET        0x40000
 #define CONFIG_KERNEL_LENGTH        0x300000
@@ -122,6 +128,9 @@
  */
 #define CONFIG_UBOOT_OFFSET         0xA400
 #define CONFIG_UBOOT_LENGTH         0x40000
+
+#define CONFIG_RTOS_OFFSET          0x40000
+#define CONFIG_RTOS_LENGTH          0x40000
 
 #define CONFIG_KERNEL_OFFSET        0x40000
 #define CONFIG_KERNEL_LENGTH        0x300000

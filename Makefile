@@ -79,6 +79,8 @@ ifeq ($(BOOT_NEXT_STAGE), 0)
 CONFIG_BOOT_UBOOT := y
 else ifeq ($(BOOT_NEXT_STAGE), 1)
 CONFIG_BOOT_KERNEL := y
+else ifeq ($(BOOT_NEXT_STAGE), 2)
+CONFIG_BOOT_RTOS := y
 else
 $(error Boot next stage "$(BOOT_NEXT_STAGE)" has not support yet!)
 endif
@@ -91,6 +93,13 @@ endif # FUNCTION := 0
 ifeq ($(CONFIG_BOOT_UBOOT), y)
 BOOT_NEXT_STAGE_LOAD_ADDR := 0x80100000
 BOOT_NEXT_STAGE_ENTRY_ADDR := 0x80100000
+endif
+
+#
+# RTOS load & entry address
+ifeq ($(CONFIG_BOOT_RTOS), y)
+BOOT_NEXT_STAGE_LOAD_ADDR := 0x80800000
+BOOT_NEXT_STAGE_ENTRY_ADDR := 0x80800000
 endif
 
 #
@@ -120,6 +129,8 @@ endif
 
 ifeq ($(CONFIG_BOOT_KERNEL), y)
 CFGFLAGS += -DCONFIG_BOOT_KERNEL
+else ifeq ($(CONFIG_BOOT_RTOS), y)
+CFGFLAGS += -DCONFIG_BOOT_RTOS
 else ifeq ($(CONFIG_BOOT_UBOOT), y)
 CFGFLAGS += -DCONFIG_BOOT_UBOOT
 endif
@@ -397,6 +408,9 @@ yak_nor_config: unconfig
 
 speaker_nand_config: unconfig
 	@./mkconfig $(@:_config) speaker nand
+
+yak_minios_nor_config: unconfig
+	@./mkconfig $(@:_config) yak_minios nor
 
 media_nor_config: unconfig
 	@./mkconfig $(@:_config) media nor

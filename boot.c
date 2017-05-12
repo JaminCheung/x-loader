@@ -21,7 +21,7 @@
 __attribute__ ((noreturn)) static void jump_to_next_stage(uint32_t entry_addr,
         uint32_t argv) {
 
-#if (defined CONFIG_BOOT_UBOOT)
+#if (defined CONFIG_BOOT_UBOOT || defined CONFIG_BOOT_RTOS)
     typedef void (*image_entry_t)(void) __attribute__ ((noreturn));
 
     (void) argv;
@@ -183,6 +183,7 @@ static int pre_handle_before_jump(void* arg) {
     }
 #endif
 
+    (void)mem_size;
     return 0;
 }
 
@@ -258,6 +259,11 @@ void boot_next_stage(void) {
     argv = (uint32_t) CONFIG_MEM_SIZE_FLAG_ADDR;
 
     error = load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
+
+#elif (defined CONFIG_BOOT_RTOS)
+    uart_puts("Mod: RTOS.\n");
+
+    error = load(CONFIG_RTOS_OFFSET, CONFIG_RTOS_LENGTH, load_addr);
 
 #endif /* CONFIG_BOOT_UBOOT */
 
