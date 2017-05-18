@@ -426,6 +426,12 @@ skyworth_nor_config: unconfig
 
 a0_ubi_nand_config: unconfig
 	@./mkconfig $(@:_config) a0_ubi nand
+
+ilock_nor_config: unconfig
+	@./mkconfig $(@:_config) ilock nor
+
+ilock_nand_config: unconfig
+	@./mkconfig $(@:_config) ilock nand
 #
 # Put your board's config here
 #
