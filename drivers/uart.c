@@ -86,3 +86,22 @@ void uart_puts(const char* s) {
         uart_putc(*s++);
 #endif
 }
+
+void uart_put_hex_n(uint32_t d) {
+        char c[9];
+        uint32_t i;
+        for (i = 0; i < 8; i++) {
+                c[i] = (d >> ((7 - i) * 4)) & 0xf;
+                if (c[i] < 10)
+                        c[i] += 0x30;
+                else
+                        c[i] += (0x41 - 10);
+        }
+        c[8] = 0;
+        uart_puts(c);
+}
+
+void uart_put_hex(uint32_t d) {
+        uart_put_hex_n(d);
+        uart_puts("\n");
+}

@@ -253,8 +253,8 @@ Tips: $(TARGET)
 
 $(SLEEPLIB): $(OUTDIR)/sleep_lib_tcsm.elf
 	$(OBJDUMP) -D $< > $(OUTDIR)/sleep_lib_tcsm.elf.dump
-	$(OBJCOPY) --gap-fill=0x0 -O binary $< $(OUTDIR)/sleep_lib_tcsm.bin
-	$(OBJCOPY) --gap-fill=0x0 --pad-to=8192 -I binary -O binary $(OUTDIR)/sleep_lib_tcsm.bin $@
+	$(OBJCOPY) --gap-fill=0xff -O binary $< $(OUTDIR)/sleep_lib_tcsm.bin
+	$(OBJCOPY) --gap-fill=0xff --pad-to=8192 -I binary -O binary $(OUTDIR)/sleep_lib_tcsm.bin $@
 
 $(OUTDIR)/sleep_lib_tcsm.elf: $(SLEEP_LIBS)
 	$(LD) $(SLEEPLIB_LDFLAGS) $(SLEEP_LIBS) -o $@ -Map $(OUTDIR)/sleep_lib_tcsm.map
