@@ -35,6 +35,11 @@ void board_early_init(void) {
      * entable mcu_power
      */
     gpio_direction_output(GPIO_PC(22), 1);
+
+    /*
+     * select charge current
+     */
+    gpio_direction_output(GPIO_PB(13), 0);
 }
 
 void board_init(void) {
