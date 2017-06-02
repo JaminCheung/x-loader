@@ -157,4 +157,11 @@
 #define CONFIG_WDT_CLK_SRC_RTC
 #define CONFIG_WDT_TIMEOUT_MS 1000
 
+/*
+ * Kernel image type
+ */
+#define ZIMAGE   0
+#define XIMAGE   1
+#define VMLINUX  2
+
 #endif /* BOARDS_COMMON_H */

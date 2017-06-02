@@ -48,12 +48,18 @@ cat x-loader-xxx.bin u-boot.bin > xxx.bin
 如何引导zImage？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 打开boards/BOARD_NAME/board.mk，修改BOOT_NEXT_STAGE := 1，
-KERNEL_IN_XIMAGE := 0，重新编译
+KERNEL_IMAGE_TYPE := 0，重新编译
 
 如何引导xImage？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 打开boards/BOARD_NAME/board.mk，修改BOOT_NEXT_STAGE := 1，
-KERNEL_IN_XIMAGE := 1，重新编译
+KERNEL_IMAGE_TYPE := 1，重新编译
+
+如何引导vmlinux？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+打开boards/BOARD_NAME/board.mk，修改BOOT_NEXT_STAGE := 1，
+KERNEL_IMAGE_TYPE := 2，重新编译
+kernel编译: make vmlinux.bin
 
 板极配置文件在哪里？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
