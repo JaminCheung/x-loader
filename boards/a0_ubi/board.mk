@@ -66,10 +66,11 @@ endif
 #
 ifeq ($(BOOT_NEXT_STAGE), 1)
 #
-# zImage: 0
-# xImage: 1
+# zImage:  0
+# xImage:  1
+# vmlinux: 2
 #
-KERNEL_IN_XIMAGE := 0
+KERNEL_IMAGE_TYPE := 1
 endif
 
 BOARD_CFLAGS :=

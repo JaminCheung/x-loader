@@ -106,18 +106,28 @@ endif
 # Kernel load & entry address
 #
 ifeq ($(CONFIG_BOOT_KERNEL), y)
+#
+# For zImage(default)
+#
 BOOT_NEXT_STAGE_LOAD_ADDR := 0x80f00000
 BOOT_NEXT_STAGE_ENTRY_ADDR := 0x80f00000
 
+#
+# For xImage(zImage with 64byte header)
+#
 ifeq ($(KERNEL_IMAGE_TYPE), 1)
 OFFSET_LEN := 0x40
 BOOT_NEXT_STAGE_LOAD_ADDR := $(BOOT_NEXT_STAGE_LOAD_ADDR)-$(OFFSET_LEN)
 #BOOT_NEXT_STAGE_LOAD_ADDR := $(shell $(AWK) 'BEGIN{printf("0x%x\n",            \
 	'$(BOOT_NEXT_STAGE_LOAD_ADDR)'-$(OFFSET_LEN));                             \
 	}')
-else ifeq($(KERNEL_IMAGE_TYPE), 2)
+
+#
+# For vmlinux.bin
+#
+else ifeq ($(KERNEL_IMAGE_TYPE), 2)
 BOOT_NEXT_STAGE_LOAD_ADDR := 0x80010000
-BOOT_NEXT_STAGE_ENTRY_ADDR := 0x80010000
+BOOT_NEXT_STAGE_ENTRY_ADDR := $(BOOT_NEXT_STAGE_LOAD_ADDR)
 endif
 endif
 

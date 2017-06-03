@@ -159,17 +159,18 @@ void aes_decrypt(struct aes_data* data) {
         else
             aes_len = input_len;
 
+
+        uint32_t trans_count = 0;
+        if (aes_len % 4 != 0)
+            trans_count = aes_len / 4 + 1;
+        else
+            trans_count = aes_len / 4;
+
 #ifdef AES_CPU_MODE
         /*
          * CPU mode
          */
-        uint32_t cpu_count = 0;
-        if (aes_len % 4 != 0)
-            cpu_count = aes_len / 4 + 1;
-        else
-            cpu_count = aes_len / 4;
-
-        for (int i = 0; i < cpu_count; i++)
+        for (int i = 0; i < trans_count; i++)
             aes_writel(((uint32_t*)data->input)[i], ASDI);
 
         ascr &= ~ASCR_DMAE;
@@ -181,13 +182,7 @@ void aes_decrypt(struct aes_data* data) {
         /*
          * DMA mode
          */
-        uint32_t dma_count = 0;
-        if (aes_len * 8 / 128 != 0)
-            dma_count = aes_len * 8 / 128 + 1;
-        else
-            dma_count = aes_len * 8 / 128;
-
-        aes_writel(dma_count, ASTC);
+        aes_writel(trans_count, ASTC);
         aes_writel((uint32_t)data->input, ASSA);
         aes_writel((uint32_t)data->output, ASDA);
 
@@ -208,7 +203,7 @@ void aes_decrypt(struct aes_data* data) {
 
         aes_writel(ASSR_AESD | aes_readl(ASSR), ASSR);
 
-        for (int i = 0; i < cpu_count; i++)
+        for (int i = 0; i < trans_count; i++)
             ((uint32_t*)data->output)[i] = aes_readl(ASDO);
 #else
         timeout = 0x10000;
@@ -247,7 +242,7 @@ void aes_test(void) {
             0x3243f6a8, 0x885a308d, 0x313198a2, 0xe0370734,
     };
 
-    uint32_t decrypted_buf[4];
+    uint32_t decrypted_buf[4] = {0, 0, 0, 0};
 
     struct aes_key aes_key;
     struct aes_data aes_data;
