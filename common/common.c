@@ -303,3 +303,25 @@ void flush_cache_all(void) {
     flush_dcache_all();
     flush_icache_all();
 }
+
+void suspend_enter(int state) {
+    struct sleep_lib_entry *entry = (void *)(SLEEP_LIB_TCSM);
+
+    printf("enter suspend state: 0x%x\n", state);
+
+    switch(state) {
+    case PM_SUSPEND_STANDBY:
+        entry->enter_idle();
+        break;
+
+    case PM_SUSPEND_MEM:
+        entry->enter_sleep(state);
+        break;
+
+    default:
+        panic("unknown suspend state: 0x%x\n", state);
+        break;
+    }
+
+    printf("exit suspend state: 0x%x\n", state);
+}

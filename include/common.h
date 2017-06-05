@@ -43,6 +43,9 @@
 #include <aes.h>
 #endif
 
+#define PM_SUSPEND_STANDBY 2
+#define PM_SUSPEND_MEM     3
+
 /*
  * CPU freq uint(MHz)
  */
