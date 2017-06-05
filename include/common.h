@@ -1689,6 +1689,7 @@ int check_socid(void);
 #endif
 
 #ifndef __ASSEMBLY__
+void suspend_enter(int state);
 void cache_init(void);
 struct sleep_context {
     unsigned int gpr_s[8];
