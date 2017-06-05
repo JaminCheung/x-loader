@@ -129,7 +129,7 @@ void x_loader_main(void) {
     board_init();
 
     /*
-     * open this for debug power
+     * Open this for debug power
      */
 #if 0
     /*
