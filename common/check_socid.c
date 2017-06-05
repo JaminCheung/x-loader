@@ -51,11 +51,11 @@ int check_socid(void)
     case X1000E:
     case X1000_NEW:
     case X1000E_NEW:
+    case X1500:
     case X1500_NEW:
         ddr_autosr = 1;
         uart_puts("\nR");
         break;
-    case X1500:
     case X1000:
     case 0:
         ddr_autosr = 0;
