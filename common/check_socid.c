@@ -48,7 +48,7 @@ int ddr_autosr = 1;
 #define WAFERID_MASK       0x1f
 
 
-int check_socid(void)
+void check_socid(void)
 {
     unsigned int socid, waferid;
     unsigned int data1, data3;
@@ -62,7 +62,7 @@ int check_socid(void)
     case X1000E_NEW:
     case X1500_NEW:
         goto check_finished;
-    case X1500:
+    case X1500: {
         efuse_read(&data1, 0x04 + EFU_ROM_BASE, sizeof(data1));
         efuse_read(&data3, 0x0c + EFU_ROM_BASE, sizeof(data3));
 
@@ -73,18 +73,16 @@ int check_socid(void)
                 goto check_finished;
             }
         }
+    }
     case X1000:
     case 0:
-        ddr_autosr = 0;
-        break;
     default:
-        uart_puts("Unknown socid!\n");
+        ddr_autosr = 0;
     }
 
-    return -1;
+    return;
 
 check_finished:
     ddr_autosr = 1;
     uart_puts("\nR");
-    return socid;
 }
