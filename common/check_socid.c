@@ -40,9 +40,18 @@ int ddr_autosr = 0;
 int ddr_autosr = 1;
 #endif
 
+#define LOTID_LOW          0x07
+#define LOTID_LOW_MASK     0x1F
+#define LOTID_HIGH         0x0E90E02F
+#define LOTID_HIGH_MASK    0x3FFFFFFF
+#define WAFERID_BIT_SHIFT  11
+#define WAFERID_MASK       0x1f
+
+
 int check_socid(void)
 {
-    int socid;
+    unsigned int socid, waferid;
+    unsigned int data1, data3;
 
     efuse_read(&socid, 0x3c + EFU_ROM_BASE, sizeof(socid));
     socid &= 0xffff;
@@ -51,19 +60,31 @@ int check_socid(void)
     case X1000E:
     case X1000_NEW:
     case X1000E_NEW:
-    case X1500:
     case X1500_NEW:
-        ddr_autosr = 1;
-        uart_puts("\nR");
-        break;
+        goto check_finished;
+    case X1500:
+        efuse_read(&data1, 0x04 + EFU_ROM_BASE, sizeof(data1));
+        efuse_read(&data3, 0x0c + EFU_ROM_BASE, sizeof(data3));
+
+        if ((data1 & LOTID_LOW_MASK) == LOTID_LOW && \
+            (data3 & LOTID_HIGH_MASK) == LOTID_HIGH) {
+            waferid = (data1 >> WAFERID_BIT_SHIFT) & WAFERID_MASK;
+            if (waferid >= 0x10 && waferid <= 0x19) {
+                goto check_finished;
+            }
+        }
     case X1000:
     case 0:
         ddr_autosr = 0;
         break;
     default:
-        socid = -1;
-        uart_puts("Check SOC id failed!\n");
+        uart_puts("Unknown socid!\n");
     }
 
+    return -1;
+
+check_finished:
+    ddr_autosr = 1;
+    uart_puts("\nR");
     return socid;
 }
