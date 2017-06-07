@@ -348,6 +348,8 @@ int enter_sleep(int state)
 
 void enter_idle(void)
 {
+    debug("Go to idle...\n");
+
     __asm__ volatile ("sync\n\t"::);
 
     __asm__ volatile (
@@ -367,4 +369,9 @@ void enter_idle(void)
         "nop\n\t"
         ".set\tmips0"
         );
+
+#ifdef DEBUG
+    static uint32_t idle_times = 0;
+    debug("Idle back, times: %d\n", ++idle_times);
+#endif
 }
