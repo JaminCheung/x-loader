@@ -139,30 +139,30 @@ static void reset_dll(void) {
      *  If clear BIT6, chip memory will not stable, gpu hang occur.
      */
     cpm_outl(0x73 | (1 << 6) , CPM_DRCG);
-    mdelay(5);
+    mdelay(3);
     cpm_outl(0x71 | (1 << 6), CPM_DRCG);
-    mdelay(5);
+    mdelay(3);
 
     /* reset phy dll dfi and cfg */
     ddr_writel(0xd << 21 | 1, DDRC_PHYRST_CFG);
-    mdelay(5);
+    mdelay(3);
     ddr_writel(0, DDRC_PHYRST_CFG);
-    mdelay(5);
+    mdelay(3);
 }
 
 static void reset_controller(void) {
     ddr_writel(0xf << 20, DDRC_CTRL);
-    mdelay(5);
+    mdelay(3);
     ddr_writel(0, DDRC_CTRL);
-    mdelay(5);
+    mdelay(3);
 }
 
 static void soft_reset_controller(void) {
     /* reset DDR ctrl */
     ddr_writel(0x2 << 21, DDRC_PHYRST_CFG);
-    mdelay(5);
+    mdelay(3);
     ddr_writel(0, DDRC_PHYRST_CFG);
-    mdelay(5);
+    mdelay(3);
 }
 
 static void ddr_phy_param_init(unsigned int mode) {
@@ -566,8 +566,13 @@ void lpddr_init(void) {
     if (ddr_autosr) {
         if(!bypass)
             ddr_writel(0 , DDRC_DLP);
-        else
+        else {
+            /*
+             * Enable dynamic gate ddr clock
+             */
+            cpm_set_bit(26, CPM_DDRCDR);
             ddr_writel((9 << 28) | 0xf, DDRC_CLKSTP_CFG);
+        }
     }
 
     ddr_writel(ddr_autosr, DDRC_AUTOSR_EN);

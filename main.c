@@ -67,6 +67,12 @@ static void pass_params_to_burner(void) {
 #endif
 
 void x_loader_main(void) {
+
+    /*
+     * Open DDR CPU AHB0 APB RTC EFUSE NEMC clock gate
+     */
+    cpm_outl(0x07fffffc, CPM_CLKGR);
+
     /*
      * Init board early
      */
