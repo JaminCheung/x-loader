@@ -74,6 +74,14 @@ void x_loader_main(void) {
     cpm_outl(0x07fffffc, CPM_CLKGR);
 
     /*
+     * Do not ask why, I do not know.
+     */
+    cpm_outl(0, CPM_PSWC0ST);
+    cpm_outl(16, CPM_PSWC1ST);
+    cpm_outl(24, CPM_PSWC2ST);
+    cpm_outl(8, CPM_PSWC3ST);
+
+    /*
      * Init board early
      */
     board_early_init();
