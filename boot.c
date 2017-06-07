@@ -287,6 +287,18 @@ void boot_next_stage(void) {
     uart_puts("\nJump...\n\n");
 
     /*
+     * Open this for debug power
+     */
+#if 0
+    /*
+     * PM_SUSPEND_STANDBY: cpu enter idle & memory entry self-refresh
+     * PM_SUSPEND_MEM:     cpu enter sleep & memory entry self-refresh & clock
+     *                     all stoped
+     */
+    suspend_enter(PM_SUSPEND_STANDBY);
+#endif
+
+    /*
      * Step 5: we will nerver return here
      */
     jump_to_next_stage(entry_addr, argv);

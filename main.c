@@ -134,18 +134,6 @@ void x_loader_main(void) {
      */
     board_init();
 
-    /*
-     * Open this for debug power
-     */
-#if 0
-    /*
-     * PM_SUSPEND_STANDBY: cpu enter idle & memory entry self-refresh
-     * PM_SUSPEND_MEM:     cpu enter sleep & memory entry self-refresh & clock
-     *                     all stoped
-     */
-    suspend_enter(PM_SUSPEND_MEM);
-#endif
-
 #ifndef CONFIG_BOOT_USB
     uart_puts("Going to boot next stage.\n");
 
