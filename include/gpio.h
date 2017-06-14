@@ -24,6 +24,12 @@
 #define GPIO_PC(n)  (2*32 + n)
 #define GPIO_PD(n)  (3*32 + n)
 
+#define GSS_OUTPUT_LOW          1
+#define GSS_OUTPUT_HIGH         2
+#define GSS_INPUT_PULL          3
+#define GSS_INPUT_NOPULL        4
+#define GSS_IGNORE              5
+#define GSS_TABLET_END          0x999
 
 enum gpio_function {
     GPIO_FUNC_0     = 0x00,  //0000, GPIO as function 0 / device 0

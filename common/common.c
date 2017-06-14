@@ -304,8 +304,46 @@ void flush_cache_all(void) {
     flush_icache_all();
 }
 
-__attribute__((weak, alias("board_gpio_suspend"))) void board_gpio_suspend(void) {}
-__attribute__((weak, alias("board_gpio_resume"))) void board_gpio_resume(void) {}
+const int __attribute__((weak)) gpio_ss_table[][2] = {
+        {GSS_TABLET_END, GSS_TABLET_END}
+};
+
+static void board_gpio_suspend(void) {
+    int pin = 0;
+    int state = 0;
+
+    for (int i = 0; gpio_ss_table[i][1] != GSS_TABLET_END; i++) {
+        pin = gpio_ss_table[i][0];
+        state = gpio_ss_table[i][1];
+
+        switch(state) {
+        case GSS_OUTPUT_HIGH:
+            gpio_direction_output(pin, 1);
+            break;
+
+        case GSS_OUTPUT_LOW:
+            gpio_direction_output(pin, 0);
+            break;
+
+        case GSS_INPUT_PULL:
+            gpio_direction_input(pin);
+            gpio_enable_pull(pin);
+            break;
+
+        case GSS_INPUT_NOPULL:
+            gpio_direction_input(pin);
+            gpio_disable_pull(pin);
+            break;
+
+        default:
+            break;
+        }
+    }
+}
+
+static void board_gpio_resume(void) {
+
+}
 
 void suspend_enter(int state) {
     printf("enter suspend state: 0x%x\n", state);
