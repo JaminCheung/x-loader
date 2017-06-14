@@ -304,8 +304,13 @@ void flush_cache_all(void) {
     flush_icache_all();
 }
 
+__attribute__((weak, alias("board_gpio_suspend"))) void board_gpio_suspend(void) {}
+__attribute__((weak, alias("board_gpio_resume"))) void board_gpio_resume(void) {}
+
 void suspend_enter(int state) {
     printf("enter suspend state: 0x%x\n", state);
+
+    board_gpio_suspend();
 
 #ifndef CONFIG_BOOT_USB
 
@@ -339,6 +344,8 @@ void suspend_enter(int state) {
         break;
     }
 #endif
+
+    board_gpio_resume();
 
     printf("exit suspend state: 0x%x\n", state);
 }

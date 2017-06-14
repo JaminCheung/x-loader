@@ -117,6 +117,9 @@ x-loader中如何进入低功耗状态？
 以及
 #define CONFIG_PM_SUSPEND_STATE PM_SUSPEND_STANDY ---> CPU进入idle状态
 #define CONFIG_PM_SUSPEND_STATE PM_SYSPEND_MEM ---> CPU进入sleep状态
+在boards/BOARD_NAME/board.c中实现board_gpio_suspend(void)函数，实现
+gpio休眠状态设置，可以不实现
+
 
 烧录什么文件？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
