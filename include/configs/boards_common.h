@@ -22,6 +22,25 @@
 #define __STR__(S)  #S
 #define STR(S)      __STR__(S)
 
+/*
+ * Kernel image type
+ */
+#define ZIMAGE   0
+#define XIMAGE   1
+#define VMLINUX  2
+
+/*
+ * PM_SUSPEND_STANDBY: cpu enter idle & memory entry self-refresh
+ * PM_SUSPEND_MEM:     cpu enter sleep & memory entry self-refresh & clock
+ *                     all stoped & cpu power down
+ */
+#define PM_SUSPEND_STANDBY 2
+#define PM_SUSPEND_MEM     3
+
+
+
+
+
 // ===========================================================
 // The following configure could be override at BOARD.h
 // ===========================================================
@@ -158,10 +177,9 @@
 #define CONFIG_WDT_TIMEOUT_MS 1000
 
 /*
- * Kernel image type
+ * Debug power
  */
-#define ZIMAGE   0
-#define XIMAGE   1
-#define VMLINUX  2
+#undef CONFIG_PM_SUSPEND
+#undef CONFIG_PM_SUSPEND_STATE
 
 #endif /* BOARDS_COMMON_H */

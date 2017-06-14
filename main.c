@@ -69,9 +69,9 @@ static void pass_params_to_burner(void) {
 void x_loader_main(void) {
 
     /*
-     * Open DDR CPU AHB0 APB RTC EFUSE NEMC clock gate
+     * Open CPU AHB0 APB RTC TCU EFUSE NEMC clock gate
      */
-    cpm_outl(0x07fffffc, CPM_CLKGR);
+    cpm_outl(0x87fbfffc, CPM_CLKGR);
 
     /*
      * Do not ask why, I do not know.
@@ -151,6 +151,16 @@ void x_loader_main(void) {
     boot_next_stage();
 
 #else /* CONFIG_BOOT_USB */
+
+#ifdef CONFIG_PM_SUSPEND
+    /*
+     * PM_SUSPEND_STANDBY: cpu enter idle & memory entry self-refresh
+     * PM_SUSPEND_MEM:     cpu enter sleep & memory entry self-refresh & clock
+     *                     all stoped
+     */
+    suspend_enter(CONFIG_PM_SUSPEND_STATE);
+#endif
+
     pass_params_to_burner();
 
     uart_puts("Going to start burner.\n");

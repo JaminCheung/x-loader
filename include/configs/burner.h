@@ -19,6 +19,9 @@
 #ifndef BURNER_H
 #define BURNER_H
 
+//#define CONFIG_PM_SUSPEND
+//#define CONFIG_PM_SUSPEND_STATE PM_SUSPEND_STANDBY
+
 /*
  * Console
  */

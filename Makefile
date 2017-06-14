@@ -228,12 +228,18 @@ OBJS := $(addprefix $(TOPDIR)/, $(OBJS-y))
 #
 # Sleep lib source
 #
+ifeq ($(CONFIG_BOOT_USB),y)
+SLEEP_LIBS-y := sleep-lib/sleep_lib_entry.o                                    \
+                sleep-lib/sleep_lib_clk.o                                      \
+                sleep-lib/sleep_lib.o
+else
 SLEEP_LIBS-y := sleep-lib/sleep_lib_entry.o                                    \
                 sleep-lib/sleep_lib_uart.o                                     \
                 sleep-lib/sleep_lib_clk.o                                      \
                 sleep-lib/sleep_lib.o                                          \
                 common/printf.o                                                \
                 common/common.o
+endif
 
 SLEEP_LIBS := $(addprefix $(TOPDIR)/, $(SLEEP_LIBS-y))
 
@@ -303,6 +309,14 @@ $(OUTDIR)/spl_lpddr.bin: $(OUTDIR)/x-loader.elf
 	$(OBJCOPY) $(OBJCFLAGS) -O binary $< $@
 endif
 
+ifeq ($(CONFIG_BOOT_USB), y)
+$(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator \
+						$(TOOLSDIR)/uart_baudrate_lut \
+						$(TOOLSDIR)/efuse_params_creator \
+						$(TOOLSDIR)/wdt_params_creator \
+						$(OBJS) $(SLEEP_LIBS)
+	$(LD) $(LDFLAGS) $(OBJS) $(SLEEP_LIBS) -o $@ -Map $(OUTDIR)/x-loader.map
+else
 $(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator \
 						$(TOOLSDIR)/sfc_timing_params_creator \
 						$(TOOLSDIR)/uart_baudrate_lut \
@@ -310,6 +324,7 @@ $(OUTDIR)/x-loader.elf: $(TIMESTAMP_FILE) $(TOOLSDIR)/ddr_params_creator \
 						$(TOOLSDIR)/wdt_params_creator \
 						$(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) -o $@ -Map $(OUTDIR)/x-loader.map
+endif
 
 ifeq ($(CONFIG_GPT_TABLE), y)
 ifneq ($(TOPDIR)/boards/$(BOARD)/partitions.tab, $(wildcard $(TOPDIR)/boards/$(BOARD)/partitions.tab))

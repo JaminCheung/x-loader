@@ -12,7 +12,7 @@
 
 #include <common.h>
 
-uint32_t cpu_freq = CONFIG_CPU_SEL_PLL == APLL ? CONFIG_APLL_FREQ : CONFIG_MPLL_FREQ;
+__attribute__((weak)) uint32_t cpu_freq = CONFIG_CPU_SEL_PLL == APLL ? CONFIG_APLL_FREQ : CONFIG_MPLL_FREQ;
 
 static void dump_register(void) {
     debug("=====================\n");

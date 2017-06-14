@@ -211,6 +211,15 @@ void boot_next_stage(void) {
     if (error)
         hang_reason("\n\tInstall sleep lib failed.\n");
 
+#ifdef CONFIG_PM_SUSPEND
+    /*
+     * PM_SUSPEND_STANDBY: cpu enter idle & memory entry self-refresh
+     * PM_SUSPEND_MEM:     cpu enter sleep & memory entry self-refresh & clock
+     *                     all stoped
+     */
+    suspend_enter(CONFIG_PM_SUSPEND_STATE);
+#endif
+
     /*
      * Step 3: prepare kernel parameter
      */
@@ -285,18 +294,6 @@ void boot_next_stage(void) {
 #endif
 
     uart_puts("\nJump...\n\n");
-
-    /*
-     * Open this for debug power
-     */
-#if 0
-    /*
-     * PM_SUSPEND_STANDBY: cpu enter idle & memory entry self-refresh
-     * PM_SUSPEND_MEM:     cpu enter sleep & memory entry self-refresh & clock
-     *                     all stoped
-     */
-    suspend_enter(PM_SUSPEND_STANDBY);
-#endif
 
     /*
      * Step 5: we will nerver return here

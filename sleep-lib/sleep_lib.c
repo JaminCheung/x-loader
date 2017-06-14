@@ -82,14 +82,6 @@ static void resume(void)
     debug("Wakeup Step 1 done.\n");
 
     /*
-     * Restore lpddr2
-     */
-#if 0
-    restore_lpddr2();
-#endif
-    debug("Wakeup Step 2 skip.\n");
-
-    /*
      * Restore CPM
      */
     cpm_outl(context->cpm_lcr, CPM_LCR);
@@ -99,11 +91,11 @@ static void resume(void)
 
     cpm_barrier();
 
-    debug("Wakeup Step 3 done.\n");
+    debug("Wakeup Step 2 done.\n");
 
     cache_init();
 
-    debug("Wakeup Step 4 done.\n");
+    debug("Wakeup Step 3 done.\n");
 
     dump_sleep_context();
 
@@ -273,15 +265,6 @@ static void sleep(void)
      * Step 6.
      ************************
      */
-#if 0
-    prepare_lpddr2_for_sleep();
-#endif
-    debug("Sleep step 6 skip\n");
-
-    /*
-     * Step 7.
-     ************************
-     */
     sleep_lib_reset_clk_tree();
 
     /*
@@ -289,7 +272,7 @@ static void sleep(void)
      */
     cpm_outl(cpm_inl(CPM_CLKGR) | (0x1 << 28), CPM_CLKGR);
 
-    debug("Sleep step 7 done\n");
+    debug("Sleep step 6 done\n");
 
     /*
      * Barriers all all all...

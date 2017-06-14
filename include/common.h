@@ -43,8 +43,6 @@
 #include <aes.h>
 #endif
 
-#define PM_SUSPEND_STANDBY 2
-#define PM_SUSPEND_MEM     3
 
 /*
  * CPU freq uint(MHz)
@@ -1690,7 +1688,11 @@ void check_socid(void);
 
 #ifndef __ASSEMBLY__
 void suspend_enter(int state);
+int enter_sleep(int state);
+void enter_idle(void);
+
 void cache_init(void);
+
 struct sleep_context {
     unsigned int gpr_s[8];
     unsigned int gpr_gp;

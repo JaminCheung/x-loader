@@ -305,9 +305,11 @@ void flush_cache_all(void) {
 }
 
 void suspend_enter(int state) {
-    struct sleep_lib_entry *entry = (void *)(SLEEP_LIB_TCSM);
-
     printf("enter suspend state: 0x%x\n", state);
+
+#ifndef CONFIG_BOOT_USB
+
+    struct sleep_lib_entry *entry = (void *)(SLEEP_LIB_TCSM);
 
     switch(state) {
     case PM_SUSPEND_STANDBY:
@@ -322,6 +324,21 @@ void suspend_enter(int state) {
         panic("unknown suspend state: 0x%x\n", state);
         break;
     }
+#else
+    switch(state) {
+    case PM_SUSPEND_STANDBY:
+        enter_idle();
+        break;
+
+    case PM_SUSPEND_MEM:
+        enter_sleep(state);
+        break;
+
+    default:
+        panic("unknown suspend state: 0x%x\n", state);
+        break;
+    }
+#endif
 
     printf("exit suspend state: 0x%x\n", state);
 }

@@ -110,6 +110,14 @@ include/configs/boards_common.h为默认值
 默认timeout为1000ms
 通过#define CONFIG_WDT_TIMEOUT_MS修改默认值
 
+如何进入低功耗状态？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+打开include/configs/BOARD_NAME.h
+增加定义：#define CONFIG_PM_SUSPEND
+以及
+#define CONFIG_PM_SUSPEND_STATE PM_SUSPEND_STANDY ---> CPU进入idle状态
+#define CONFIG_PM_SUSPEND_STATE PM_SYSPEND_MEM ---> CPU进入sleep状态
+
 烧录什么文件？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 编译完成会有提示：“Image: xxxxxx” is ready
