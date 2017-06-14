@@ -172,6 +172,7 @@ static int pre_handle_before_jump(void* arg) {
 #endif
 
     (void)mem_size;
+
     return 0;
 }
 
@@ -249,8 +250,6 @@ void boot_next_stage(void) {
  */
 #elif (defined CONFIG_BOOT_UBOOT)
     uart_puts("Mod: U-Boot.\n");
-
-    argv = (uint32_t) CONFIG_MEM_SIZE_FLAG_ADDR;
 
     error = load(CONFIG_UBOOT_OFFSET, CONFIG_UBOOT_LENGTH, load_addr);
 
