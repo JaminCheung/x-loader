@@ -153,11 +153,6 @@ void x_loader_main(void) {
 #else /* CONFIG_BOOT_USB */
 
 #ifdef CONFIG_PM_SUSPEND
-    /*
-     * PM_SUSPEND_STANDBY: cpu enter idle & memory entry self-refresh
-     * PM_SUSPEND_MEM:     cpu enter sleep & memory entry self-refresh & clock
-     *                     all stoped
-     */
     suspend_enter(CONFIG_PM_SUSPEND_STATE);
 #endif
 

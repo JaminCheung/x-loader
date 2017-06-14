@@ -212,12 +212,9 @@ void boot_next_stage(void) {
         hang_reason("\n\tInstall sleep lib failed.\n");
 
 #ifdef CONFIG_PM_SUSPEND
-    /*
-     * PM_SUSPEND_STANDBY: cpu enter idle & memory entry self-refresh
-     * PM_SUSPEND_MEM:     cpu enter sleep & memory entry self-refresh & clock
-     *                     all stoped
-     */
     suspend_enter(CONFIG_PM_SUSPEND_STATE);
+
+    hang();
 #endif
 
     /*
