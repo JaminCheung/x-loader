@@ -38,34 +38,6 @@ uint32_t cpu_freq = CONFIG_EXTAL_FREQ;
 __attribute__((weak, alias("board_init"))) void board_init(void) {}
 __attribute__((weak, alias("board_early_init"))) void board_early_init(void) {}
 
-#ifdef CONFIG_BOOT_USB
-static void pass_params_to_burner(void) {
-    /*
-     * Memory size
-     */
-    uint32_t mem_size;
-
-#ifdef CONFIG_PROBE_MEM_SIZE
-    mem_size = get_lpddr_size();
-#elif (defined CONFIG_MEM_SIZE_64M)
-    mem_size = SZ_64M;
-#else
-    mem_size = SZ_32M;
-#endif
-
-    if (mem_size == SZ_64M)
-        writel(MEM_SIZE_FLAG_64M, CONFIG_MEM_SIZE_FLAG_ADDR);
-    else
-        writel(MEM_SIZE_FLAG_32M, CONFIG_MEM_SIZE_FLAG_ADDR);
-
-    /*
-     * Uart index and baudrate
-     */
-    writel(CONFIG_CONSOLE_INDEX, CONFIG_UART_INDEX_ADDR);
-    writel(CONFIG_CONSOLE_BAUDRATE, CONFIG_UART_BAUDRATE_ADDR);
-}
-#endif
-
 void x_loader_main(void) {
 
     /*
@@ -156,7 +128,7 @@ void x_loader_main(void) {
     suspend_enter(CONFIG_PM_SUSPEND_STATE);
 #endif
 
-    pass_params_to_burner();
+    pass_params_to_uboot();
 
     uart_puts("Going to start burner.\n");
 

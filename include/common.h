@@ -1684,6 +1684,7 @@ void dump_mem_content(uint32_t *src, uint32_t len);
 #ifndef __ASSEMBLY__
 extern int ddr_autosr;
 void check_socid(void);
+void pass_params_to_uboot(void);
 #endif
 
 #ifndef __ASSEMBLY__

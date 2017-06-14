@@ -36,8 +36,6 @@ enum gpio_function {
     GPIO_FUNC_1     = 0x01,  //0001, GPIO as function 1 / device 1
     GPIO_FUNC_2     = 0x02,  //0010, GPIO as function 2 / device 2
     GPIO_FUNC_3     = 0x03,  //0011, GPIO as function 3 / device 3
-    GPIO_INT_FE     = 0x0a,  //1010, Fall Edge trigger interrupt
-    GPIO_INT_RE     = 0x0b,  //1011, Rise Edge trigger interrupt
 };
 
 enum gpio_port {

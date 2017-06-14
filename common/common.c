@@ -304,6 +304,32 @@ void flush_cache_all(void) {
     flush_icache_all();
 }
 
+void pass_params_to_uboot(void) {
+    /*
+     * Memory size
+     */
+    uint32_t mem_size;
+
+#ifdef CONFIG_PROBE_MEM_SIZE
+    mem_size = get_lpddr_size();
+#elif (defined CONFIG_MEM_SIZE_64M)
+    mem_size = SZ_64M;
+#else
+    mem_size = SZ_32M;
+#endif
+
+    if (mem_size == SZ_64M)
+        writel(MEM_SIZE_FLAG_64M, CONFIG_MEM_SIZE_FLAG_ADDR);
+    else
+        writel(MEM_SIZE_FLAG_32M, CONFIG_MEM_SIZE_FLAG_ADDR);
+
+    /*
+     * Uart index and baudrate
+     */
+    writel(CONFIG_CONSOLE_INDEX, CONFIG_UART_INDEX_ADDR);
+    writel(CONFIG_CONSOLE_BAUDRATE, CONFIG_UART_BAUDRATE_ADDR);
+}
+
 __attribute__((weak)) const int gpio_ss_table[2][2] = {
         {GSS_TABLET_END, GSS_TABLET_END},
 };

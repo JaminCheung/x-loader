@@ -168,19 +168,7 @@ static int pre_handle_before_jump(void* arg) {
     }
 
 #elif (defined CONFIG_BOOT_UBOOT) /* CONFIG_BOOT_UBOOT */
-
-    switch (mem_size) {
-    case SZ_64M:
-        writel(MEM_SIZE_FLAG_64M, arg);
-        break;
-
-    case SZ_32M:
-        writel(MEM_SIZE_FLAG_32M, arg);
-        break;
-
-    default:
-        return -1;
-    }
+    pass_params_to_uboot();
 #endif
 
     (void)mem_size;
