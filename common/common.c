@@ -304,17 +304,19 @@ void flush_cache_all(void) {
     flush_icache_all();
 }
 
-const int __attribute__((weak)) gpio_ss_table[][2] = {
-        {GSS_TABLET_END, GSS_TABLET_END}
+__attribute__((weak)) const int gpio_ss_table[2][2] = {
+        {GSS_TABLET_END, GSS_TABLET_END},
 };
 
-static void board_gpio_suspend(void) {
+inline static void board_gpio_suspend(void) {
     int pin = 0;
     int state = 0;
 
     for (int i = 0; gpio_ss_table[i][1] != GSS_TABLET_END; i++) {
         pin = gpio_ss_table[i][0];
         state = gpio_ss_table[i][1];
+
+        debug("pin=%d, state=%d\n", pin, state);
 
         switch(state) {
         case GSS_OUTPUT_HIGH:
@@ -341,7 +343,7 @@ static void board_gpio_suspend(void) {
     }
 }
 
-static void board_gpio_resume(void) {
+inline static void board_gpio_resume(void) {
 
 }
 

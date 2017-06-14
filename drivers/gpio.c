@@ -94,6 +94,20 @@ void gpio_set_func(unsigned int gpio, enum gpio_function func) {
         writel(1 << pin, GPIO_PXPAT1S(port));
         writel(1 << pin, GPIO_PXPAT0S(port));
         break;
+
+    case GPIO_INT_FE:
+        writel(1 << pin, GPIO_PXINTS(port));
+        writel(1 << pin, GPIO_PXMSKC(port));
+        writel(1 << pin, GPIO_PXPAT1S(port));
+        writel(1 << pin, GPIO_PXPAT0C(port));
+        break;
+
+    case GPIO_INT_RE:
+        writel(1 << pin, GPIO_PXINTS(port));
+        writel(1 << pin, GPIO_PXMSKC(port));
+        writel(1 << pin, GPIO_PXPAT1S(port));
+        writel(1 << pin, GPIO_PXPAT0S(port));
+        break;
     }
 }
 
