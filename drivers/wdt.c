@@ -52,7 +52,14 @@ void wdt_restart(void) {
 #define TCSR_PRESCALE_64    (3 << 3)
 #define TCSR_PRESCALE       TCSR_PRESCALE_64
 
-    int time = RTC_FREQ / WDT_DIV * RESET_DELAY_MS / 1000;
+    uint32_t src_freq;
+#ifdef CONFIG_RTCCLK_SEL
+    src_freq = CONFIG_EXTAL_FREQ * 1000 * 1000 / 512;
+#else
+    src_freq = RTC_FREQ;
+#endif
+
+    int time = src_freq / WDT_DIV * RESET_DELAY_MS / 1000;
 
     if(time > 65535)
         time = 65535;
