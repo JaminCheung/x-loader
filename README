@@ -119,6 +119,12 @@ x-loader中如何进入低功耗状态？
 #define CONFIG_PM_SUSPEND_STATE PM_SYSPEND_MEM ---> CPU进入sleep状态
 在boards/BOARD_NAME/board.c中实现gpio_ss_table[][2]数组设置休眠状态，可以不实现
 
+x-loader中如何进入USB烧录模式？
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+打开include/configs/BOARD_NAME.h
+增加定义：#define CONFIG_SOFT_BURN
+在适当位置调用jump_to_usbboot();机器会重启进入烧录模式
+
 烧录什么文件？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 编译完成会有提示：“Image: xxxxxx” is ready

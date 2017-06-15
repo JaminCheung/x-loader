@@ -1685,6 +1685,8 @@ void dump_mem_content(uint32_t *src, uint32_t len);
 extern int ddr_autosr;
 void check_socid(void);
 void pass_params_to_uboot(void);
+void jump_to_usbboot(void);
+void set_jump_to_usbboot(void);
 #endif
 
 #ifndef __ASSEMBLY__

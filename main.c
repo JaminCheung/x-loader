@@ -40,6 +40,10 @@ __attribute__((weak, alias("board_early_init"))) void board_early_init(void) {}
 
 void x_loader_main(void) {
 
+#ifdef CONFIG_SOFT_BURN
+    jump_to_usbboot();
+#endif
+
     /*
      * Open CPU AHB0 APB RTC TCU EFUSE NEMC clock gate
      */

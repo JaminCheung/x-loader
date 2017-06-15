@@ -18,6 +18,8 @@
 
 #include <common.h>
 
+const static uint32_t burn_magic = 'b' << 24 | 'u' << 16 | 'r' << 8 | 'n';
+
 #define cache_op(op, addr)      \
     __asm__ __volatile__(       \
         ".set   push\n"     \
@@ -302,6 +304,28 @@ void flush_dcache_all(void) {
 void flush_cache_all(void) {
     flush_dcache_all();
     flush_icache_all();
+}
+
+void jump_to_usbboot(void) {
+    uint32_t reg;
+
+    reg = cpm_inl(CPM_SLPC);
+
+    if(reg == burn_magic) {
+        typedef void (*image_entry_t)(void) __attribute__ ((noreturn));
+
+        image_entry_t image_entry = (image_entry_t) (0xbfc0320c);
+
+            cpm_outl(0, CPM_SLPC);
+
+            image_entry();
+    }
+}
+
+void set_jump_to_usbboot(void) {
+    cpm_outl(burn_magic, CPM_SLPC);
+
+    wdt_restart();
 }
 
 void pass_params_to_uboot(void) {

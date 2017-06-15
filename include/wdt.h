@@ -45,6 +45,7 @@
 
 void wdt_init(void);
 void wdt_stop(void);
-void wdt_reset(void);
+void wdt_feed(void);
+void wdt_restart(void);
 
 #endif /* __WDT_H__ */
