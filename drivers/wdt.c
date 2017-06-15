@@ -64,7 +64,7 @@ void wdt_restart(void) {
     wdt_write(TCSR_PRESCALE | TCSR_RTC_EN, WDT_TCSR);
     wdt_write(0, WDT_TCER);
 
-    printf("reset in %dms", RESET_DELAY_MS);
+    printf("reset in %dms\n", RESET_DELAY_MS);
 
     wdt_write(TCER_TCEN, WDT_TCER);
 
