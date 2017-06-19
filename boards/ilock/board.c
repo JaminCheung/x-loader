@@ -19,7 +19,8 @@
 #include <common.h>
 
 void board_early_init(void) {
-
+    //enable 3.3V - DCDC
+    gpio_direction_output(GPIO_PC(9), 1);
 }
 
 void board_init(void) {
