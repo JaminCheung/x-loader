@@ -56,9 +56,9 @@ struct cgu cgu_clk_sel[CGU_CNT] = {
 #endif /* CONFIG_MMC_PC_4BIT || CONFIG_BURN_MMC */
 
 #if (defined CONFIG_BOOT_SFC || defined CONFIG_BURN_SPI_FLASH)
-    [SFC]    = {1, CPM_SSICDR,  30, CONFIG_DDR_SEL_PLL, { EXCLK, APLL,  EXCLK,  MPLL}, 29, 28, 27, 2 },
+    [SFC]    = {1, CPM_SSICDR,  30, CONFIG_DDR_SEL_PLL, { APLL, -1,  MPLL,  -1}, 29, 28, 27, 2 },
 #else
-    [SFC]    = {0, CPM_SSICDR,  30, CONFIG_DDR_SEL_PLL, { EXCLK, APLL,  EXCLK,  MPLL}, 29, 28, 27, 2 },
+    [SFC]    = {0, CPM_SSICDR,  30, CONFIG_DDR_SEL_PLL, { APLL, -1,  MPLL,  -1}, 29, 28, 27, 2 },
 #endif /* CONFIG_BOOT_SFC || CONFIG_BURN_SPI_FLASH */
 
     [CIM]    = {0, CPM_CIMCDR,  31, CONFIG_DDR_SEL_PLL, { APLL,  MPLL,  -1,    -1  }, 29, 28, 27, 22},
