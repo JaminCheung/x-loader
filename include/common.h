@@ -43,6 +43,7 @@
 #include <aes.h>
 #endif
 
+#define CONFIG_SPL_VERSION 1
 
 /*
  * CPU freq uint(MHz)
