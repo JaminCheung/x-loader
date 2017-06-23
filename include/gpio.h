@@ -39,7 +39,8 @@ enum gpio_function {
 };
 
 enum gpio_port {
-    GPIO_PORT_A,
+    GPIO_PORT_Z = 0x07,
+    GPIO_PORT_A = 0x0,
     GPIO_PORT_B,
     GPIO_PORT_C,
     GPIO_PORT_D,
@@ -67,6 +68,7 @@ enum gpio_port {
 #define PXPE        0x70   /* Port Pull Disable Register */
 #define PXPES       0x74   /* Port Pull Disable Set Register */
 #define PXPEC       0x78   /* Port Pull Disable Clear Register */
+#define PZGID2LD    0xF0   /* GPIOZ Group ID to load */
 
 #define GPIO_PXPIN(n)   (GPIO_BASE + (PXPIN + (n)*0x100)) /* PIN Level Register */
 #define GPIO_PXINT(n)   (GPIO_BASE + (PXINT + (n)*0x100)) /* Port Interrupt Register */
@@ -86,6 +88,7 @@ enum gpio_port {
 #define GPIO_PXPE(n)    (GPIO_BASE + (PXPE + (n)*0x100)) /* Port Pull Disable Register */
 #define GPIO_PXPES(n)   (GPIO_BASE + (PXPES + (n)*0x100)) /* Port Pull Disable Set Register */
 #define GPIO_PXPEC(n)   (GPIO_BASE + (PXPEC + (n)*0x100)) /* Port Pull Disable Clear Register */
+#define GPIO_PZLOAD     (GPIO_BASE + (PZGID2LD + (0x07)*0x100)) /* GPIOZ Group ID to load */
 
 void gpio_set_func(unsigned int gpio, enum gpio_function func);
 void gpio_enable_pull(unsigned gpio);

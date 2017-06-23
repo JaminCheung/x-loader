@@ -29,23 +29,27 @@ void gpio_direction_input(unsigned gpio) {
     unsigned port = gpio / 32;
     unsigned pin = gpio % 32;
 
-    writel(1 << pin, GPIO_PXINTC(port));
-    writel(1 << pin, GPIO_PXMSKS(port));
-    writel(1 << pin, GPIO_PXPAT1S(port));
+    writel(1 << pin, GPIO_PXINTC(GPIO_PORT_Z));
+    writel(1 << pin, GPIO_PXMSKS(GPIO_PORT_Z));
+    writel(1 << pin, GPIO_PXPAT1S(GPIO_PORT_Z));
+
+    writel(port & 0x7, GPIO_PZLOAD);
 }
 
 void gpio_direction_output(unsigned gpio, int value) {
     unsigned port = gpio / 32;
     unsigned pin = gpio % 32;
 
-    writel(1 << pin, GPIO_PXINTC(port));
-    writel(1 << pin, GPIO_PXMSKS(port));
-    writel(1 << pin, GPIO_PXPAT1C(port));
+    writel(1 << pin, GPIO_PXINTC(GPIO_PORT_Z));
+    writel(1 << pin, GPIO_PXMSKS(GPIO_PORT_Z));
+    writel(1 << pin, GPIO_PXPAT1C(GPIO_PORT_Z));
 
     if (value)
-        writel(1 << pin, GPIO_PXPAT0S(port));
+        writel(1 << pin, GPIO_PXPAT0S(GPIO_PORT_Z));
     else
-        writel(1 << pin, GPIO_PXPAT0C(port));
+        writel(1 << pin, GPIO_PXPAT0C(GPIO_PORT_Z));
+
+    writel(port & 0x7, GPIO_PZLOAD);
 }
 
 void gpio_enable_pull(unsigned gpio) {
@@ -68,33 +72,34 @@ void gpio_set_func(unsigned int gpio, enum gpio_function func) {
 
     switch (func) {
     case GPIO_FUNC_0:
-        writel(1 << pin, GPIO_PXINTC(port));
-        writel(1 << pin, GPIO_PXMSKC(port));
-        writel(1 << pin, GPIO_PXPAT1C(port));
-        writel(1 << pin, GPIO_PXPAT0C(port));
+        writel(1 << pin, GPIO_PXINTC(GPIO_PORT_Z));
+        writel(1 << pin, GPIO_PXMSKC(GPIO_PORT_Z));
+        writel(1 << pin, GPIO_PXPAT1C(GPIO_PORT_Z));
+        writel(1 << pin, GPIO_PXPAT0C(GPIO_PORT_Z));
         break;
 
     case GPIO_FUNC_1:
-        writel(1 << pin, GPIO_PXINTC(port));
-        writel(1 << pin, GPIO_PXMSKC(port));
-        writel(1 << pin, GPIO_PXPAT1C(port));
-        writel(1 << pin, GPIO_PXPAT0S(port));
+        writel(1 << pin, GPIO_PXINTC(GPIO_PORT_Z));
+        writel(1 << pin, GPIO_PXMSKC(GPIO_PORT_Z));
+        writel(1 << pin, GPIO_PXPAT1C(GPIO_PORT_Z));
+        writel(1 << pin, GPIO_PXPAT0S(GPIO_PORT_Z));
         break;
 
     case GPIO_FUNC_2:
-        writel(1 << pin, GPIO_PXINTC(port));
-        writel(1 << pin, GPIO_PXMSKC(port));
-        writel(1 << pin, GPIO_PXPAT1S(port));
-        writel(1 << pin, GPIO_PXPAT0C(port));
+        writel(1 << pin, GPIO_PXINTC(GPIO_PORT_Z));
+        writel(1 << pin, GPIO_PXMSKC(GPIO_PORT_Z));
+        writel(1 << pin, GPIO_PXPAT1S(GPIO_PORT_Z));
+        writel(1 << pin, GPIO_PXPAT0C(GPIO_PORT_Z));
         break;
 
     case GPIO_FUNC_3:
-        writel(1 << pin, GPIO_PXINTC(port));
-        writel(1 << pin, GPIO_PXMSKC(port));
-        writel(1 << pin, GPIO_PXPAT1S(port));
-        writel(1 << pin, GPIO_PXPAT0S(port));
+        writel(1 << pin, GPIO_PXINTC(GPIO_PORT_Z));
+        writel(1 << pin, GPIO_PXMSKC(GPIO_PORT_Z));
+        writel(1 << pin, GPIO_PXPAT1S(GPIO_PORT_Z));
+        writel(1 << pin, GPIO_PXPAT0S(GPIO_PORT_Z));
         break;
     }
+    writel(port & 0x7, GPIO_PZLOAD);
 }
 
 #if (defined CONFIG_BURN_MMC || defined CONFIG_BOOT_MMC)
