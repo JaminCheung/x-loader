@@ -21,6 +21,13 @@
 void board_early_init(void) {
     //enable 3.3V - DCDC
     gpio_direction_output(GPIO_PC(9), 1);
+
+    //disable zigbee_gpio
+    gpio_direction_output(GPIO_PD(0), 0);
+    gpio_direction_output(GPIO_PD(1), 0);
+    gpio_direction_output(GPIO_PD(2), 0);
+    gpio_direction_output(GPIO_PD(3), 0);
+    gpio_direction_output(GPIO_PD(5), 0);
 }
 
 void board_init(void) {
