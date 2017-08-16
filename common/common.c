@@ -343,9 +343,9 @@ void pass_params_to_uboot(void) {
 #endif
 
     if (mem_size == SZ_64M)
-        writel(MEM_SIZE_FLAG_64M, CONFIG_MEM_SIZE_FLAG_ADDR);
+        writel(MEM_SIZE_MAGIC_64M, CONFIG_MEM_SIZE_MAGIC_ADDR);
     else
-        writel(MEM_SIZE_FLAG_32M, CONFIG_MEM_SIZE_FLAG_ADDR);
+        writel(MEM_SIZE_MAGIC_32M, CONFIG_MEM_SIZE_MAGIC_ADDR);
 
     /*
      * Uart index and baudrate

@@ -96,7 +96,7 @@ include/configs/boards_common.h为默认值
 系统没有32KHz晶振如何休眠唤醒？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 打开include/configs/BOARD_NAME.h
-增加定义：#define CONFIG_RTCCLK_SEL
+增加定义：#define CONFIG_RTCCLK_SRC_EXT
 
 如何添加recovery引导功能？
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝

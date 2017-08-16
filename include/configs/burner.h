@@ -45,6 +45,6 @@
 /*
  * Ignore RTC 32KHz clk
  */
-#define CONFIG_RTCCLK_SEL
+#define CONFIG_RTCCLK_SRC_EXT
 
 #endif /* BURNER_H */

@@ -81,9 +81,17 @@ extern uint32_t cpu_freq;
 /*
  * Memory size flag pass to u-boot
  */
-#define CONFIG_MEM_SIZE_FLAG_ADDR (SLEEP_LIB_TCSM + SLEEP_LIB_LENGTH - 4)
-#define MEM_SIZE_FLAG_64M       0x64646464
-#define MEM_SIZE_FLAG_32M       0x32323232
+#define CONFIG_MEM_SIZE_MAGIC_ADDR (SLEEP_LIB_TCSM + SLEEP_LIB_LENGTH - 4)
+
+/*
+ * ASCII: "64MB"
+ */
+#define MEM_SIZE_MAGIC_64M       0x36344d42
+
+/*
+ * ASCII: "32MB"
+ */
+#define MEM_SIZE_MAGIC_32M       0x33324d42
 
 /*
  * Uart index and baudrate to u-boot

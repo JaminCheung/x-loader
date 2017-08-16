@@ -26,7 +26,7 @@ static inline void wait_write_ready(void) {
         uart_puts("RTC wait_write_ready timeout!\n");
 }
 
-void rtc_change_sel(void) {
+void rtc_clk_src_to_ext(void) {
     /*
      * Set OPCR.ERCS of CPM to 1
      */

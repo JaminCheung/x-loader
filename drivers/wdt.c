@@ -53,7 +53,7 @@ void wdt_restart(void) {
 #define TCSR_PRESCALE       TCSR_PRESCALE_64
 
     uint32_t src_freq;
-#ifdef CONFIG_RTCCLK_SEL
+#ifdef CONFIG_RTCCLK_SRC_EXT
     src_freq = CONFIG_EXTAL_FREQ * 1000 * 1000 / 512;
 #else
     src_freq = RTC_FREQ;

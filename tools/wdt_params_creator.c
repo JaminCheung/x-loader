@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 
 #ifdef CONFIG_WDT_CLK_SRC_RTC
 
-#ifdef CONFIG_RTCCLK_SEL
+#ifdef CONFIG_RTCCLK_SRC_EXT
     src_freq = CONFIG_EXTAL_FREQ * 1000 * 1000 / 512;
 #else
     src_freq = RTC_FREQ;

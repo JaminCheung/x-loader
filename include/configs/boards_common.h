@@ -139,7 +139,7 @@
 /*
  * RTC clk sel
  */
-#undef CONFIG_RTCCLK_SEL
+#undef CONFIG_RTCCLK_SRC_EXT
 
 /*
  * DDR R/W test

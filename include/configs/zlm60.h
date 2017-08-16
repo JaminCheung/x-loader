@@ -26,7 +26,7 @@
 #define CONFIG_CONSOLE_PC
 #define CONFIG_CONSOLE_INDEX         2
 
-#define CONFIG_RTCCLK_SEL
+#define CONFIG_RTCCLK_SRC_EXT
 
 /*
  * The following configure only for boot kernel

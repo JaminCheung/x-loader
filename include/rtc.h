@@ -78,4 +78,4 @@
 #define rtc_set_bit(bit,off)    (rtc_outl((rtc_inl(off) | 0x1<<(bit)),off))
 #define rtc_clear_bit(bit,off)  (rtc_outl(rtc_inl(off) & ~(0x1 << bit), off))
 
-void rtc_change_sel(void);
+void rtc_clk_src_to_ext(void);

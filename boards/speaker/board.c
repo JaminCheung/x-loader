@@ -43,7 +43,5 @@ void board_early_init(void) {
 }
 
 void board_init(void) {
-#ifdef CONFIG_RTCCLK_SEL
-    rtc_change_sel();
-#endif
+
 }

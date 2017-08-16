@@ -50,7 +50,7 @@ void x_loader_main(void) {
     cpm_outl(0x87fbfffc, CPM_CLKGR);
 
     /*
-     * Do not ask why, I do not know.
+     * Don't ask, it's magic...
      */
     cpm_outl(0, CPM_PSWC0ST);
     cpm_outl(16, CPM_PSWC1ST);
@@ -111,6 +111,13 @@ void x_loader_main(void) {
     ddr_access_test();
 
     hang_reason("Memory test done.\n");
+#endif
+
+#ifdef CONFIG_RTCCLK_SRC_EXT
+    /*
+     * RTC clock source change to external main crystal
+     */
+    rtc_clk_src_to_ext();
 #endif
 
     /*
