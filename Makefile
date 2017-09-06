@@ -459,6 +459,12 @@ ilock_nor_config: unconfig
 
 ilock_nand_config: unconfig
 	@./mkconfig $(@:_config) ilock nand
+
+uboot_nor_config: unconfig
+	@./mkconfig $(@:_config) uboot nor
+
+uboot_nand_config: unconfig
+	@./mkconfig $(@:_config) uboot nand
 #
 # Put your board's config here
 #
